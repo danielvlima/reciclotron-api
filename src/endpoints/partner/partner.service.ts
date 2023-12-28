@@ -3,6 +3,8 @@ import {
   CreatePartnerDto,
   UpdatePartnerDto,
   UpdateAddressPartnerDto,
+  GetPaginatedPartnerDto,
+  FilterOptionsPartnerDto,
 } from './dto';
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
 
@@ -33,8 +35,82 @@ export class PartnerService {
     });
   }
 
-  findAll() {
-    return `This action returns all partner`;
+  count(data: FilterOptionsPartnerDto) {
+    const filter = [];
+    if (data.tipoEmpresa) {
+      filter.push({
+        tipoEmpresa: {
+          equals: data.tipoEmpresa,
+        },
+      });
+    }
+
+    if (data.ativo) {
+      filter.push({
+        ativo: {
+          equals: data.ativo,
+        },
+      });
+    }
+    return this.prisma.empresasParceiras.count({
+      where: {
+        OR: [
+          {
+            nomeFantasia: {
+              contains: data.nome ?? '',
+            },
+          },
+          {
+            ramo: {
+              contains: data.ramo ?? '',
+            },
+          },
+          ...filter,
+        ],
+      },
+    });
+  }
+
+  findPaginated(data: GetPaginatedPartnerDto) {
+    const filter = [];
+    if (data.filtro.tipoEmpresa) {
+      filter.push({
+        tipoEmpresa: {
+          equals: data.filtro.tipoEmpresa,
+        },
+      });
+    }
+
+    if (data.filtro.ativo) {
+      filter.push({
+        ativo: {
+          equals: data.filtro.ativo,
+        },
+      });
+    }
+
+    return this.prisma.empresasParceiras.findMany({
+      where: {
+        OR: [
+          {
+            nomeFantasia: {
+              contains: data.filtro.nome ?? '',
+            },
+          },
+          {
+            ramo: {
+              contains: data.filtro.ramo ?? '',
+            },
+          },
+          ...filter,
+        ],
+      },
+      include: {
+        endereco: true,
+      },
+      take: data.take,
+      skip: data.skip,
+    });
   }
 
   findOne(email: string) {

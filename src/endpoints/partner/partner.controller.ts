@@ -1,6 +1,5 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
   Patch,
@@ -14,6 +13,8 @@ import {
   ResponsePartnerDto,
   UpdatePartnerDto,
   UpdateAddressPartnerDto,
+  GetPaginatedPartnerDto,
+  ResponsePaginatedPartnerDto,
 } from './dto';
 
 import { LoginDto } from 'src/shared/dto/login.dto';
@@ -32,13 +33,22 @@ export class PartnerController {
   create(@Body() createPartnerDto: CreatePartnerDto) {
     createPartnerDto.senha = CryptoModule.hashPassword(createPartnerDto.senha);
     return this.partnerService.create(createPartnerDto).then((newPartner) => {
-      return ResponseFactoryModule.generate(newPartner);
+      return ResponseFactoryModule.generate(toPartnerDTO(newPartner));
     });
   }
 
-  @Get()
-  findAll() {
-    return this.partnerService.findAll();
+  @Post('paginated')
+  findPaginated(
+    @Body() data: GetPaginatedPartnerDto,
+  ): Promise<ResponseDto<ResponsePaginatedPartnerDto>> {
+    return this.partnerService.count(data.filtro).then((total) => {
+      return this.partnerService.findPaginated(data).then((parters) => {
+        return ResponseFactoryModule.generate({
+          total,
+          empresas: parters.map((el) => toPartnerDTO(el)),
+        });
+      });
+    });
   }
 
   @Post('login')
