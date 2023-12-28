@@ -5,10 +5,9 @@ import { UsersModule } from './users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { CryptoModule } from './crypto/crypto.module';
 import { CodeGeneratorModule } from './code-generator/code-generator.module';
-import { PartnerModule } from './partner/partner.module';
 
 @Module({
-  imports: [UsersModule, PrismaModule, CryptoModule, CodeGeneratorModule, PartnerModule],
+  imports: [UsersModule, PrismaModule, CryptoModule, CodeGeneratorModule],
   controllers: [AppController],
   providers: [AppService],
 })
