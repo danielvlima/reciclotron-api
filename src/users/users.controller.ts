@@ -1,25 +1,31 @@
-import { Controller } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { Body, Controller, Delete, Param, Patch, Post } from '@nestjs/common';
+import {
+  CreateUserDto,
+  UpdateUserDto,
+  CheckCodeUserDto,
+  LoginUserDto,
+} from './dto';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { CryptoModule } from 'src/crypto/crypto.module';
 import { CodeGeneratorModule } from 'src/code-generator/code-generator.module';
 
-@Controller()
+@Controller('user')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @MessagePattern('createUser')
-  create(@Payload() createUserDto: CreateUserDto) {
+  @Post()
+  create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
-  @MessagePattern('findOneUser')
-  findOne(@Payload() email: string, password: string) {
-    return this.usersService.findOne(email).then((user) => {
+  @Post()
+  login(@Body() data: LoginUserDto) {
+    return this.usersService.findOne(data.email).then((user) => {
       const passwordSplitted = user.senha.split(':');
-      const passwordHashed = CryptoModule.sha256(password, passwordSplitted[1]);
+      const passwordHashed = CryptoModule.sha256(
+        data.senha,
+        passwordSplitted[1],
+      );
 
       if (passwordHashed === passwordSplitted[0]) {
         return user;
@@ -27,31 +33,31 @@ export class UsersController {
     });
   }
 
-  @MessagePattern('updateUser')
-  update(@Payload() updateUserDto: UpdateUserDto) {
+  @Patch()
+  update(@Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(updateUserDto.cpf, updateUserDto);
   }
 
-  @MessagePattern('removeUser')
-  remove(@Payload() cpf: string) {
+  @Delete(':cpf')
+  remove(@Param(':cpf') cpf: string) {
     return this.usersService.remove(cpf);
   }
 
-  @MessagePattern('generateCode')
-  createCode(@Payload() cpf: string) {
+  @Post(':cpf')
+  createCode(@Param(':cpf') cpf: string) {
     const code = CodeGeneratorModule.new();
     return this.usersService.updateRecoveryCode(cpf, code);
   }
 
-  @MessagePattern('checkCode')
-  checkCode(@Payload() cpf: string, code: string) {
-    return this.usersService.findOneWithCpf(cpf).then((user) => {
+  @Post()
+  checkCode(@Body() data: CheckCodeUserDto) {
+    return this.usersService.findOneWithCpf(data.cpf).then((user) => {
       const now = new Date();
       const limitDate = new Date(user.codigoRecuperacaoCriadoEm!);
       limitDate.setMinutes(limitDate.getMinutes() + 15);
 
       if (now.getTime() - limitDate.getTime() < 0) {
-        return user.codigoRecuperacao === code;
+        return user.codigoRecuperacao === data.code;
       }
       return false;
     });
