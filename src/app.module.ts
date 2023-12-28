@@ -7,6 +7,7 @@ import { CryptoModule } from './shared/modules/crypto/crypto.module';
 import { CodeGeneratorModule } from './shared/modules/code-generator/code-generator.module';
 import { ResponseFactoryModule } from './shared/modules/response-factory/response-factory.module';
 import { PartnerModule } from './endpoints/partner/partner.module';
+import { CouponsPurchasedModule } from './endpoints/coupons-purchased/coupons-purchased.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { PartnerModule } from './endpoints/partner/partner.module';
     CodeGeneratorModule,
     ResponseFactoryModule,
     PartnerModule,
+    CouponsPurchasedModule,
   ],
   controllers: [AppController],
   providers: [AppService],
