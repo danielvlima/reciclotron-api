@@ -15,10 +15,10 @@ import {
   ResponseUserDto,
 } from './dto';
 import { UsersService } from './users.service';
-import { CryptoModule } from 'src/crypto/crypto.module';
-import { CodeGeneratorModule } from 'src/code-generator/code-generator.module';
+import { CryptoModule } from 'src/shared/modules/crypto/crypto.module';
+import { CodeGeneratorModule } from 'src/shared/modules/code-generator/code-generator.module';
 import { toUserDTO } from './mappers';
-import { ResponseDto } from 'src/response.dto';
+import { ResponseDto } from 'src/shared/dto/response.dto';
 
 @Controller('user')
 export class UsersController {
