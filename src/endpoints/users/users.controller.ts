@@ -7,19 +7,15 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import {
-  CreateUserDto,
-  UpdateUserDto,
-  CheckCodeUserDto,
-  LoginUserDto,
-  ResponseUserDto,
-} from './dto';
+import { CreateUserDto, UpdateUserDto, ResponseUserDto } from './dto';
 import { UsersService } from './users.service';
 import { CryptoModule } from 'src/shared/modules/crypto/crypto.module';
 import { CodeGeneratorModule } from 'src/shared/modules/code-generator/code-generator.module';
 import { toUserDTO } from './mappers';
 import { ResponseDto } from 'src/shared/dto/response.dto';
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
+import { LoginDto } from 'src/shared/dto/login.dto';
+import { CheckCodeDto } from 'src/shared/dto/check-code.dto';
 
 @Controller('user')
 export class UsersController {
@@ -34,7 +30,7 @@ export class UsersController {
   }
 
   @Post('login')
-  login(@Body() data: LoginUserDto): Promise<ResponseDto<ResponseUserDto>> {
+  login(@Body() data: LoginDto): Promise<ResponseDto<ResponseUserDto>> {
     return this.usersService.findOne(data.email).then((user) => {
       CryptoModule.checkPasssword(user.senha, data.senha);
       return ResponseFactoryModule.generate(toUserDTO(user));
@@ -64,8 +60,8 @@ export class UsersController {
   }
 
   @Post('recovery')
-  checkCode(@Body() data: CheckCodeUserDto): Promise<ResponseDto<boolean>> {
-    return this.usersService.findOneWithCpf(data.cpf).then((user) => {
+  checkCode(@Body() data: CheckCodeDto): Promise<ResponseDto<boolean>> {
+    return this.usersService.findOneWithCpf(data.key).then((user) => {
       const now = new Date();
       const limitDate = new Date(user.codigoRecuperacaoCriadoEm!);
       limitDate.setMinutes(limitDate.getMinutes() + 15);

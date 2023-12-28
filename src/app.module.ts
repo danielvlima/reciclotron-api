@@ -6,6 +6,7 @@ import { PrismaModule } from './shared/modules/prisma/prisma.module';
 import { CryptoModule } from './shared/modules/crypto/crypto.module';
 import { CodeGeneratorModule } from './shared/modules/code-generator/code-generator.module';
 import { ResponseFactoryModule } from './shared/modules/response-factory/response-factory.module';
+import { PartnerModule } from './endpoints/partner/partner.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ResponseFactoryModule } from './shared/modules/response-factory/respons
     CryptoModule,
     CodeGeneratorModule,
     ResponseFactoryModule,
+    PartnerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

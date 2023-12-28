@@ -1,0 +1,98 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpCode,
+} from '@nestjs/common';
+import { PartnerService } from './partner.service';
+import { CreatePartnerDto } from './dto/create-partner.dto';
+import { UpdatePartnerDto } from './dto/update-partner.dto';
+import { LoginDto } from 'src/shared/dto/login.dto';
+import { CryptoModule } from 'src/shared/modules/crypto/crypto.module';
+import { CodeGeneratorModule } from 'src/shared/modules/code-generator/code-generator.module';
+import { CheckCodeDto } from 'src/shared/dto/check-code.dto';
+import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
+import { ResponseDto } from 'src/shared/dto/response.dto';
+import { UpdateAddressPartnerDto } from './dto/update-address-partner.dto';
+
+@Controller('partner')
+export class PartnerController {
+  constructor(private readonly partnerService: PartnerService) {}
+
+  @Post()
+  create(@Body() createPartnerDto: CreatePartnerDto) {
+    createPartnerDto.senha = CryptoModule.hashPassword(createPartnerDto.senha);
+    return this.partnerService.create(createPartnerDto).then((newPartner) => {
+      return ResponseFactoryModule.generate(newPartner);
+    });
+  }
+
+  @Get()
+  findAll() {
+    return this.partnerService.findAll();
+  }
+
+  @Get('login')
+  login(@Body() data: LoginDto) {
+    return this.partnerService.findOne(data.email).then((partner) => {
+      CryptoModule.checkPasssword(partner.senha, data.senha);
+      return ResponseFactoryModule.generate(partner);
+    });
+  }
+
+  @HttpCode(204)
+  @Patch(':cnpj')
+  update(
+    @Param('cnpj') cnpj: string,
+    @Body() updatePartnerDto: UpdatePartnerDto,
+  ) {
+    if (updatePartnerDto.senha) {
+      updatePartnerDto.senha = CryptoModule.hashPassword(
+        updatePartnerDto.senha,
+      );
+    }
+    return this.partnerService.update(cnpj, updatePartnerDto);
+  }
+
+  @HttpCode(204)
+  @Patch('partnr/:cnpj')
+  updateAddress(
+    @Param('cnpj') cnpj: string,
+    @Body() data: UpdateAddressPartnerDto,
+  ) {
+    return this.partnerService.updateAddress(cnpj, data);
+  }
+
+  @HttpCode(204)
+  @Delete(':cnpj')
+  remove(@Param('cnpj') cnpj: string) {
+    return this.partnerService.remove(cnpj);
+  }
+
+  @HttpCode(204)
+  @Post('recovery/:cnpj')
+  createCode(@Param('cnpj') cnpj: string) {
+    const code = CodeGeneratorModule.new();
+    return this.partnerService.updateRecoveryCode(cnpj, code);
+  }
+
+  @Post('recovery')
+  checkCode(@Body() data: CheckCodeDto): Promise<ResponseDto<boolean>> {
+    return this.partnerService.findOneWithCnpj(data.key).then((partner) => {
+      const now = new Date();
+      const limitDate = new Date(partner.codigoRecuperacaoCriadoEm!);
+      limitDate.setMinutes(limitDate.getMinutes() + 15);
+
+      if (now.getTime() - limitDate.getTime() < 0) {
+        return ResponseFactoryModule.generate(
+          partner.codigoRecuperacao === data.codigo,
+        );
+      }
+      return ResponseFactoryModule.generate(false);
+    });
+  }
+}

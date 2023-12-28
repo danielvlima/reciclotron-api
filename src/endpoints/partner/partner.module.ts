@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { UsersController } from './users.controller';
+import { PartnerService } from './partner.service';
+import { PartnerController } from './partner.controller';
 import { CryptoModule } from 'src/shared/modules/crypto/crypto.module';
 import { CodeGeneratorModule } from 'src/shared/modules/code-generator/code-generator.module';
 
 @Module({
   imports: [CryptoModule, CodeGeneratorModule],
-  controllers: [UsersController],
-  providers: [UsersService],
+  controllers: [PartnerController],
+  providers: [PartnerService],
 })
-export class UsersModule {}
+export class PartnerModule {}
