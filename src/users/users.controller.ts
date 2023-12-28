@@ -18,7 +18,7 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-  @Post()
+  @Post('login')
   login(@Body() data: LoginUserDto) {
     return this.usersService.findOne(data.email).then((user) => {
       const passwordSplitted = user.senha.split(':');
@@ -43,13 +43,13 @@ export class UsersController {
     return this.usersService.remove(cpf);
   }
 
-  @Post(':cpf')
+  @Post('recovery/:cpf')
   createCode(@Param(':cpf') cpf: string) {
     const code = CodeGeneratorModule.new();
     return this.usersService.updateRecoveryCode(cpf, code);
   }
 
-  @Post()
+  @Post('recovery')
   checkCode(@Body() data: CheckCodeUserDto) {
     return this.usersService.findOneWithCpf(data.cpf).then((user) => {
       const now = new Date();
