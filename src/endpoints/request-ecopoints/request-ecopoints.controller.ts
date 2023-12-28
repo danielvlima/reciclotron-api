@@ -1,14 +1,33 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpCode,
+} from '@nestjs/common';
 import { RequestEcopointsService } from './request-ecopoints.service';
 import { CreateRequestEcopointDto } from './dto/create-request-ecopoint.dto';
 import { UpdateRequestEcopointDto } from './dto/update-request-ecopoint.dto';
+import { RequestActionEcopoint } from './enum/request-action-ecopoint.enum';
+import { CancelRequestEcopointDto } from './dto';
 
 @Controller('request-ecopoints')
 export class RequestEcopointsController {
-  constructor(private readonly requestEcopointsService: RequestEcopointsService) {}
+  constructor(
+    private readonly requestEcopointsService: RequestEcopointsService,
+  ) {}
 
+  @HttpCode(204)
   @Post()
   create(@Body() createRequestEcopointDto: CreateRequestEcopointDto) {
+    if (createRequestEcopointDto.acao === RequestActionEcopoint.ADICIONAR) {
+      return this.requestEcopointsService.createAddEcopoint(
+        createRequestEcopointDto,
+      );
+    }
     return this.requestEcopointsService.create(createRequestEcopointDto);
   }
 
@@ -23,12 +42,16 @@ export class RequestEcopointsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRequestEcopointDto: UpdateRequestEcopointDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateRequestEcopointDto: UpdateRequestEcopointDto,
+  ) {
     return this.requestEcopointsService.update(+id, updateRequestEcopointDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.requestEcopointsService.remove(+id);
+  @HttpCode(204)
+  @Post('cancel')
+  cancel(@Body() data: CancelRequestEcopointDto) {
+    return this.requestEcopointsService.cancel(data);
   }
 }
