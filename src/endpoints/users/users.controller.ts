@@ -29,6 +29,7 @@ export class UsersController {
     });
   }
 
+  @HttpCode(200)
   @Post('login')
   login(@Body() data: LoginDto): Promise<ResponseDto<ResponseUserDto>> {
     return this.usersService.findOne(data.email).then((user) => {
@@ -59,6 +60,7 @@ export class UsersController {
     return this.usersService.updateRecoveryCode(cpf, code);
   }
 
+  @HttpCode(200)
   @Post('recovery')
   checkCode(@Body() data: CheckCodeDto): Promise<ResponseDto<boolean>> {
     return this.usersService.findOneWithCpf(data.key).then((user) => {

@@ -37,6 +37,7 @@ export class PartnerController {
     });
   }
 
+  @HttpCode(200)
   @Post('paginated')
   findPaginated(
     @Body() data: GetPaginatedPartnerDto,
@@ -51,6 +52,7 @@ export class PartnerController {
     });
   }
 
+  @HttpCode(200)
   @Post('login')
   login(@Body() data: LoginDto): Promise<ResponseDto<ResponsePartnerDto>> {
     return this.partnerService.findOne(data.email).then((partner) => {
@@ -95,6 +97,7 @@ export class PartnerController {
     return this.partnerService.updateRecoveryCode(cnpj, code);
   }
 
+  @HttpCode(200)
   @Post('recovery')
   checkCode(@Body() data: CheckCodeDto): Promise<ResponseDto<boolean>> {
     return this.partnerService.findOneWithCnpj(data.key).then((partner) => {
