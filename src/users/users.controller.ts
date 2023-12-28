@@ -26,6 +26,8 @@ export class UsersController {
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
+    const s = CryptoModule.salt();
+    createUserDto.senha = `${CryptoModule.sha256(createUserDto.senha, s)}:${s}`;
     return this.usersService.create(createUserDto);
   }
 
@@ -47,18 +49,25 @@ export class UsersController {
   @HttpCode(204)
   @Patch()
   update(@Body() updateUserDto: UpdateUserDto) {
+    if (updateUserDto.senha) {
+      const s = CryptoModule.salt();
+      updateUserDto.senha = `${CryptoModule.sha256(
+        updateUserDto.senha,
+        s,
+      )}:${s}`;
+    }
     return this.usersService.update(updateUserDto.cpf, updateUserDto);
   }
 
   @HttpCode(204)
   @Delete(':cpf')
-  remove(@Param(':cpf') cpf: string) {
+  remove(@Param('cpf') cpf: string) {
     return this.usersService.remove(cpf);
   }
 
   @HttpCode(204)
   @Post('recovery/:cpf')
-  createCode(@Param(':cpf') cpf: string) {
+  createCode(@Param('cpf') cpf: string) {
     const code = CodeGeneratorModule.new();
     return this.usersService.updateRecoveryCode(cpf, code);
   }
@@ -71,7 +80,7 @@ export class UsersController {
       limitDate.setMinutes(limitDate.getMinutes() + 15);
 
       if (now.getTime() - limitDate.getTime() < 0) {
-        return { body: user.codigoRecuperacao === data.code };
+        return { body: user.codigoRecuperacao === data.codigo };
       }
       return { body: false };
     });
