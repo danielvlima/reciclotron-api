@@ -9,15 +9,20 @@ import {
   HttpCode,
 } from '@nestjs/common';
 import { PartnerService } from './partner.service';
-import { CreatePartnerDto } from './dto/create-partner.dto';
-import { UpdatePartnerDto } from './dto/update-partner.dto';
+import {
+  CreatePartnerDto,
+  ResponsePartnerDto,
+  UpdatePartnerDto,
+  UpdateAddressPartnerDto,
+} from './dto';
+
 import { LoginDto } from 'src/shared/dto/login.dto';
 import { CryptoModule } from 'src/shared/modules/crypto/crypto.module';
 import { CodeGeneratorModule } from 'src/shared/modules/code-generator/code-generator.module';
 import { CheckCodeDto } from 'src/shared/dto/check-code.dto';
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
 import { ResponseDto } from 'src/shared/dto/response.dto';
-import { UpdateAddressPartnerDto } from './dto/update-address-partner.dto';
+import { toPartnerDTO } from './mapper';
 
 @Controller('partner')
 export class PartnerController {
@@ -36,11 +41,11 @@ export class PartnerController {
     return this.partnerService.findAll();
   }
 
-  @Get('login')
-  login(@Body() data: LoginDto) {
+  @Post('login')
+  login(@Body() data: LoginDto): Promise<ResponseDto<ResponsePartnerDto>> {
     return this.partnerService.findOne(data.email).then((partner) => {
       CryptoModule.checkPasssword(partner.senha, data.senha);
-      return ResponseFactoryModule.generate(partner);
+      return ResponseFactoryModule.generate(toPartnerDTO(partner));
     });
   }
 

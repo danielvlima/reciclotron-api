@@ -1,16 +1,32 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePartnerDto } from './dto/create-partner.dto';
-import { UpdatePartnerDto } from './dto/update-partner.dto';
+import {
+  CreatePartnerDto,
+  UpdatePartnerDto,
+  UpdateAddressPartnerDto,
+} from './dto';
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
-import { UpdateAddressPartnerDto } from './dto/update-address-partner.dto';
 
 @Injectable()
 export class PartnerService {
   constructor(private prisma: PrismaService) {}
 
-  create(createPartnerDto: CreatePartnerDto) {
+  create(data: CreatePartnerDto) {
     return this.prisma.empresasParceiras.create({
-      data: createPartnerDto,
+      data: {
+        cnpj: data.cnpj,
+        email: data.email,
+        senha: data.senha,
+        telefone: data.telefone,
+        nomeFantasia: data.nomeFantasia,
+        razaoSocial: data.razaoSocial,
+        ramo: data.ramo,
+        ativo: data.ativo,
+        tipoEmpresa: data.tipoEmpresa,
+        enderecolojaOnline: data.enderecolojaOnline,
+        endereco: {
+          create: data.endereco,
+        },
+      },
       include: {
         endereco: true,
       },
@@ -43,14 +59,23 @@ export class PartnerService {
     });
   }
 
-  update(cnpj: string, updatePartnerDto: UpdatePartnerDto) {
+  update(cnpj: string, data: UpdatePartnerDto) {
     return this.prisma.empresasParceiras.update({
       where: {
         cnpj,
       },
 
       data: {
-        ...updatePartnerDto,
+        logo: data.logo || undefined,
+        email: data.email || undefined,
+        senha: data.senha || undefined,
+        telefone: data.telefone || undefined,
+        nomeFantasia: data.nomeFantasia || undefined,
+        razaoSocial: data.razaoSocial || undefined,
+        ramo: data.ramo || undefined,
+        ativo: data.ativo || undefined,
+        tipoEmpresa: data.tipoEmpresa || undefined,
+        enderecolojaOnline: data.enderecolojaOnline || undefined,
         atualizadoEm: new Date(),
         codigoRecuperacao: null,
         codigoRecuperacaoCriadoEm: null,
@@ -67,8 +92,15 @@ export class PartnerService {
       data: {
         atualizadoEm: new Date(),
         endereco: {
-          where: { id: data.id! },
-          data: updateAddress,
+          update: {
+            rua: updateAddress.rua,
+            numero: updateAddress.numero,
+            complemento: updateAddress.complemento,
+            bairro: updateAddress.bairro,
+            cidade: updateAddress.cidade,
+            uf: updateAddress.uf,
+            cep: updateAddress.cep,
+          },
         },
       },
       include: {

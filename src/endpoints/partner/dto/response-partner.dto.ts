@@ -1,11 +1,10 @@
 import { TypePartnerEnum } from '../enum/type-partner.enum';
-import { CreateAddressPartnerDTO } from './create-address-partner.dto';
+import { ResponseAddressDto } from './response-address.dto';
 
-export class CreatePartnerDto {
+export class ResponsePartnerDto {
   cnpj: string;
-  logo: string;
+  logo: string | null;
   email: string;
-  senha: string;
   telefone: string;
   nomeFantasia: string;
   razaoSocial: string;
@@ -13,5 +12,5 @@ export class CreatePartnerDto {
   ativo: boolean | undefined;
   tipoEmpresa: TypePartnerEnum;
   enderecolojaOnline: string | null;
-  endereco: CreateAddressPartnerDTO;
+  endereco: ResponseAddressDto | null;
 }
