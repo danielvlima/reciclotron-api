@@ -1,26 +1,61 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
-  }
+  constructor(private prisma: PrismaService) {}
 
-  findAll() {
-    return `This action returns all users`;
-  }
+  create = (createUserDto: CreateUserDto) => {
+    return this.prisma.usuarios.create({
+      data: createUserDto,
+    });
+  };
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
+  findOne = (email: string) => {
+    return this.prisma.usuarios.findFirstOrThrow({
+      where: {
+        email,
+      },
+    });
+  };
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
+  update = (cpf: string, updateUserDto: UpdateUserDto) => {
+    return this.prisma.usuarios.update({
+      where: {
+        cpf,
+      },
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
+      data: {
+        ...updateUserDto,
+        atualizadoEm: new Date(),
+        codigoRecuperacao: null,
+        codigoRecuperacaoCriadoEm: null,
+      },
+    });
+  };
+
+  updateRecoveryCode = (cpf: string, code: string) => {
+    const now = new Date();
+    return this.prisma.usuarios.update({
+      where: {
+        cpf,
+      },
+
+      data: {
+        codigoRecuperacao: code,
+        atualizadoEm: now,
+        codigoRecuperacaoCriadoEm: now,
+      },
+    });
+  };
+
+  remove = (cpf: string) => {
+    return this.prisma.usuarios.delete({
+      where: {
+        cpf,
+      },
+    });
+  };
 }
