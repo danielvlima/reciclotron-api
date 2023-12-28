@@ -9,6 +9,7 @@ import { ResponseFactoryModule } from './shared/modules/response-factory/respons
 import { PartnerModule } from './endpoints/partner/partner.module';
 import { CouponsPurchasedModule } from './endpoints/coupons-purchased/coupons-purchased.module';
 import { MaterialsModule } from './endpoints/materials/materials.module';
+import { RequestEcopointsModule } from './endpoints/request-ecopoints/request-ecopoints.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MaterialsModule } from './endpoints/materials/materials.module';
     PartnerModule,
     CouponsPurchasedModule,
     MaterialsModule,
+    RequestEcopointsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
