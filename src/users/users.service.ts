@@ -21,6 +21,14 @@ export class UsersService {
     });
   };
 
+  findOneWithCpf = (cpf: string) => {
+    return this.prisma.usuarios.findFirstOrThrow({
+      where: {
+        cpf,
+      },
+    });
+  };
+
   update = (cpf: string, updateUserDto: UpdateUserDto) => {
     return this.prisma.usuarios.update({
       where: {
