@@ -52,7 +52,7 @@ export class CouponsPurchasedService {
 
   findPaginated(data: GetPaginatedCouponsPurchasedDto, dateNow: Date) {
     let orderParams = {};
-    switch (data.ordem.value) {
+    switch (data.ordem.opcao) {
       case OrderByCouponsPurchasedEnum.ExpiracaoMaisLonga:
         orderParams = {
           expiraEm: 'desc',

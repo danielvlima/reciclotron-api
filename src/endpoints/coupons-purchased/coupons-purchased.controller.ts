@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param } from '@nestjs/common';
+import { Controller, Post, Body, Param, HttpCode } from '@nestjs/common';
 import { CouponsPurchasedService } from './coupons-purchased.service';
 import { CreateCouponsPurchasedDto } from './dto/create-coupons-purchased.dto';
 import { ResponseDto } from 'src/shared/dto/response.dto';
@@ -15,11 +15,12 @@ export class CouponsPurchasedController {
     private readonly couponsPurchasedService: CouponsPurchasedService,
   ) {}
 
-  @Post()
+  @Post('create')
   create(@Body() createCouponsPurchasedDto: CreateCouponsPurchasedDto) {
     return this.couponsPurchasedService.create(createCouponsPurchasedDto);
   }
 
+  @HttpCode(200)
   @Post('filters/:cpf')
   findAll(@Param('cpf') cpf: string): Promise<ResponseDto<string[]>> {
     const dateNow = new Date();
@@ -31,7 +32,8 @@ export class CouponsPurchasedController {
       });
   }
 
-  @Post('find')
+  @HttpCode(200)
+  @Post()
   findPaginated(
     @Body() data: GetPaginatedCouponsPurchasedDto,
   ): Promise<ResponseDto<ResponsePaginatedCouponsPurchasedDto>> {
