@@ -8,6 +8,7 @@ import { CodeGeneratorModule } from './shared/modules/code-generator/code-genera
 import { ResponseFactoryModule } from './shared/modules/response-factory/response-factory.module';
 import { PartnerModule } from './endpoints/partner/partner.module';
 import { CouponsPurchasedModule } from './endpoints/coupons-purchased/coupons-purchased.module';
+import { MaterialsModule } from './endpoints/materials/materials.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { CouponsPurchasedModule } from './endpoints/coupons-purchased/coupons-pu
     ResponseFactoryModule,
     PartnerModule,
     CouponsPurchasedModule,
+    MaterialsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
