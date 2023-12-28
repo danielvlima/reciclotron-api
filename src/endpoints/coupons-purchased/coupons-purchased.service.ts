@@ -1,26 +1,96 @@
 import { Injectable } from '@nestjs/common';
-import { CreateCouponsPurchasedDto } from './dto/create-coupons-purchased.dto';
-import { UpdateCouponsPurchasedDto } from './dto/update-coupons-purchased.dto';
+import {
+  CreateCouponsPurchasedDto,
+  GetPaginatedCouponsPurchasedDto,
+} from './dto';
+import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
+import { OrderByCouponsPurchasedEnum } from './enum/order-by-coupons-purchased.enum';
 
 @Injectable()
 export class CouponsPurchasedService {
+  constructor(private prisma: PrismaService) {}
+
   create(createCouponsPurchasedDto: CreateCouponsPurchasedDto) {
     return 'This action adds a new couponsPurchased';
   }
 
-  findAll() {
-    return `This action returns all couponsPurchased`;
+  async findFilters(cpf: string, dateNow: Date) {
+    const coupons = await this.prisma.cuponsCompradosUsuario.findMany({
+      include: {
+        cupom: {
+          include: {
+            empresa: true,
+          },
+        },
+      },
+      where: {
+        usuarioCPF: cpf,
+        expiraEm: { gte: dateNow },
+        utilizadoEm: null,
+      },
+    });
+
+    return coupons
+      .map((item) => item.cupom.empresa.nomeFantasia)
+      .filter((value, index, self) => self.indexOf(value) === index);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} couponsPurchased`;
+  count(data: GetPaginatedCouponsPurchasedDto, dateNow: Date) {
+    return this.prisma.cuponsCompradosUsuario.count({
+      where: {
+        usuarioCPF: data.usuarioCPF,
+        expiraEm: { gte: dateNow },
+        utilizadoEm: null,
+        cupom: {
+          empresa: {
+            nomeFantasia: { contains: data.filtro.nomeFantasia ?? '' },
+          },
+        },
+      },
+    });
   }
 
-  update(id: number, updateCouponsPurchasedDto: UpdateCouponsPurchasedDto) {
-    return `This action updates a #${id} couponsPurchased`;
-  }
+  findPaginated(data: GetPaginatedCouponsPurchasedDto, dateNow: Date) {
+    let orderParams = {};
+    switch (data.ordem.value) {
+      case OrderByCouponsPurchasedEnum.ExpiracaoMaisLonga:
+        orderParams = {
+          expiraEm: 'desc',
+        };
+        break;
 
-  remove(id: number) {
-    return `This action removes a #${id} couponsPurchased`;
+      case OrderByCouponsPurchasedEnum.ExpiracaoMaisProxima:
+        orderParams = {
+          expiraEm: 'asc',
+        };
+        break;
+
+      case OrderByCouponsPurchasedEnum.CompraMaisRecente:
+        orderParams = {
+          criadoEm: 'desc',
+        };
+        break;
+
+      case OrderByCouponsPurchasedEnum.CompraMaisAntiga:
+        orderParams = {
+          criadoEm: 'asc',
+        };
+        break;
+    }
+    return this.prisma.cuponsCompradosUsuario.findMany({
+      include: {
+        cupom: {
+          include: {
+            empresa: true,
+          },
+        },
+      },
+      where: {
+        usuarioCPF: data.usuarioCPF,
+        expiraEm: { gte: dateNow },
+        utilizadoEm: null,
+      },
+      orderBy: orderParams,
+    });
   }
 }
