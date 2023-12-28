@@ -5,9 +5,16 @@ import { UsersModule } from './users/users.module';
 import { PrismaModule } from './shared/modules/prisma/prisma.module';
 import { CryptoModule } from './shared/modules/crypto/crypto.module';
 import { CodeGeneratorModule } from './shared/modules/code-generator/code-generator.module';
+import { ResponseFactoryModule } from './shared/modules/response-factory/response-factory.module';
 
 @Module({
-  imports: [UsersModule, PrismaModule, CryptoModule, CodeGeneratorModule],
+  imports: [
+    UsersModule,
+    PrismaModule,
+    CryptoModule,
+    CodeGeneratorModule,
+    ResponseFactoryModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

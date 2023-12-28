@@ -19,6 +19,7 @@ import { CryptoModule } from 'src/shared/modules/crypto/crypto.module';
 import { CodeGeneratorModule } from 'src/shared/modules/code-generator/code-generator.module';
 import { toUserDTO } from './mappers';
 import { ResponseDto } from 'src/shared/dto/response.dto';
+import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
 
 @Controller('user')
 export class UsersController {
@@ -26,23 +27,17 @@ export class UsersController {
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
-    const s = CryptoModule.salt();
-    createUserDto.senha = `${CryptoModule.sha256(createUserDto.senha, s)}:${s}`;
-    return this.usersService.create(createUserDto);
+    createUserDto.senha = CryptoModule.hashPassword(createUserDto.senha);
+    return this.usersService.create(createUserDto).then((newUser) => {
+      return ResponseFactoryModule.generate(toUserDTO(newUser));
+    });
   }
 
   @Post('login')
   login(@Body() data: LoginUserDto): Promise<ResponseDto<ResponseUserDto>> {
     return this.usersService.findOne(data.email).then((user) => {
-      const passwordSplitted = user.senha.split(':');
-      const passwordHashed = CryptoModule.sha256(
-        data.senha,
-        passwordSplitted[1],
-      );
-
-      if (passwordHashed === passwordSplitted[0]) {
-        return { body: toUserDTO(user) };
-      }
+      CryptoModule.checkPasssword(user.senha, data.senha);
+      return ResponseFactoryModule.generate(toUserDTO(user));
     });
   }
 
@@ -50,11 +45,7 @@ export class UsersController {
   @Patch()
   update(@Body() updateUserDto: UpdateUserDto) {
     if (updateUserDto.senha) {
-      const s = CryptoModule.salt();
-      updateUserDto.senha = `${CryptoModule.sha256(
-        updateUserDto.senha,
-        s,
-      )}:${s}`;
+      updateUserDto.senha = CryptoModule.hashPassword(updateUserDto.senha);
     }
     return this.usersService.update(updateUserDto.cpf, updateUserDto);
   }
@@ -80,9 +71,11 @@ export class UsersController {
       limitDate.setMinutes(limitDate.getMinutes() + 15);
 
       if (now.getTime() - limitDate.getTime() < 0) {
-        return { body: user.codigoRecuperacao === data.codigo };
+        return ResponseFactoryModule.generate(
+          user.codigoRecuperacao === data.codigo,
+        );
       }
-      return { body: false };
+      return ResponseFactoryModule.generate(false);
     });
   }
 }
