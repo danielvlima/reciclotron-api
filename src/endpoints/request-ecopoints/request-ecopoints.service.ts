@@ -64,6 +64,27 @@ export class RequestEcopointsService {
     });
   }
 
+  countAllRequests() {
+    return this.prisma.solicitacoesEcoponto.count({
+      where: {
+        atendidoEm: null,
+      },
+    });
+  }
+
+  findAllPaginated(skip: number, take: number) {
+    return this.prisma.solicitacoesEcoponto.findMany({
+      where: {
+        atendidoEm: null,
+      },
+      orderBy: {
+        criadoEm: 'desc',
+      },
+      skip: skip,
+      take: take,
+    });
+  }
+
   findOneRequest(ecopointId: string) {
     return this.prisma.solicitacoesEcoponto.findFirst({
       where: {
