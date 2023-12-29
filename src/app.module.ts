@@ -10,6 +10,7 @@ import { PartnerModule } from './endpoints/partner/partner.module';
 import { CouponsPurchasedModule } from './endpoints/coupons-purchased/coupons-purchased.module';
 import { MaterialsModule } from './endpoints/materials/materials.module';
 import { RequestEcopointsModule } from './endpoints/request-ecopoints/request-ecopoints.module';
+import { DiscountCouponModule } from './endpoints/discount-coupon/discount-coupon.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { RequestEcopointsModule } from './endpoints/request-ecopoints/request-ec
     CouponsPurchasedModule,
     MaterialsModule,
     RequestEcopointsModule,
+    DiscountCouponModule,
   ],
   controllers: [AppController],
   providers: [AppService],
