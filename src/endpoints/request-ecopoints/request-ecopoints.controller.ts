@@ -49,9 +49,7 @@ export class RequestEcopointsController {
           .then((newEcopoints) => {
             return ResponseFactoryModule.generate({
               total,
-              novosEcopontos: newEcopoints.map((el) =>
-                toEcopointRequestDTO(el),
-              ),
+              ecopontos: newEcopoints.map((el) => toEcopointRequestDTO(el)),
             });
           });
       });
@@ -68,9 +66,7 @@ export class RequestEcopointsController {
         .then((requestEcopoints) => {
           return ResponseFactoryModule.generate({
             total,
-            novosEcopontos: requestEcopoints.map((el) =>
-              toEcopointRequestDTO(el),
-            ),
+            ecopontos: requestEcopoints.map((el) => toEcopointRequestDTO(el)),
           });
         });
     });
