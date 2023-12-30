@@ -179,7 +179,7 @@ export class DiscountCouponService {
   }
 
   findOne(id: number) {
-    return this.prisma.cuponsDesconto.findFirst({
+    return this.prisma.cuponsDesconto.findFirstOrThrow({
       where: {
         id,
       },
