@@ -178,6 +178,14 @@ export class DiscountCouponService {
     });
   }
 
+  findOne(id: number) {
+    this.prisma.cuponsDesconto.findFirst({
+      where: {
+        id,
+      },
+    });
+  }
+
   update(updateDiscountCouponDto: UpdateDiscountCouponDto) {
     return this.prisma.cuponsDesconto.update({
       where: {
