@@ -8,5 +8,6 @@ import { CodeGeneratorModule } from 'src/shared/modules/code-generator/code-gene
   imports: [CryptoModule, CodeGeneratorModule],
   controllers: [UsersController],
   providers: [UsersService],
+  exports: [UsersService],
 })
 export class UsersModule {}

@@ -12,6 +12,7 @@ import { MaterialsModule } from './endpoints/materials/materials.module';
 import { RequestEcopointsModule } from './endpoints/request-ecopoints/request-ecopoints.module';
 import { DiscountCouponModule } from './endpoints/discount-coupon/discount-coupon.module';
 import { TransactionsModule } from './endpoints/transactions/transactions.module';
+import { CompareModule } from './shared/modules/compare/compare.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { TransactionsModule } from './endpoints/transactions/transactions.module
     RequestEcopointsModule,
     DiscountCouponModule,
     TransactionsModule,
+    CompareModule,
   ],
   controllers: [AppController],
   providers: [AppService],

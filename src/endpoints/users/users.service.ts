@@ -29,10 +29,10 @@ export class UsersService {
     });
   };
 
-  update = (cpf: string, updateUserDto: UpdateUserDto) => {
+  update = (updateUserDto: UpdateUserDto) => {
     return this.prisma.usuarios.update({
       where: {
-        cpf,
+        cpf: updateUserDto.cpf,
       },
 
       data: {

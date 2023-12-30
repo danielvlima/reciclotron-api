@@ -5,5 +5,6 @@ import { CouponsPurchasedController } from './coupons-purchased.controller';
 @Module({
   controllers: [CouponsPurchasedController],
   providers: [CouponsPurchasedService],
+  exports: [CouponsPurchasedService],
 })
 export class CouponsPurchasedModule {}
