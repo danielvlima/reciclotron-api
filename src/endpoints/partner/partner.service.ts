@@ -135,10 +135,10 @@ export class PartnerService {
     });
   }
 
-  update(cnpj: string, data: UpdatePartnerDto) {
+  update(data: UpdatePartnerDto) {
     return this.prisma.empresasParceiras.update({
       where: {
-        cnpj,
+        cnpj: data.cnpj,
       },
 
       data: {

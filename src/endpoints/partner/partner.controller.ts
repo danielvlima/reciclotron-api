@@ -64,21 +64,18 @@ export class PartnerController {
   }
 
   @HttpCode(204)
-  @Patch(':cnpj')
-  update(
-    @Param('cnpj') cnpj: string,
-    @Body() updatePartnerDto: UpdatePartnerDto,
-  ) {
+  @Patch()
+  update(@Body() updatePartnerDto: UpdatePartnerDto) {
     if (updatePartnerDto.senha) {
       updatePartnerDto.senha = CryptoModule.hashPassword(
         updatePartnerDto.senha,
       );
     }
-    return this.partnerService.update(cnpj, updatePartnerDto);
+    return this.partnerService.update(updatePartnerDto);
   }
 
   @HttpCode(204)
-  @Patch('partnr/:cnpj')
+  @Patch('address/:cnpj')
   updateAddress(
     @Param('cnpj') cnpj: string,
     @Body() data: UpdateAddressPartnerDto,
