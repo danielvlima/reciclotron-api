@@ -100,6 +100,12 @@ export class TransactionsService {
     });
   }
 
+  findOne(id: number) {
+    return this.prisma.transacoes.findFirstOrThrow({
+      where: { id },
+    });
+  }
+
   update(updateTransactionDto: UpdateTransactionDto) {
     return this.prisma.transacoes.update({
       where: {

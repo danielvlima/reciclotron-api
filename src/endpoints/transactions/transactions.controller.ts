@@ -14,6 +14,8 @@ import { DiscountCouponService } from '../discount-coupon/discount-coupon.servic
 import { CompareModule } from 'src/shared/modules/compare/compare.module';
 import { UsersService } from '../users/users.service';
 import { CouponsPurchasedService } from '../coupons-purchased/coupons-purchased.service';
+import { $Enums } from '@prisma/client';
+import { TransactionStatusEnum } from './enum/transactions-type.enum';
 
 @Controller('transactions')
 export class TransactionsController {
@@ -99,6 +101,23 @@ export class TransactionsController {
   @HttpCode(204)
   @Patch()
   update(@Body() updateTransactionDto: UpdateTransactionDto) {
-    return this.transactionsService.update(updateTransactionDto);
+    return this.transactionsService
+      .findOne(updateTransactionDto.id)
+      .then((transaction) => {
+        return this.usersService
+          .findOneWithCpf(transaction.usuarioCPF)
+          .then(async (user) => {
+            if (
+              transaction.tipo === $Enums.TipoTransacao.CREDITO &&
+              updateTransactionDto.status === TransactionStatusEnum.EFETIVADO
+            ) {
+              await this.usersService.update({
+                cpf: transaction.usuarioCPF,
+                pontos: user.pontos + transaction.valorTotal,
+              });
+            }
+            return this.transactionsService.update(updateTransactionDto);
+          });
+      });
   }
 }
