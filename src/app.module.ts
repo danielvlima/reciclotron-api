@@ -11,6 +11,7 @@ import { CouponsPurchasedModule } from './endpoints/coupons-purchased/coupons-pu
 import { MaterialsModule } from './endpoints/materials/materials.module';
 import { RequestEcopointsModule } from './endpoints/request-ecopoints/request-ecopoints.module';
 import { DiscountCouponModule } from './endpoints/discount-coupon/discount-coupon.module';
+import { TransactionsModule } from './endpoints/transactions/transactions.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { DiscountCouponModule } from './endpoints/discount-coupon/discount-coupo
     MaterialsModule,
     RequestEcopointsModule,
     DiscountCouponModule,
+    TransactionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
