@@ -5,5 +5,6 @@ import { RequestEcopointsController } from './request-ecopoints.controller';
 @Module({
   controllers: [RequestEcopointsController],
   providers: [RequestEcopointsService],
+  exports: [RequestEcopointsService],
 })
 export class RequestEcopointsModule {}
