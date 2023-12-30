@@ -100,10 +100,6 @@ export class TransactionsService {
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} transaction`;
-  }
-
   update(updateTransactionDto: UpdateTransactionDto) {
     return this.prisma.transacoes.update({
       where: {

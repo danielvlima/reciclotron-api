@@ -3,6 +3,8 @@ import { CreatePurchaseTransactionDto } from './create-purchase-transaction.dto'
 import { DepositMaterialsTransactionDTO } from './deposit-materials-transaction.dto';
 import { FilterTransactionsOptionsDto } from './filter-transactions-options.dto';
 import { PaginatedTransaction } from './paginated-transaction.dto';
+import { ResponsePaginatedTransactionsDto } from './response-paginated-transactions.dto';
+import { ResponseTransactionDto } from './response-transaction.dto';
 import { UpdateTransactionDto } from './update-transaction.dto';
 
 export {
@@ -12,4 +14,6 @@ export {
   CreatePurchaseTransactionDto,
   PaginatedTransaction,
   FilterTransactionsOptionsDto,
+  ResponsePaginatedTransactionsDto,
+  ResponseTransactionDto,
 };

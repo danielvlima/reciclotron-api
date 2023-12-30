@@ -1,34 +1,57 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Patch, HttpCode } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
+import {
+  CreateDepositTransactionDto,
+  CreatePurchaseTransactionDto,
+  PaginatedTransaction,
+  ResponsePaginatedTransactionsDto,
+  ResponseTransactionDto,
+} from './dto';
+import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
+import { toTransactionDTO } from './mappers';
 
 @Controller('transactions')
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
+  @Post('deposit')
+  deposit(@Body() depositDto: CreateDepositTransactionDto) {
+    return this.transactionsService.createDeposit(depositDto).then((value) => {
+      return ResponseFactoryModule.generate<ResponseTransactionDto>(
+        toTransactionDTO(value),
+      );
+    });
+  }
+
+  @Post('purchase')
+  purchase(@Body() purchaseDto: CreatePurchaseTransactionDto) {
+    return this.transactionsService
+      .createPurchase(purchaseDto)
+      .then((value) => {
+        return ResponseFactoryModule.generate<ResponseTransactionDto>(
+          toTransactionDTO(value),
+        );
+      });
+  }
+
   @Post()
-  create(@Body() createTransactionDto: CreateTransactionDto) {
-    return this.transactionsService.create(createTransactionDto);
+  findAll(@Body() data: PaginatedTransaction) {
+    return this.transactionsService.count(data).then((total) => {
+      return this.transactionsService.findAll(data).then((transactions) => {
+        return ResponseFactoryModule.generate<ResponsePaginatedTransactionsDto>(
+          {
+            total,
+            transacoes: transactions.map((el) => toTransactionDTO(el)),
+          },
+        );
+      });
+    });
   }
 
-  @Get()
-  findAll() {
-    return this.transactionsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.transactionsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTransactionDto: UpdateTransactionDto) {
-    return this.transactionsService.update(+id, updateTransactionDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.transactionsService.remove(+id);
+  @HttpCode(204)
+  @Patch()
+  update(@Body() updateTransactionDto: UpdateTransactionDto) {
+    return this.transactionsService.update(updateTransactionDto);
   }
 }
