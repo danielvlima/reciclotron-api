@@ -27,7 +27,9 @@ export class UsersController {
   create(@Body() createUserDto: CreateUserDto) {
     createUserDto.senha = CryptoModule.hashPassword(createUserDto.senha);
     return this.usersService.create(createUserDto).then((newUser) => {
-      return ResponseFactoryModule.generate(toUserDTO(newUser));
+      return ResponseFactoryModule.generate<ResponseUserDto>(
+        toUserDTO(newUser),
+      );
     });
   }
 
@@ -36,7 +38,7 @@ export class UsersController {
   login(@Body() data: LoginDto): Promise<ResponseDto<ResponseUserDto>> {
     return this.usersService.findOne(data.email).then((user) => {
       CryptoModule.checkPasssword(user.senha, data.senha);
-      return ResponseFactoryModule.generate(toUserDTO(user));
+      return ResponseFactoryModule.generate<ResponseUserDto>(toUserDTO(user));
     });
   }
 
