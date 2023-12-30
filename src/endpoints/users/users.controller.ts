@@ -65,7 +65,7 @@ export class UsersController {
   }
 
   @HttpCode(200)
-  @Post('recovery')
+  @Post('checkRecoveryCode')
   checkCode(@Body() data: CheckCodeDto): Promise<ResponseDto<boolean>> {
     return this.usersService.findOneWithCpf(data.key).then((user) => {
       const now = new Date();

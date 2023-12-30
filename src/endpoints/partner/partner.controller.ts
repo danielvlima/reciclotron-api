@@ -97,7 +97,7 @@ export class PartnerController {
   }
 
   @HttpCode(200)
-  @Post('recovery')
+  @Post('checkRecoveryCode')
   checkCode(@Body() data: CheckCodeDto): Promise<ResponseDto<boolean>> {
     return this.partnerService.findOneWithCnpj(data.key).then((partner) => {
       const now = new Date();

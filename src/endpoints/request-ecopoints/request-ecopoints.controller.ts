@@ -41,7 +41,7 @@ export class RequestEcopointsController {
   @HttpCode(200)
   @Post('findAllRequestNewEcopoints')
   findPaginatedNewEcopoints(
-    data: PaginatedNewEcopointsRequestDto,
+    @Body() data: PaginatedNewEcopointsRequestDto,
   ): Promise<ResponseDto<ResponsePaginatedEcopointsRequestDto>> {
     return this.requestEcopointsService
       .countNewEcopoints(data.cnpj)
