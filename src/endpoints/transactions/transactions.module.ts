@@ -7,13 +7,13 @@ import { UsersService } from '../users/users.service';
 import { CouponsPurchasedService } from '../coupons-purchased/coupons-purchased.service';
 
 @Module({
-  imports: [
-    CompareModule,
+  imports: [CompareModule],
+  controllers: [TransactionsController],
+  providers: [
+    TransactionsService,
     DiscountCouponService,
     UsersService,
     CouponsPurchasedService,
   ],
-  controllers: [TransactionsController],
-  providers: [TransactionsService],
 })
 export class TransactionsModule {}
