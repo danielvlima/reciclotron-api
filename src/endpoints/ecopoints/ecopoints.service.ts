@@ -1,11 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { CreateEcopointDto } from './dto/create-ecopoint.dto';
-import { UpdateEcopointDto } from './dto/update-ecopoint.dto';
+import { CreateEcopointDto, UpdateEcopointDto } from './dto';
+import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
 
 @Injectable()
 export class EcopointsService {
+  constructor(private prisma: PrismaService) {}
+
   create(createEcopointDto: CreateEcopointDto) {
-    return 'This action adds a new ecopoint';
+    return this.prisma.ecopontos.create({
+      data: createEcopointDto,
+      include: {
+        enderecos: true,
+      },
+    });
   }
 
   findAll() {
@@ -16,11 +23,30 @@ export class EcopointsService {
     return `This action returns a #${id} ecopoint`;
   }
 
-  update(id: number, updateEcopointDto: UpdateEcopointDto) {
-    return `This action updates a #${id} ecopoint`;
+  update(updateEcopointDto: UpdateEcopointDto) {
+    return this.prisma.ecopontos.update({
+      where: {
+        id: updateEcopointDto.id,
+      },
+
+      data: {
+        id: updateEcopointDto.id || undefined,
+        ativo: updateEcopointDto.ativo || undefined,
+        enderecoId: updateEcopointDto.enderecoId || undefined,
+        tipo: updateEcopointDto.tipo || undefined,
+        atualizadoEm: new Date(),
+      },
+      include: {
+        enderecos: true,
+      },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} ecopoint`;
+  remove(id: string) {
+    return this.prisma.ecopontos.delete({
+      where: {
+        id,
+      },
+    });
   }
 }
