@@ -178,10 +178,10 @@ export class DiscountCouponService {
     });
   }
 
-  update(id: number, updateDiscountCouponDto: UpdateDiscountCouponDto) {
+  update(updateDiscountCouponDto: UpdateDiscountCouponDto) {
     return this.prisma.cuponsDesconto.update({
       where: {
-        id,
+        id: updateDiscountCouponDto.id,
       },
 
       data: {
@@ -196,10 +196,11 @@ export class DiscountCouponService {
     });
   }
 
-  remove(id: number) {
+  remove(cnpj: string, id: number) {
     return this.prisma.cuponsDesconto.delete({
       where: {
         id,
+        cnpjEmpresa: cnpj,
       },
     });
   }
