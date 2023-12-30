@@ -10,8 +10,20 @@ import { OrderByCouponsPurchasedEnum } from './enum/order-by-coupons-purchased.e
 export class CouponsPurchasedService {
   constructor(private prisma: PrismaService) {}
 
-  create(createCouponsPurchasedDto: CreateCouponsPurchasedDto) {
-    return 'This action adds a new couponsPurchased';
+  create(data: CreateCouponsPurchasedDto) {
+    return this.prisma.cuponsCompradosUsuario.create({
+      data: {
+        usuarioCPF: data.usuarioCPF,
+        cupomId: data.cupomId,
+        expiraEm: data.expiraEm,
+        criadoEm: data.criadoEm,
+      },
+
+      include: {
+        cupom: true,
+        usuario: true,
+      },
+    });
   }
 
   async findFilters(cpf: string, dateNow: Date) {

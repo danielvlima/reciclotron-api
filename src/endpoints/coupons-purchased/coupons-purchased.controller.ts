@@ -1,6 +1,5 @@
 import { Controller, Post, Body, Param, HttpCode } from '@nestjs/common';
 import { CouponsPurchasedService } from './coupons-purchased.service';
-import { CreateCouponsPurchasedDto } from './dto/create-coupons-purchased.dto';
 import { ResponseDto } from 'src/shared/dto/response.dto';
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
 import {
@@ -16,11 +15,6 @@ export class CouponsPurchasedController {
   constructor(
     private readonly couponsPurchasedService: CouponsPurchasedService,
   ) {}
-
-  @Post('create')
-  create(@Body() createCouponsPurchasedDto: CreateCouponsPurchasedDto) {
-    return this.couponsPurchasedService.create(createCouponsPurchasedDto);
-  }
 
   @HttpCode(200)
   @Post('filters/:cpf')
