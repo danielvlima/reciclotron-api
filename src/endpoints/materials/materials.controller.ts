@@ -20,7 +20,9 @@ import {
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
 import { toMaterialDTO } from './mappers';
 import { ResponseDto } from 'src/shared/dto/response.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Materiais')
 @Controller('materials')
 export class MaterialsController {
   constructor(private readonly materialsService: MaterialsService) {}

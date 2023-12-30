@@ -8,7 +8,9 @@ import {
   ResponsePaginatedCouponsPurchasedDto,
 } from './dto';
 import { toCouponsPurchasedDTO } from './mappers';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Cupons comprados pelo Usuário')
 @Controller('couponsPurchased')
 export class CouponsPurchasedController {
   constructor(

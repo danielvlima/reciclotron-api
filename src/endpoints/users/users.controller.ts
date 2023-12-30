@@ -16,7 +16,9 @@ import { ResponseDto } from 'src/shared/dto/response.dto';
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
 import { LoginDto } from 'src/shared/dto/login.dto';
 import { CheckCodeDto } from 'src/shared/dto/check-code.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Usuários')
 @Controller('user')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

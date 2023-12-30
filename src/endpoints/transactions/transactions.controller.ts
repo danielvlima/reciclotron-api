@@ -16,7 +16,9 @@ import { UsersService } from '../users/users.service';
 import { CouponsPurchasedService } from '../coupons-purchased/coupons-purchased.service';
 import { $Enums } from '@prisma/client';
 import { TransactionStatusEnum } from './enum/transactions-type.enum';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Transações')
 @Controller('transactions')
 export class TransactionsController {
   constructor(

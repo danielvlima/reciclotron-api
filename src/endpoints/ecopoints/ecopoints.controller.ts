@@ -19,7 +19,9 @@ import { ResponseFactoryModule } from 'src/shared/modules/response-factory/respo
 import { toEcopontoDTO, toEcopontoDTOFromQuery } from './mappers';
 import { RequestEcopointsService } from '../request-ecopoints/request-ecopoints.service';
 import { toEcopointRequestDTO } from '../request-ecopoints/mappers';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Ecopontos')
 @Controller('ecopoints')
 export class EcopointsController {
   constructor(

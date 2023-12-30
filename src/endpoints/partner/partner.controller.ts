@@ -24,7 +24,9 @@ import { CheckCodeDto } from 'src/shared/dto/check-code.dto';
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
 import { ResponseDto } from 'src/shared/dto/response.dto';
 import { toPartnerDTO } from './mapper';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Empresas Parceiras')
 @Controller('partner')
 export class PartnerController {
   constructor(private readonly partnerService: PartnerService) {}

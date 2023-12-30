@@ -21,7 +21,9 @@ import {
 } from './dto';
 import { toCouponsDescDTO } from './mappers';
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Cupons de Desconto')
 @Controller('discount-coupon')
 export class DiscountCouponController {
   constructor(private readonly discountCouponService: DiscountCouponService) {}
