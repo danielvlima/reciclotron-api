@@ -1,4 +1,6 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateTransactionDto } from './create-transaction.dto';
+import { TransactionStatusEnum } from '../enum/transactions-type.enum';
 
-export class UpdateTransactionDto extends PartialType(CreateTransactionDto) {}
+export class UpdateTransactionDto {
+  id: number;
+  status: TransactionStatusEnum;
+}
