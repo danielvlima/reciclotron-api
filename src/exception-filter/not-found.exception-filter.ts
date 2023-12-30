@@ -9,14 +9,11 @@ export class NotFoundExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
+    const msgError = exception.meta?.cause ?? exception.message;
     if (exception.code === 'P2025') {
-      response
-        .status(404)
-        .json(ResponseFactoryModule.generateError('Elemento não encontrado'));
+      response.status(404).json(ResponseFactoryModule.generateError(msgError));
     } else {
-      response
-        .status(500)
-        .json(ResponseFactoryModule.generateError('Erro interno'));
+      response.status(500).json(ResponseFactoryModule.generateError(msgError));
     }
   }
 }
