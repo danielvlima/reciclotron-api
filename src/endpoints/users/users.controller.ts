@@ -44,7 +44,7 @@ export class UsersController {
     if (updateUserDto.senha) {
       updateUserDto.senha = CryptoModule.hashPassword(updateUserDto.senha);
     }
-    return this.usersService.update(updateUserDto.cpf, updateUserDto);
+    return this.usersService.update(updateUserDto);
   }
 
   @HttpCode(204)
