@@ -1,11 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { NotFoundException } from './exceptions/not-found.exception';
+import { NotFoundExceptionFilter } from './exception-filter/not-found.exception-filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.useGlobalFilters(new NotFoundException());
+  app.useGlobalFilters(new NotFoundExceptionFilter());
   await app.listen(5000);
 }
 bootstrap();

@@ -4,7 +4,7 @@ import { Response } from 'express';
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
 
 @Catch(Prisma.PrismaClientKnownRequestError)
-export class NotFoundException implements ExceptionFilter {
+export class NotFoundExceptionFilter implements ExceptionFilter {
   catch(exception: Prisma.PrismaClientKnownRequestError, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
