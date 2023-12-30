@@ -7,6 +7,7 @@ import {
 } from './dto';
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
 import { $Enums } from '@prisma/client';
+import { EcopointQuery } from './entities/ecopoint.query.entity';
 
 @Injectable()
 export class EcopointsService {
@@ -48,7 +49,9 @@ export class EcopointsService {
       });
   }
 
-  findPaginatedEcopointsForDeposit(data: PaginatedEcopointsDepositDto) {
+  findPaginatedEcopointsForDeposit(
+    data: PaginatedEcopointsDepositDto,
+  ): Promise<EcopointQuery[]> {
     if (data.hasItemForBox && data.city) {
       return this.prisma.$queryRaw`
               select 

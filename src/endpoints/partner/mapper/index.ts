@@ -1,5 +1,5 @@
 import { ResponseAddressDto, ResponsePartnerDto } from '../dto';
-import { Address } from '../entities/address.entity';
+import { Address } from '../../../shared/entities/address.entity';
 import { Partner } from '../entities/partner.entity';
 import { TypePartnerEnum } from '../enum/type-partner.enum';
 

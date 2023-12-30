@@ -1,5 +1,5 @@
 import { $Enums } from '@prisma/client';
-import { Address } from './address.entity';
+import { Address } from '../../../shared/entities/address.entity';
 
 export class Partner {
   cnpj: string;
