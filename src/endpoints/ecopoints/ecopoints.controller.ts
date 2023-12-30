@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpCode,
+} from '@nestjs/common';
 import { EcopointsService } from './ecopoints.service';
 import { CreateEcopointDto } from './dto/create-ecopoint.dto';
 import { UpdateEcopointDto } from './dto/update-ecopoint.dto';
@@ -24,6 +32,7 @@ export class EcopointsController {
     return this.ecopointsService.create(createEcopointDto);
   }
 
+  @HttpCode(200)
   @Post('findPaginated')
   findPaginated(@Body() data: PaginatedEcopointDto) {
     return this.ecopointsService
@@ -58,6 +67,7 @@ export class EcopointsController {
       });
   }
 
+  @HttpCode(200)
   @Post('findForDeposit')
   findForDeposit(@Body() data: PaginatedEcopointsDepositDto) {
     return this.ecopointsService
@@ -76,11 +86,13 @@ export class EcopointsController {
       });
   }
 
+  @HttpCode(204)
   @Patch()
   update(@Body() updateEcopointDto: UpdateEcopointDto) {
     return this.ecopointsService.update(updateEcopointDto);
   }
 
+  @HttpCode(204)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.ecopointsService.remove(id);
