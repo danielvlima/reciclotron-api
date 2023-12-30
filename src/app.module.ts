@@ -13,7 +13,6 @@ import { RequestEcopointsModule } from './endpoints/request-ecopoints/request-ec
 import { DiscountCouponModule } from './endpoints/discount-coupon/discount-coupon.module';
 import { TransactionsModule } from './endpoints/transactions/transactions.module';
 import { CompareModule } from './shared/modules/compare/compare.module';
-import { EcopintsModule } from './endpoints/ecopints/ecopints.module';
 
 @Module({
   imports: [
@@ -29,7 +28,6 @@ import { EcopintsModule } from './endpoints/ecopints/ecopints.module';
     DiscountCouponModule,
     TransactionsModule,
     CompareModule,
-    EcopintsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
