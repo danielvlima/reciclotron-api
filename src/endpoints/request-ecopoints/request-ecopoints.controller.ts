@@ -31,9 +31,11 @@ export class RequestEcopointsController {
   @Post('create')
   create(@Body() createRequestEcopointDto: CreateRequestEcopointDto) {
     if (createRequestEcopointDto.acao === RequestActionEcopoint.ADICIONAR) {
-      return this.requestEcopointsService.createAddEcopoint(
-        createRequestEcopointDto,
-      );
+      return this.requestEcopointsService
+        .createAddEcopoint(createRequestEcopointDto)
+        .then((value) => {
+          return ResponseFactoryModule.generate(toEcopointRequestDTO(value));
+        });
     }
     return this.requestEcopointsService.create(createRequestEcopointDto);
   }
