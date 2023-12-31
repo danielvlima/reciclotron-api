@@ -11,6 +11,6 @@ export class CreateDepositTransactionDto {
   @ApiProperty()
   valorTotal: number;
 
-  @ApiProperty({ type: DepositMaterialsTransactionDTO })
+  @ApiProperty({ type: [DepositMaterialsTransactionDTO] })
   materiaisDepositados: DepositMaterialsTransactionDTO[];
 }
