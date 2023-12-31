@@ -68,20 +68,18 @@ export class DiscountCouponController {
 
   @Get('userFindByRamo')
   userFindByRamo() {
-    return this.discountCouponService.findRamos().then((tiposDeRamos) => {
+    return this.discountCouponService.findRamos().then(async (tiposDeRamos) => {
       const coupons = new Map<string, ResponseDiscountCouponDto[]>();
       for (const tipoDeRamo of tiposDeRamos) {
-        this.discountCouponService
+        const list = await this.discountCouponService
           .findByRamos(tipoDeRamo.ramo, 10)
           .then((response) => {
-            const list = response.map((el) =>
-              toCouponsDescDTO(el, el.empresa?.ramo),
-            );
-            coupons.set(tipoDeRamo.ramo, list);
+            return response.map((el) => toCouponsDescDTO(el, el.empresa?.ramo));
           });
+        coupons.set(tipoDeRamo.ramo, list);
       }
 
-      return ResponseFactoryModule.generate(coupons);
+      return ResponseFactoryModule.generate(Object.fromEntries(coupons));
     });
   }
 
