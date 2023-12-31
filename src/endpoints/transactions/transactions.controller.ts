@@ -28,6 +28,7 @@ export class TransactionsController {
     private readonly couponsPurchasedService: CouponsPurchasedService,
   ) {}
 
+  @HttpCode(204)
   @Post('deposit')
   deposit(@Body() depositDto: CreateDepositTransactionDto) {
     return this.transactionsService.createDeposit(depositDto).then((value) => {
