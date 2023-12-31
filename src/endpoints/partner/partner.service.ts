@@ -156,6 +156,9 @@ export class PartnerService {
         codigoRecuperacao: null,
         codigoRecuperacaoCriadoEm: null,
       },
+      include: {
+        endereco: true,
+      },
     });
   }
 

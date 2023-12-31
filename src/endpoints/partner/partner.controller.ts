@@ -63,7 +63,7 @@ export class PartnerController {
     });
   }
 
-  @HttpCode(204)
+  @HttpCode(200)
   @Patch()
   update(@Body() updatePartnerDto: UpdatePartnerDto) {
     if (updatePartnerDto.senha) {
@@ -71,7 +71,9 @@ export class PartnerController {
         updatePartnerDto.senha,
       );
     }
-    return this.partnerService.update(updatePartnerDto);
+    return this.partnerService.update(updatePartnerDto).then((partner) => {
+      return ResponseFactoryModule.generate(toPartnerDTO(partner));
+    });
   }
 
   @HttpCode(204)

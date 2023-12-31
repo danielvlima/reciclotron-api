@@ -42,13 +42,15 @@ export class UsersController {
     });
   }
 
-  @HttpCode(204)
+  @HttpCode(200)
   @Patch()
   update(@Body() updateUserDto: UpdateUserDto) {
     if (updateUserDto.senha) {
       updateUserDto.senha = CryptoModule.hashPassword(updateUserDto.senha);
     }
-    return this.usersService.update(updateUserDto);
+    return this.usersService.update(updateUserDto).then((user) => {
+      return ResponseFactoryModule.generate<ResponseUserDto>(toUserDTO(user));
+    });
   }
 
   @HttpCode(204)
