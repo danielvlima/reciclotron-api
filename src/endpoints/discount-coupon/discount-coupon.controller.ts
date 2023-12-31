@@ -100,7 +100,13 @@ export class DiscountCouponController {
   @HttpCode(204)
   @Patch()
   update(@Body() updateDiscountCouponDto: UpdateDiscountCouponDto) {
-    return this.discountCouponService.update(updateDiscountCouponDto);
+    return this.discountCouponService
+      .update(updateDiscountCouponDto)
+      .then((value) => {
+        return ResponseFactoryModule.generate<ResponseDiscountCouponDto>(
+          toCouponsDescDTO(value),
+        );
+      });
   }
 
   @HttpCode(204)
