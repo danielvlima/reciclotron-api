@@ -4,6 +4,7 @@ import {
   CreateDepositTransactionDto,
   CreatePurchaseTransactionDto,
   PaginatedTransaction,
+  PaginatedUnconfirmedTransaction,
   UpdateTransactionDto,
 } from './dto';
 import { $Enums } from '@prisma/client';
@@ -113,6 +114,34 @@ export class TransactionsService {
       },
       data: {
         status: updateTransactionDto.status,
+      },
+    });
+  }
+
+  countUnconfirmed() {
+    return this.prisma.transacoes.count({
+      where: {
+        AND: [
+          { status: { equals: $Enums.StatusTransacao.PENDENTE } },
+          { tipo: { equals: $Enums.TipoTransacao.CREDITO } },
+        ],
+      },
+    });
+  }
+
+  findAllUnconfirmed(data: PaginatedUnconfirmedTransaction) {
+    return this.prisma.transacoes.findMany({
+      where: {
+        AND: [
+          { status: { equals: $Enums.StatusTransacao.PENDENTE } },
+          { tipo: { equals: $Enums.TipoTransacao.CREDITO } },
+        ],
+      },
+      orderBy: [{ id: 'desc' }],
+      take: data.take,
+      skip: data.skip,
+      include: {
+        materiaisDepositados: true,
       },
     });
   }

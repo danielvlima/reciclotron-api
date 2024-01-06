@@ -5,11 +5,13 @@ import {
   CreateDepositTransactionDto,
   CreatePurchaseTransactionDto,
   PaginatedTransaction,
+  PaginatedUnconfirmedTransaction,
   ResponsePaginatedTransactionsDto,
   ResponseTransactionDto,
+  ResponseUnconfirmedDepositTransactionDto,
 } from './dto';
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
-import { toTransactionDTO } from './mappers';
+import { toTransactionDTO, toUnconfirmedTransactionDTO } from './mappers';
 import { DiscountCouponService } from '../discount-coupon/discount-coupon.service';
 import { CompareModule } from 'src/shared/modules/compare/compare.module';
 import { UsersService } from '../users/users.service';
@@ -87,17 +89,37 @@ export class TransactionsController {
       });
   }
 
+  @HttpCode(200)
   @Post()
   findAll(@Body() data: PaginatedTransaction) {
     return this.transactionsService.count(data).then((total) => {
       return this.transactionsService.findAll(data).then((transactions) => {
-        return ResponseFactoryModule.generate<ResponsePaginatedTransactionsDto>(
-          {
-            total,
-            transacoes: transactions.map((el) => toTransactionDTO(el)),
-          },
-        );
+        return ResponseFactoryModule.generate<
+          ResponsePaginatedTransactionsDto<ResponseTransactionDto>
+        >({
+          total,
+          transacoes: transactions.map((el) => toTransactionDTO(el)),
+        });
       });
+    });
+  }
+
+  @HttpCode(200)
+  @Post('getDeposit')
+  findAllUnconfirmed(@Body() data: PaginatedUnconfirmedTransaction) {
+    return this.transactionsService.countUnconfirmed().then((total) => {
+      return this.transactionsService
+        .findAllUnconfirmed(data)
+        .then((transactions) => {
+          return ResponseFactoryModule.generate<
+            ResponsePaginatedTransactionsDto<ResponseUnconfirmedDepositTransactionDto>
+          >({
+            total,
+            transacoes: transactions.map((el) =>
+              toUnconfirmedTransactionDTO(el),
+            ),
+          });
+        });
     });
   }
 
