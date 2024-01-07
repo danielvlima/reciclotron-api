@@ -146,14 +146,15 @@ export class EcopointsService {
   update(updateEcopointDto: UpdateEcopointDto) {
     return this.prisma.ecopontos.update({
       where: {
-        id: updateEcopointDto.id,
+        id: updateEcopointDto.oldId,
       },
 
       data: {
         id: updateEcopointDto.id || undefined,
-        ativo: updateEcopointDto.ativo || undefined,
+        ativo: updateEcopointDto.ativo,
         enderecoId: updateEcopointDto.enderecoId || undefined,
-        tipo: updateEcopointDto.tipo || undefined,
+        tipo: updateEcopointDto.tipo,
+        nome: updateEcopointDto.nome || undefined,
         atualizadoEm: new Date(),
       },
       include: {

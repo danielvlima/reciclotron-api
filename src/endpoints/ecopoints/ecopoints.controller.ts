@@ -13,6 +13,7 @@ import { UpdateEcopointDto } from './dto/update-ecopoint.dto';
 import {
   PaginatedEcopointDto,
   PaginatedEcopointsDepositDto,
+  ResponseEcopointDto,
   ResponsePaginatedEcopointsDto,
 } from './dto';
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
@@ -31,7 +32,11 @@ export class EcopointsController {
 
   @Post()
   create(@Body() createEcopointDto: CreateEcopointDto) {
-    return this.ecopointsService.create(createEcopointDto);
+    return this.ecopointsService.create(createEcopointDto).then((value) => {
+      return ResponseFactoryModule.generate<ResponseEcopointDto>(
+        toEcopontoDTO(value),
+      );
+    });
   }
 
   @HttpCode(200)
@@ -91,7 +96,11 @@ export class EcopointsController {
   @HttpCode(204)
   @Patch()
   update(@Body() updateEcopointDto: UpdateEcopointDto) {
-    return this.ecopointsService.update(updateEcopointDto);
+    return this.ecopointsService.update(updateEcopointDto).then((value) => {
+      return ResponseFactoryModule.generate<ResponseEcopointDto>(
+        toEcopontoDTO(value),
+      );
+    });
   }
 
   @HttpCode(204)
