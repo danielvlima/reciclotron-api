@@ -6,4 +6,7 @@ export class PaginatedUnconfirmedTransaction {
 
   @ApiProperty()
   take: number;
+
+  @ApiProperty()
+  ecopontoId: string;
 }

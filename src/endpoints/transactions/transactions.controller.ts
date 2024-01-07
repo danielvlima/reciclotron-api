@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Patch, HttpCode } from '@nestjs/common';
+import { Controller, Post, Body, Patch, HttpCode, Get } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import {
@@ -105,22 +105,36 @@ export class TransactionsController {
   }
 
   @HttpCode(200)
-  @Post('getDeposit')
+  @Post('deposit/unconfirmed/get')
   findAllUnconfirmed(@Body() data: PaginatedUnconfirmedTransaction) {
-    return this.transactionsService.countUnconfirmed().then((total) => {
-      return this.transactionsService
-        .findAllUnconfirmed(data)
-        .then((transactions) => {
-          return ResponseFactoryModule.generate<
-            ResponsePaginatedTransactionsDto<ResponseUnconfirmedDepositTransactionDto>
-          >({
-            total,
-            transacoes: transactions.map((el) =>
-              toUnconfirmedTransactionDTO(el),
-            ),
+    return this.transactionsService
+      .countUnconfirmed(data.ecopontoId)
+      .then((total) => {
+        return this.transactionsService
+          .findAllUnconfirmed(data)
+          .then((transactions) => {
+            return ResponseFactoryModule.generate<
+              ResponsePaginatedTransactionsDto<ResponseUnconfirmedDepositTransactionDto>
+            >({
+              total,
+              transacoes: transactions.map((el) =>
+                toUnconfirmedTransactionDTO(el),
+              ),
+            });
           });
-        });
-    });
+      });
+  }
+
+  @HttpCode(200)
+  @Get('deposit/unconfirmed/ecopoints')
+  findAllUnconfirmedEcopoints() {
+    return this.transactionsService
+      .findAllUnconfirmedEcopoints()
+      .then((value) => {
+        return ResponseFactoryModule.generate<string[]>(
+          value.map((el) => el.ecopontoId),
+        );
+      });
   }
 
   @HttpCode(204)

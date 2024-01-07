@@ -129,13 +129,12 @@ export class TransactionsService {
     });
   }
 
-  countUnconfirmed() {
+  countUnconfirmed(ecopontoId: string) {
     return this.prisma.transacoes.count({
       where: {
-        AND: [
-          { status: { equals: $Enums.StatusTransacao.PENDENTE } },
-          { tipo: { equals: $Enums.TipoTransacao.CREDITO } },
-        ],
+        status: $Enums.StatusTransacao.PENDENTE,
+        tipo: $Enums.TipoTransacao.CREDITO,
+        ecopontoId: ecopontoId ? ecopontoId : undefined,
       },
     });
   }
@@ -143,10 +142,9 @@ export class TransactionsService {
   findAllUnconfirmed(data: PaginatedUnconfirmedTransaction) {
     return this.prisma.transacoes.findMany({
       where: {
-        AND: [
-          { status: { equals: $Enums.StatusTransacao.PENDENTE } },
-          { tipo: { equals: $Enums.TipoTransacao.CREDITO } },
-        ],
+        status: $Enums.StatusTransacao.PENDENTE,
+        tipo: $Enums.TipoTransacao.CREDITO,
+        ecopontoId: data.ecopontoId ? data.ecopontoId : undefined,
       },
       orderBy: [{ id: 'desc' }],
       take: data.take,
@@ -161,6 +159,21 @@ export class TransactionsService {
             material: true,
           },
         },
+      },
+    });
+  }
+
+  findAllUnconfirmedEcopoints() {
+    return this.prisma.transacoes.findMany({
+      where: {
+        AND: [
+          { status: { equals: $Enums.StatusTransacao.PENDENTE } },
+          { tipo: { equals: $Enums.TipoTransacao.CREDITO } },
+        ],
+      },
+      orderBy: [{ ecopontoId: 'asc' }],
+      select: {
+        ecopontoId: true,
       },
     });
   }
