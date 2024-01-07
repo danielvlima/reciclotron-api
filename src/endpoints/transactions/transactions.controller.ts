@@ -1,15 +1,17 @@
-import { Controller, Post, Body, Patch, HttpCode } from '@nestjs/common';
+import { Controller, Post, Body, Patch, HttpCode, Get } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import {
   CreateDepositTransactionDto,
   CreatePurchaseTransactionDto,
   PaginatedTransaction,
+  PaginatedUnconfirmedTransaction,
   ResponsePaginatedTransactionsDto,
   ResponseTransactionDto,
+  ResponseUnconfirmedDepositTransactionDto,
 } from './dto';
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
-import { toTransactionDTO } from './mappers';
+import { toTransactionDTO, toUnconfirmedTransactionDTO } from './mappers';
 import { DiscountCouponService } from '../discount-coupon/discount-coupon.service';
 import { CompareModule } from 'src/shared/modules/compare/compare.module';
 import { UsersService } from '../users/users.service';
@@ -87,18 +89,52 @@ export class TransactionsController {
       });
   }
 
+  @HttpCode(200)
   @Post()
   findAll(@Body() data: PaginatedTransaction) {
     return this.transactionsService.count(data).then((total) => {
       return this.transactionsService.findAll(data).then((transactions) => {
-        return ResponseFactoryModule.generate<ResponsePaginatedTransactionsDto>(
-          {
-            total,
-            transacoes: transactions.map((el) => toTransactionDTO(el)),
-          },
-        );
+        return ResponseFactoryModule.generate<
+          ResponsePaginatedTransactionsDto<ResponseTransactionDto>
+        >({
+          total,
+          transacoes: transactions.map((el) => toTransactionDTO(el)),
+        });
       });
     });
+  }
+
+  @HttpCode(200)
+  @Post('deposit/unconfirmed/get')
+  findAllUnconfirmed(@Body() data: PaginatedUnconfirmedTransaction) {
+    return this.transactionsService
+      .countUnconfirmed(data.ecopontoId)
+      .then((total) => {
+        return this.transactionsService
+          .findAllUnconfirmed(data)
+          .then((transactions) => {
+            return ResponseFactoryModule.generate<
+              ResponsePaginatedTransactionsDto<ResponseUnconfirmedDepositTransactionDto>
+            >({
+              total,
+              transacoes: transactions.map((el) =>
+                toUnconfirmedTransactionDTO(el),
+              ),
+            });
+          });
+      });
+  }
+
+  @HttpCode(200)
+  @Get('deposit/unconfirmed/ecopoints')
+  findAllUnconfirmedEcopoints() {
+    return this.transactionsService
+      .findAllUnconfirmedEcopoints()
+      .then((value) => {
+        return ResponseFactoryModule.generate<string[]>(
+          value.map((el) => el.ecopontoId),
+        );
+      });
   }
 
   @HttpCode(204)
@@ -107,6 +143,10 @@ export class TransactionsController {
     return this.transactionsService
       .findOne(updateTransactionDto.id)
       .then((transaction) => {
+        CompareModule.notIsEqual(
+          transaction.status,
+          $Enums.StatusTransacao[updateTransactionDto.status],
+        );
         return this.usersService
           .findOneWithCpf(transaction.usuarioCPF)
           .then(async (user) => {
@@ -119,7 +159,13 @@ export class TransactionsController {
                 pontos: user.pontos + transaction.valorTotal,
               });
             }
-            return this.transactionsService.update(updateTransactionDto);
+            return this.transactionsService
+              .update(updateTransactionDto)
+              .then((value) => {
+                return ResponseFactoryModule.generate<ResponseTransactionDto>(
+                  toTransactionDTO(value),
+                );
+              });
           });
       });
   }

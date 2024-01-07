@@ -4,9 +4,11 @@ import {
   CreateDepositTransactionDto,
   CreatePurchaseTransactionDto,
   PaginatedTransaction,
+  PaginatedUnconfirmedTransaction,
   UpdateTransactionDto,
 } from './dto';
 import { $Enums } from '@prisma/client';
+import { TransactionStatusEnum } from './enum/transactions-type.enum';
 
 @Injectable()
 export class TransactionsService {
@@ -107,12 +109,71 @@ export class TransactionsService {
   }
 
   update(updateTransactionDto: UpdateTransactionDto) {
+    let date = new Date();
+    if (updateTransactionDto.status === TransactionStatusEnum.PENDENTE) {
+      date = null;
+    }
+
     return this.prisma.transacoes.update({
       where: {
         id: updateTransactionDto.id,
       },
       data: {
         status: updateTransactionDto.status,
+        finalizadoEm: date,
+        valorTotal: updateTransactionDto.valorTotal || undefined,
+      },
+      include: {
+        materiaisDepositados: true,
+      },
+    });
+  }
+
+  countUnconfirmed(ecopontoId: string) {
+    return this.prisma.transacoes.count({
+      where: {
+        status: $Enums.StatusTransacao.PENDENTE,
+        tipo: $Enums.TipoTransacao.CREDITO,
+        ecopontoId: ecopontoId ? ecopontoId : undefined,
+      },
+    });
+  }
+
+  findAllUnconfirmed(data: PaginatedUnconfirmedTransaction) {
+    return this.prisma.transacoes.findMany({
+      where: {
+        status: $Enums.StatusTransacao.PENDENTE,
+        tipo: $Enums.TipoTransacao.CREDITO,
+        ecopontoId: data.ecopontoId ? data.ecopontoId : undefined,
+      },
+      orderBy: [{ id: 'desc' }],
+      take: data.take,
+      skip: data.skip,
+      include: {
+        materiaisDepositados: {
+          select: {
+            materialId: true,
+            quantidade: true,
+            transacaoId: true,
+            valorTotal: true,
+            material: true,
+          },
+        },
+      },
+    });
+  }
+
+  findAllUnconfirmedEcopoints() {
+    return this.prisma.transacoes.findMany({
+      where: {
+        AND: [
+          { status: { equals: $Enums.StatusTransacao.PENDENTE } },
+          { tipo: { equals: $Enums.TipoTransacao.CREDITO } },
+        ],
+      },
+      orderBy: [{ ecopontoId: 'asc' }],
+      select: {
+        ecopontoId: true,
       },
     });
   }

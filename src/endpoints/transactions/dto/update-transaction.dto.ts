@@ -7,4 +7,7 @@ export class UpdateTransactionDto {
 
   @ApiProperty({ enum: ['PENDENTE', 'EFETIVADO', 'REJEITADO'] })
   status: TransactionStatusEnum;
+
+  @ApiProperty()
+  valorTotal?: number;
 }

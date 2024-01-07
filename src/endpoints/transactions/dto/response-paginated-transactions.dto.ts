@@ -1,6 +1,4 @@
-import { ResponseTransactionDto } from './response-transaction.dto';
-
-export class ResponsePaginatedTransactionsDto {
+export class ResponsePaginatedTransactionsDto<T> {
   total: number;
-  transacoes: ResponseTransactionDto[];
+  transacoes: T[];
 }
