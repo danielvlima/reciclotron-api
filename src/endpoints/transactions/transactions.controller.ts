@@ -129,6 +129,10 @@ export class TransactionsController {
     return this.transactionsService
       .findOne(updateTransactionDto.id)
       .then((transaction) => {
+        CompareModule.notIsEqual(
+          transaction.status,
+          $Enums.StatusTransacao[updateTransactionDto.status],
+        );
         return this.usersService
           .findOneWithCpf(transaction.usuarioCPF)
           .then(async (user) => {
@@ -141,7 +145,13 @@ export class TransactionsController {
                 pontos: user.pontos + transaction.valorTotal,
               });
             }
-            return this.transactionsService.update(updateTransactionDto);
+            return this.transactionsService
+              .update(updateTransactionDto)
+              .then((value) => {
+                return ResponseFactoryModule.generate<ResponseTransactionDto>(
+                  toTransactionDTO(value),
+                );
+              });
           });
       });
   }

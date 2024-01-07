@@ -8,6 +8,7 @@ import {
   UpdateTransactionDto,
 } from './dto';
 import { $Enums } from '@prisma/client';
+import { TransactionStatusEnum } from './enum/transactions-type.enum';
 
 @Injectable()
 export class TransactionsService {
@@ -108,12 +109,21 @@ export class TransactionsService {
   }
 
   update(updateTransactionDto: UpdateTransactionDto) {
+    let date = new Date();
+    if (updateTransactionDto.status === TransactionStatusEnum.PENDENTE) {
+      date = null;
+    }
+
     return this.prisma.transacoes.update({
       where: {
         id: updateTransactionDto.id,
       },
       data: {
         status: updateTransactionDto.status,
+        finalizadoEm: date,
+      },
+      include: {
+        materiaisDepositados: true,
       },
     });
   }
