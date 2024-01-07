@@ -141,7 +141,15 @@ export class TransactionsService {
       take: data.take,
       skip: data.skip,
       include: {
-        materiaisDepositados: true,
+        materiaisDepositados: {
+          select: {
+            materialId: true,
+            quantidade: true,
+            transacaoId: true,
+            valorTotal: true,
+            material: true,
+          },
+        },
       },
     });
   }

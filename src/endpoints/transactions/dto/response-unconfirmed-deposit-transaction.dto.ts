@@ -1,5 +1,9 @@
-import { CreateDepositTransactionDto } from './create-deposit-transaction.dto';
+import { ResponseDepositMaterialsTransactionDTO } from './response-deposit-materials-transaction.dto';
 
-export class ResponseUnconfirmedDepositTransactionDto extends CreateDepositTransactionDto {
+export class ResponseUnconfirmedDepositTransactionDto {
   id: number;
+  usuarioCPF: string;
+  ecopontoId: string;
+  valorTotal: number;
+  materiaisDepositados: ResponseDepositMaterialsTransactionDTO[];
 }

@@ -1,4 +1,5 @@
-import { $Enums, MateriaisDepositados } from '@prisma/client';
+import { $Enums } from '@prisma/client';
+import { MateriaisDepositados } from './materiais-depositados.entity';
 
 export class Transaction {
   tipo: $Enums.TipoTransacao;

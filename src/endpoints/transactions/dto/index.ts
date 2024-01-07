@@ -4,6 +4,7 @@ import { DepositMaterialsTransactionDTO } from './deposit-materials-transaction.
 import { FilterTransactionsOptionsDto } from './filter-transactions-options.dto';
 import { PaginatedTransaction } from './paginated-transaction.dto';
 import { PaginatedUnconfirmedTransaction } from './paginated-unconfirmed-transaction.dto';
+import { ResponseDepositMaterialsTransactionDTO } from './response-deposit-materials-transaction.dto';
 import { ResponsePaginatedTransactionsDto } from './response-paginated-transactions.dto';
 import { ResponseTransactionDto } from './response-transaction.dto';
 import { ResponseUnconfirmedDepositTransactionDto } from './response-unconfirmed-deposit-transaction.dto';
@@ -20,4 +21,5 @@ export {
   ResponseTransactionDto,
   ResponseUnconfirmedDepositTransactionDto,
   PaginatedUnconfirmedTransaction,
+  ResponseDepositMaterialsTransactionDTO,
 };

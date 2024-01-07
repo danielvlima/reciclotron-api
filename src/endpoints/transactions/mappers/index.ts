@@ -44,6 +44,7 @@ export const toUnconfirmedTransactionDTO = (
         materialId: Number(el.materialId),
         quantidade: el.quantidade,
         valorTotal: el.valorTotal,
+        nome: el.material!.nome,
       };
     }),
   };
