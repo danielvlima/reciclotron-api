@@ -121,6 +121,7 @@ export class TransactionsService {
       data: {
         status: updateTransactionDto.status,
         finalizadoEm: date,
+        valorTotal: updateTransactionDto.valorTotal || undefined,
       },
       include: {
         materiaisDepositados: true,
