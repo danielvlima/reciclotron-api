@@ -1,5 +1,5 @@
 export class ResponseDepositMaterialsTransactionDTO {
-  transacaoId?: number;
+  transacaoId: number;
   materialId: number;
   nome: string;
   quantidade: number;
