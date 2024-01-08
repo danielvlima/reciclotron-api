@@ -102,6 +102,7 @@ model Materiais {
   nome                 String                     @unique
   valor                Int
   ativo                Boolean                    @default(true)
+  logo                 String?                    @db.LongText
   criadoEm             DateTime                   @default(now())
   atualizadoEm         DateTime?
   ehAceitoTipoEcoponto TipoEcopontoAceitaMaterial
