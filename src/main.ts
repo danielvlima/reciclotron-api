@@ -21,6 +21,7 @@ async function bootstrap() {
     .addTag('Ecopontos')
     .addTag('Ações para Ecopontos')
     .addTag('Materiais')
+    .addTag('Endereços')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
