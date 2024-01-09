@@ -106,6 +106,10 @@ export class EcopointsController {
   @HttpCode(204)
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.ecopointsService.remove(id);
+    return this.ecopointsService.remove(id).then((value) => {
+      return ResponseFactoryModule.generate<ResponseEcopointDto>(
+        toEcopontoDTO(value),
+      );
+    });
   }
 }

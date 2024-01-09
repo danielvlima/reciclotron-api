@@ -168,6 +168,9 @@ export class EcopointsService {
       where: {
         id,
       },
+      include: {
+        enderecos: true,
+      },
     });
   }
 }
