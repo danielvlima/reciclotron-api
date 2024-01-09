@@ -76,13 +76,15 @@ export class PartnerController {
     });
   }
 
-  @HttpCode(204)
+  @HttpCode(200)
   @Patch('address/:cnpj')
   updateAddress(
     @Param('cnpj') cnpj: string,
     @Body() data: UpdateAddressPartnerDto,
   ) {
-    return this.partnerService.updateAddress(cnpj, data);
+    return this.partnerService.updateAddress(cnpj, data).then((partner) => {
+      return ResponseFactoryModule.generate(toPartnerDTO(partner));
+    });
   }
 
   @HttpCode(204)
