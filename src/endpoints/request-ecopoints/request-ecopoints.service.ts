@@ -64,19 +64,50 @@ export class RequestEcopointsService {
     });
   }
 
-  countAllRequests() {
-    return this.prisma.solicitacoesEcoponto.count({
-      where: {
+  countAllRequests(adicionarRealizado: boolean, dia?: string) {
+    let condition = {};
+
+    if (!adicionarRealizado) {
+      condition = {
         atendidoEm: null,
-      },
+      };
+    }
+
+    if (dia) {
+      condition = {
+        ...condition,
+        agendadoPara: dia,
+      };
+    }
+
+    return this.prisma.solicitacoesEcoponto.count({
+      where: condition,
     });
   }
 
-  findAllPaginated(skip: number, take: number) {
-    return this.prisma.solicitacoesEcoponto.findMany({
-      where: {
+  findAllPaginated(
+    skip: number,
+    take: number,
+    adicionarRealizado: boolean,
+    dia?: string,
+  ) {
+    let condition = {};
+
+    if (!adicionarRealizado) {
+      condition = {
         atendidoEm: null,
-      },
+      };
+    }
+
+    if (dia) {
+      condition = {
+        ...condition,
+        agendadoPara: dia,
+      };
+    }
+
+    return this.prisma.solicitacoesEcoponto.findMany({
+      where: condition,
       orderBy: {
         criadoEm: 'desc',
       },
