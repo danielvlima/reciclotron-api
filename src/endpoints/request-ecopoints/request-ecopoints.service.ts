@@ -3,6 +3,7 @@ import {
   CancelRequestEcopointDto,
   CreateRequestEcopointDto,
   PaginatedNewEcopointsRequestDto,
+  UpdateRequestEcopointDto,
 } from './dto';
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
 import { $Enums } from '@prisma/client';
@@ -121,6 +122,18 @@ export class RequestEcopointsService {
       where: {
         ecopontoId: ecopointId,
         atendidoEm: null,
+      },
+    });
+  }
+
+  update(updateRequestEcopointDto: UpdateRequestEcopointDto) {
+    return this.prisma.solicitacoesEcoponto.update({
+      where: {
+        id: updateRequestEcopointDto.id,
+      },
+      data: {
+        atendidoEm: updateRequestEcopointDto.atendidoEm || undefined,
+        agendadoPara: updateRequestEcopointDto.agendadoPara || undefined,
       },
     });
   }

@@ -7,6 +7,7 @@ import {
   Query,
   ParseIntPipe,
   ParseBoolPipe,
+  Patch,
 } from '@nestjs/common';
 import { RequestEcopointsService } from './request-ecopoints.service';
 import { CreateRequestEcopointDto } from './dto/create-request-ecopoint.dto';
@@ -15,6 +16,7 @@ import {
   CancelRequestEcopointDto,
   PaginatedNewEcopointsRequestDto,
   ResponsePaginatedEcopointsRequestDto,
+  UpdateRequestEcopointDto,
 } from './dto';
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
 import { ResponseDto } from 'src/shared/dto/response.dto';
@@ -29,7 +31,6 @@ export class RequestEcopointsController {
     private readonly requestEcopointsService: RequestEcopointsService,
   ) {}
 
-  @HttpCode(204)
   @Post('create')
   create(@Body() createRequestEcopointDto: CreateRequestEcopointDto) {
     if (createRequestEcopointDto.acao === RequestActionEcopoint.ADICIONAR) {
@@ -80,6 +81,16 @@ export class RequestEcopointsController {
               ecopontos: requestEcopoints.map((el) => toEcopointRequestDTO(el)),
             });
           });
+      });
+  }
+
+  @HttpCode(204)
+  @Patch('update')
+  update(@Body() updateRequestEcopointDto: UpdateRequestEcopointDto) {
+    return this.requestEcopointsService
+      .update(updateRequestEcopointDto)
+      .then((value) => {
+        return ResponseFactoryModule.generate(toEcopointRequestDTO(value));
       });
   }
 
