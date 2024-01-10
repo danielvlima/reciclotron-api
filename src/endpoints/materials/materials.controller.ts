@@ -29,7 +29,11 @@ export class MaterialsController {
 
   @Post()
   create(@Body() createMaterialDto: CreateMaterialDto) {
-    return this.materialsService.create(createMaterialDto);
+    return this.materialsService.create(createMaterialDto).then((value) => {
+      return ResponseFactoryModule.generate<ResponseMaterialDto>(
+        toMaterialDTO(value),
+      );
+    });
   }
 
   @Get('all?')
@@ -46,10 +50,11 @@ export class MaterialsController {
   @HttpCode(204)
   @Patch()
   update(@Body() updateMaterialDto: UpdateMaterialDto) {
-    return this.materialsService.update(
-      updateMaterialDto.id,
-      updateMaterialDto,
-    );
+    return this.materialsService.update(updateMaterialDto).then((value) => {
+      return ResponseFactoryModule.generate<ResponseMaterialDto>(
+        toMaterialDTO(value),
+      );
+    });
   }
 
   @HttpCode(204)
