@@ -8,4 +8,5 @@ export class ResponseRequestEcopointDto {
   tipoEcoponto: TypeEcopointEnum | null;
   ecopontoId: string;
   agendadoPara: Date | null;
+  atendidoEm: Date | null;
 }
