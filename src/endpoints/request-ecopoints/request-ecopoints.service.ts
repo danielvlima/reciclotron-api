@@ -97,6 +97,7 @@ export class RequestEcopointsService {
     if (!adicionarRealizado) {
       condition = {
         atendidoEm: null,
+        agendadoPara: null,
       };
     }
 
