@@ -101,9 +101,14 @@ export class RequestEcopointsService {
     }
 
     if (dia) {
+      const range = new Date(dia);
+      range.setDate(range.getDate() + 1);
       condition = {
         ...condition,
-        agendadoPara: dia,
+        agendadoPara: {
+          gte: dia,
+          lte: range,
+        },
       };
     }
 
