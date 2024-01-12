@@ -6,7 +6,7 @@ import {
   UpdateRequestEcopointDto,
 } from './dto';
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
-import { $Enums } from '@prisma/client';
+import { $Enums, Prisma } from '@prisma/client';
 
 @Injectable()
 export class RequestEcopointsService {
@@ -93,6 +93,9 @@ export class RequestEcopointsService {
     dia?: string,
   ) {
     let condition = {};
+    let order: Prisma.SolicitacoesEcopontoOrderByWithRelationInput = {
+      criadoEm: 'desc',
+    };
 
     if (!adicionarRealizado) {
       condition = {
@@ -111,13 +114,15 @@ export class RequestEcopointsService {
           lte: range,
         },
       };
+
+      order = {
+        agendadoPara: 'asc',
+      };
     }
 
     return this.prisma.solicitacoesEcoponto.findMany({
       where: condition,
-      orderBy: {
-        criadoEm: 'desc',
-      },
+      orderBy: order,
       skip: skip,
       take: take,
     });
