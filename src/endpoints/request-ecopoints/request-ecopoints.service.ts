@@ -130,6 +130,13 @@ export class RequestEcopointsService {
       orderBy: order,
       skip: skip,
       take: take,
+      include: {
+        empresa: {
+          include: {
+            endereco: true,
+          },
+        },
+      },
     });
   }
 

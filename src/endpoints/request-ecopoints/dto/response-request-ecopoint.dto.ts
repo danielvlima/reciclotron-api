@@ -9,4 +9,6 @@ export class ResponseRequestEcopointDto {
   ecopontoId: string;
   agendadoPara: Date | null;
   atendidoEm: Date | null;
+  lat?: number;
+  long?: number;
 }

@@ -15,7 +15,7 @@ export class Partner {
   enderecolojaOnline: string | null;
   criadoEm: Date;
   atualizadoEm: Date | null;
-  endereco: Address | null;
+  endereco?: Address | null;
   codigoRecuperacao: string | null;
   codigoRecuperacaoCriadoEm: Date | null;
 }
