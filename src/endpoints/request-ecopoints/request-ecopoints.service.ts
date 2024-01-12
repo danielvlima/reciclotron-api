@@ -3,9 +3,10 @@ import {
   CancelRequestEcopointDto,
   CreateRequestEcopointDto,
   PaginatedNewEcopointsRequestDto,
+  UpdateRequestEcopointDto,
 } from './dto';
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
-import { $Enums } from '@prisma/client';
+import { $Enums, Prisma } from '@prisma/client';
 
 @Injectable()
 export class RequestEcopointsService {
@@ -64,24 +65,78 @@ export class RequestEcopointsService {
     });
   }
 
-  countAllRequests() {
-    return this.prisma.solicitacoesEcoponto.count({
-      where: {
+  countAllRequests(adicionarRealizado: boolean, dia?: string) {
+    let condition = {};
+
+    if (!adicionarRealizado) {
+      condition = {
         atendidoEm: null,
-      },
+      };
+    }
+
+    if (dia) {
+      const range = new Date(dia);
+      range.setDate(range.getDate() + 1);
+      condition = {
+        ...condition,
+        agendadoPara: {
+          gte: dia,
+          lte: range,
+        },
+      };
+    }
+
+    return this.prisma.solicitacoesEcoponto.count({
+      where: condition,
     });
   }
 
-  findAllPaginated(skip: number, take: number) {
-    return this.prisma.solicitacoesEcoponto.findMany({
-      where: {
+  findAllPaginated(
+    skip: number,
+    take: number,
+    adicionarRealizado: boolean,
+    dia?: string,
+  ) {
+    let condition = {};
+    let order: Prisma.SolicitacoesEcopontoOrderByWithRelationInput = {
+      criadoEm: 'desc',
+    };
+
+    if (!adicionarRealizado) {
+      condition = {
         atendidoEm: null,
-      },
-      orderBy: {
-        criadoEm: 'desc',
-      },
+        agendadoPara: null,
+      };
+    }
+
+    if (dia) {
+      const range = new Date(dia);
+      range.setDate(range.getDate() + 1);
+      condition = {
+        ...condition,
+        agendadoPara: {
+          gte: dia,
+          lte: range,
+        },
+      };
+
+      order = {
+        agendadoPara: 'asc',
+      };
+    }
+
+    return this.prisma.solicitacoesEcoponto.findMany({
+      where: condition,
+      orderBy: order,
       skip: skip,
       take: take,
+      include: {
+        empresa: {
+          include: {
+            endereco: true,
+          },
+        },
+      },
     });
   }
 
@@ -90,6 +145,18 @@ export class RequestEcopointsService {
       where: {
         ecopontoId: ecopointId,
         atendidoEm: null,
+      },
+    });
+  }
+
+  update(updateRequestEcopointDto: UpdateRequestEcopointDto) {
+    return this.prisma.solicitacoesEcoponto.update({
+      where: {
+        id: updateRequestEcopointDto.id,
+      },
+      data: {
+        atendidoEm: updateRequestEcopointDto.atendidoEm || undefined,
+        agendadoPara: updateRequestEcopointDto.agendadoPara || undefined,
       },
     });
   }

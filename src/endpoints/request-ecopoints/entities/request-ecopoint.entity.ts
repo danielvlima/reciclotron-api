@@ -1,4 +1,5 @@
 import { $Enums } from '@prisma/client';
+import { Partner } from 'src/endpoints/partner/entities/partner.entity';
 
 export class RequestEcopoint {
   id: bigint;
@@ -9,4 +10,5 @@ export class RequestEcopoint {
   criadoEm: Date;
   atendidoEm: Date | null;
   agendadoPara: Date | null;
+  empresa?: Partner;
 }

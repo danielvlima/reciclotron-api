@@ -15,5 +15,8 @@ export const toEcopointRequestDTO = (
       : null,
     ecopontoId: data.ecopontoId ?? '',
     agendadoPara: data.agendadoPara,
+    atendidoEm: data.atendidoEm,
+    lat: data.empresa?.endereco.lat,
+    long: data.empresa?.endereco.long,
   };
 };
