@@ -15,6 +15,7 @@ import { TransactionsModule } from './endpoints/transactions/transactions.module
 import { CompareModule } from './shared/modules/compare/compare.module';
 import { EcopointsModule } from './endpoints/ecopoints/ecopoints.module';
 import { AddressesModule } from './endpoints/addresses/addresses.module';
+import { MailModule } from './endpoints/mail/mail.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { AddressesModule } from './endpoints/addresses/addresses.module';
     CompareModule,
     EcopointsModule,
     AddressesModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
