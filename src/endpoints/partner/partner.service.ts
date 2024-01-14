@@ -5,7 +5,6 @@ import {
   UpdateAddressPartnerDto,
   GetPaginatedPartnerDto,
   FilterOptionsPartnerDto,
-  GetPaginatedAddressesDTO,
 } from './dto';
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
 
@@ -211,72 +210,4 @@ export class PartnerService {
       },
     });
   }
-
-  countAddress = (busca: string) => {
-    return this.prisma.empresasParceiras
-      .findMany({
-        where: {
-          AND: [
-            { ativo: true },
-            {
-              OR: [
-                { nomeFantasia: { contains: busca } },
-                { ramo: { contains: busca } },
-                {
-                  endereco: {
-                    OR: [
-                      { bairro: { contains: busca } },
-                      { rua: { contains: busca } },
-                      { cidade: { contains: busca } },
-                      { uf: { contains: busca } },
-                      { cep: busca },
-                      { complemento: { contains: busca } },
-                      { numero: busca },
-                    ],
-                  },
-                },
-              ],
-            },
-          ],
-        },
-        include: {
-          endereco: true,
-        },
-      })
-      .then((value) => value.length);
-  };
-
-  findAddress = (data: GetPaginatedAddressesDTO) => {
-    return this.prisma.empresasParceiras.findMany({
-      where: {
-        AND: [
-          { ativo: true },
-          {
-            OR: [
-              { nomeFantasia: { contains: data.busca } },
-              { ramo: { contains: data.busca } },
-              {
-                endereco: {
-                  OR: [
-                    { bairro: { contains: data.busca } },
-                    { rua: { contains: data.busca } },
-                    { cidade: { contains: data.busca } },
-                    { uf: { contains: data.busca } },
-                    { cep: data.busca },
-                    { complemento: { contains: data.busca } },
-                    { numero: data.busca },
-                  ],
-                },
-              },
-            ],
-          },
-        ],
-      },
-      include: {
-        endereco: true,
-      },
-      skip: data.skip,
-      take: data.take,
-    });
-  };
 }

@@ -15,7 +15,6 @@ import {
   UpdateAddressPartnerDto,
   GetPaginatedPartnerDto,
   ResponsePaginatedPartnerDto,
-  GetPaginatedAddressesDTO,
 } from './dto';
 
 import { LoginDto } from 'src/shared/dto/login.dto';
@@ -115,21 +114,6 @@ export class PartnerController {
         );
       }
       return ResponseFactoryModule.generate(false);
-    });
-  }
-
-  @HttpCode(200)
-  @Post('address/paginated')
-  findPaginatedAddress(
-    @Body() data: GetPaginatedAddressesDTO,
-  ): Promise<ResponseDto<ResponsePaginatedPartnerDto>> {
-    return this.partnerService.countAddress(data.busca).then((total) => {
-      return this.partnerService.findAddress(data).then((parters) => {
-        return ResponseFactoryModule.generate({
-          total,
-          empresas: parters.map((el) => toPartnerDTO(el)),
-        });
-      });
     });
   }
 }
