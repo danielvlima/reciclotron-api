@@ -7,6 +7,7 @@ import { UpdateAddressPartnerDto } from './update-address-partner.dto';
 import { FilterOptionsPartnerDto } from './filter-options-partner.dto';
 import { GetPaginatedPartnerDto } from './get-paginated-partner.dto';
 import { ResponsePaginatedPartnerDto } from './response-paginated-partner.dto';
+import { GetPaginatedAddressesDTO } from './get-paginated-addresses.dto';
 
 export {
   CreateAddressPartnerDTO,
@@ -18,4 +19,5 @@ export {
   FilterOptionsPartnerDto,
   GetPaginatedPartnerDto,
   ResponsePaginatedPartnerDto,
+  GetPaginatedAddressesDTO,
 };
