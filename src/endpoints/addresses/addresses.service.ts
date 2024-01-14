@@ -7,8 +7,32 @@ import { GetPaginatedAddressesDTO } from './dto';
 export class AddressesService {
   constructor(private prisma: PrismaService) {}
 
-  count(/*data: GetPaginatedAddressesDTO*/) {
-    return this.prisma.enderecos.count({});
+  count(data: GetPaginatedAddressesDTO) {
+    return this.prisma.enderecos
+      .findMany({
+        where: {
+          AND: [
+            {
+              OR: [
+                { bairro: { contains: data.filterOptions.busca } },
+                { rua: { contains: data.filterOptions.busca } },
+                { cidade: { contains: data.filterOptions.busca } },
+                { uf: { contains: data.filterOptions.busca } },
+                { cep: { contains: data.filterOptions.busca } },
+                { complemento: { contains: data.filterOptions.busca } },
+                { numero: { contains: data.filterOptions.busca } },
+              ],
+            },
+            {
+              empresa: { ativo: true },
+            },
+          ],
+        },
+        include: {
+          empresa: true,
+        },
+      })
+      .then((value) => value.length);
   }
 
   findPaginated(data: GetPaginatedAddressesDTO) {
@@ -16,11 +40,23 @@ export class AddressesService {
       where: {
         AND: [
           {
-            rua: {
-              contains: data.filterOptions.busca,
-            },
+            OR: [
+              { bairro: { contains: data.filterOptions.busca } },
+              { rua: { contains: data.filterOptions.busca } },
+              { cidade: { contains: data.filterOptions.busca } },
+              { uf: { contains: data.filterOptions.busca } },
+              { cep: { contains: data.filterOptions.busca } },
+              { complemento: { contains: data.filterOptions.busca } },
+              { numero: { contains: data.filterOptions.busca } },
+            ],
+          },
+          {
+            empresa: { ativo: true },
           },
         ],
+      },
+      include: {
+        empresa: true,
       },
       take: data.take,
       skip: data.skip,

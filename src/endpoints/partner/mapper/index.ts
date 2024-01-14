@@ -1,22 +1,7 @@
-import { ResponseAddressDto, ResponsePartnerDto } from '../dto';
-import { Address } from '../../../shared/entities/address.entity';
+import { toAddressDTO } from 'src/endpoints/addresses/mappers';
+import { ResponsePartnerDto } from '../dto';
 import { Partner } from '../entities/partner.entity';
 import { TypePartnerEnum } from '../enum/type-partner.enum';
-
-export const toAddressDTO = (a: Address): ResponseAddressDto => {
-  return {
-    id: Number(a.id),
-    rua: a.rua,
-    numero: a.numero,
-    complemento: a.complemento,
-    bairro: a.bairro,
-    cidade: a.cidade,
-    uf: a.uf,
-    cep: a.cep,
-    lat: a.lat,
-    long: a.long,
-  };
-};
 
 export const toPartnerDTO = (p: Partner): ResponsePartnerDto => {
   return {

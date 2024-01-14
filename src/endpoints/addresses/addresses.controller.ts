@@ -5,7 +5,7 @@ import { ResponseFactoryModule } from 'src/shared/modules/response-factory/respo
 import { ApiTags } from '@nestjs/swagger';
 import { AddressesService } from './addresses.service';
 import { GetPaginatedAddressesDTO, ResponsePaginatedAddressesDTO } from './dto';
-import { toAddressDTO } from '../partner/mapper';
+import { toAddressDTO } from './mappers';
 
 @ApiTags('Endereços')
 @Controller('addresses')
@@ -17,7 +17,7 @@ export class AddressesController {
   findPaginated(
     @Body() data: GetPaginatedAddressesDTO,
   ): Promise<ResponseDto<ResponsePaginatedAddressesDTO>> {
-    return this.addressesService.count().then((total) => {
+    return this.addressesService.count(data).then((total) => {
       return this.addressesService.findPaginated(data).then((addresses) => {
         return ResponseFactoryModule.generate<ResponsePaginatedAddressesDTO>({
           total,
