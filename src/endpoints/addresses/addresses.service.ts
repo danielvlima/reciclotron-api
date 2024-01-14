@@ -21,6 +21,11 @@ export class AddressesService {
                 { cep: { contains: data.filterOptions.busca } },
                 { complemento: { contains: data.filterOptions.busca } },
                 { numero: { contains: data.filterOptions.busca } },
+                {
+                  empresa: {
+                    nomeFantasia: { contains: data.filterOptions.busca },
+                  },
+                },
               ],
             },
             {
@@ -48,6 +53,11 @@ export class AddressesService {
               { cep: { contains: data.filterOptions.busca } },
               { complemento: { contains: data.filterOptions.busca } },
               { numero: { contains: data.filterOptions.busca } },
+              {
+                empresa: {
+                  nomeFantasia: { contains: data.filterOptions.busca },
+                },
+              },
             ],
           },
           {
