@@ -1,5 +1,5 @@
 import { $Enums } from '@prisma/client';
-import { Address } from '../../../shared/entities/address.entity';
+import { Address } from '../../addresses/entities/address.entity';
 
 export class Partner {
   cnpj: string;
@@ -15,7 +15,7 @@ export class Partner {
   enderecolojaOnline: string | null;
   criadoEm: Date;
   atualizadoEm: Date | null;
-  endereco: Address | null;
+  endereco?: Address | null;
   codigoRecuperacao: string | null;
   codigoRecuperacaoCriadoEm: Date | null;
 }

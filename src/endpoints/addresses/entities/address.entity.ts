@@ -1,3 +1,5 @@
+import { Partner } from 'src/endpoints/partner/entities/partner.entity';
+
 export class Address {
   id: bigint;
   cnpjEmpresa: string;
@@ -10,4 +12,5 @@ export class Address {
   cep: string;
   lat: number;
   long: number;
+  empresa?: Partner;
 }

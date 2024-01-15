@@ -43,7 +43,7 @@ export class EcopointsController {
   @Post('findPaginated')
   findPaginated(@Body() data: PaginatedEcopointDto) {
     return this.ecopointsService
-      .count(data.busca, data.enderecoId, data.ativo)
+      .count(data.busca, data.enderecoId, data.ativo, data.tipo)
       .then((total) => {
         return this.ecopointsService
           .findPaginated(data)
@@ -106,6 +106,10 @@ export class EcopointsController {
   @HttpCode(204)
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.ecopointsService.remove(id);
+    return this.ecopointsService.remove(id).then((value) => {
+      return ResponseFactoryModule.generate<ResponseEcopointDto>(
+        toEcopontoDTO(value),
+      );
+    });
   }
 }
