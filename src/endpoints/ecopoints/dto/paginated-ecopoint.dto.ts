@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { TypeEcopointEnum } from 'src/shared/enum/type-ecopoint.enum';
 
 export class PaginatedEcopointDto {
   @ApiProperty()
@@ -9,6 +10,9 @@ export class PaginatedEcopointDto {
 
   @ApiProperty()
   busca: string;
+
+  @ApiProperty()
+  tipo?: TypeEcopointEnum;
 
   @ApiProperty()
   enderecoId?: number;

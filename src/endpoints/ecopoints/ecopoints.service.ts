@@ -8,6 +8,7 @@ import {
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
 import { $Enums } from '@prisma/client';
 import { EcopointQuery } from './entities/ecopoint.query.entity';
+import { TypeEcopointEnum } from 'src/shared/enum/type-ecopoint.enum';
 
 @Injectable()
 export class EcopointsService {
@@ -115,11 +116,17 @@ export class EcopointsService {
     }
   }
 
-  count(search: string, endId?: number, ativo?: boolean) {
+  count(
+    search: string,
+    endId?: number,
+    ativo?: boolean,
+    tipo?: TypeEcopointEnum,
+  ) {
     return this.prisma.ecopontos.count({
       where: {
         ativo: ativo,
         enderecoId: endId,
+        tipo: tipo,
         OR: [{ id: { contains: search } }, { nome: { contains: search } }],
       },
     });
@@ -129,6 +136,7 @@ export class EcopointsService {
     return this.prisma.ecopontos.findMany({
       where: {
         ativo: data.ativo,
+        tipo: data.tipo,
         enderecoId: data.enderecoId,
         OR: [
           { id: { contains: data.busca } },

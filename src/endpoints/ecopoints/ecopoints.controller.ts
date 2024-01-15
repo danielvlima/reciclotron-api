@@ -43,7 +43,7 @@ export class EcopointsController {
   @Post('findPaginated')
   findPaginated(@Body() data: PaginatedEcopointDto) {
     return this.ecopointsService
-      .count(data.busca, data.enderecoId, data.ativo)
+      .count(data.busca, data.enderecoId, data.ativo, data.tipo)
       .then((total) => {
         return this.ecopointsService
           .findPaginated(data)
