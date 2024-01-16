@@ -60,6 +60,10 @@ export class MaterialsController {
   @HttpCode(204)
   @Delete(':id')
   remove(@Param('id', new ParseIntPipe()) id: number) {
-    return this.materialsService.remove(id);
+    return this.materialsService.remove(id).then((value) => {
+      return ResponseFactoryModule.generate<ResponseMaterialDto>(
+        toMaterialDTO(value),
+      );
+    });
   }
 }
