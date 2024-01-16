@@ -22,10 +22,10 @@ export class MaterialsService {
     return this.prisma.materiais.findMany(condition);
   }
 
-  update(id: number, updateMaterialDto: UpdateMaterialDto) {
+  update(updateMaterialDto: UpdateMaterialDto) {
     return this.prisma.materiais.update({
       where: {
-        id,
+        id: updateMaterialDto.id,
       },
       data: updateMaterialDto,
     });

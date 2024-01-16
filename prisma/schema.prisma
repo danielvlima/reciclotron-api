@@ -105,6 +105,7 @@ model Materiais {
   criadoEm             DateTime                   @default(now())
   atualizadoEm         DateTime?
   ehAceitoTipoEcoponto TipoEcopontoAceitaMaterial
+  logo                 String?                    @db.LongText
   materiaisDepositados MateriaisDepositados[]
 }
 

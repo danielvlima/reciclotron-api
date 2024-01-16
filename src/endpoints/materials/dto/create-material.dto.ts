@@ -8,6 +8,9 @@ export class CreateMaterialDto {
   @ApiProperty()
   valor: number;
 
+  @ApiProperty()
+  logo: string;
+
   @ApiProperty({
     enum: ['TOTEM', 'BOX', 'TODOS'],
   })

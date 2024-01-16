@@ -5,6 +5,7 @@ export class Material {
   nome: string;
   valor: number;
   ativo: boolean;
+  logo: string | null;
   criadoEm: Date;
   atualizadoEm: Date | null;
   ehAceitoTipoEcoponto: $Enums.TipoEcopontoAceitaMaterial;
