@@ -19,6 +19,7 @@ import { CouponsPurchasedService } from '../coupons-purchased/coupons-purchased.
 import { $Enums } from '@prisma/client';
 import { TransactionStatusEnum } from './enum/transactions-type.enum';
 import { ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/shared/decorators';
 
 @ApiTags('Transações')
 @Controller('transactions')
@@ -30,6 +31,7 @@ export class TransactionsController {
     private readonly couponsPurchasedService: CouponsPurchasedService,
   ) {}
 
+  @Public()
   @HttpCode(204)
   @Post('deposit')
   deposit(@Body() depositDto: CreateDepositTransactionDto) {
@@ -40,6 +42,7 @@ export class TransactionsController {
     });
   }
 
+  @Public()
   @Post('purchase')
   purchase(@Body() purchaseDto: CreatePurchaseTransactionDto) {
     return this.discountCouponService
@@ -89,6 +92,7 @@ export class TransactionsController {
       });
   }
 
+  @Public()
   @HttpCode(200)
   @Post()
   findAll(@Body() data: PaginatedTransaction) {
@@ -104,6 +108,7 @@ export class TransactionsController {
     });
   }
 
+  @Public()
   @HttpCode(200)
   @Post('deposit/unconfirmed/get')
   findAllUnconfirmed(@Body() data: PaginatedUnconfirmedTransaction) {
@@ -125,6 +130,7 @@ export class TransactionsController {
       });
   }
 
+  @Public()
   @HttpCode(200)
   @Get('deposit/unconfirmed/ecopoints')
   findAllUnconfirmedEcopoints() {
@@ -137,6 +143,7 @@ export class TransactionsController {
       });
   }
 
+  @Public()
   @HttpCode(204)
   @Patch()
   update(@Body() updateTransactionDto: UpdateTransactionDto) {

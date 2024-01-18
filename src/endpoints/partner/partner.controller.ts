@@ -26,7 +26,7 @@ import { ResponseFactoryModule } from 'src/shared/modules/response-factory/respo
 import { ResponseDto } from 'src/shared/dto/response.dto';
 import { toPartnerDTO } from './mapper';
 import { ApiTags } from '@nestjs/swagger';
-import { GetCurrentEntity, GetCurrentKey } from 'src/shared/decorators';
+import { GetCurrentEntity, GetCurrentKey, Public } from 'src/shared/decorators';
 import { Tokens } from 'src/shared/types';
 import { RtGuard } from 'src/shared/guards';
 
@@ -35,6 +35,7 @@ import { RtGuard } from 'src/shared/guards';
 export class PartnerController {
   constructor(private readonly partnerService: PartnerService) {}
 
+  @Public()
   @Post()
   create(@Body() createPartnerDto: CreatePartnerDto) {
     createPartnerDto.senha = CryptoModule.hashPassword(createPartnerDto.senha);
@@ -43,6 +44,7 @@ export class PartnerController {
     });
   }
 
+  @Public()
   @HttpCode(200)
   @Post('paginated')
   findPaginated(
@@ -58,6 +60,7 @@ export class PartnerController {
     });
   }
 
+  @Public()
   @HttpCode(200)
   @Post('login')
   login(@Body() data: LoginDto): Promise<ResponseDto<ResponsePartnerDto>> {
@@ -67,6 +70,7 @@ export class PartnerController {
     });
   }
 
+  @Public()
   @HttpCode(200)
   @Patch()
   update(@Body() updatePartnerDto: UpdatePartnerDto) {
@@ -80,6 +84,7 @@ export class PartnerController {
     });
   }
 
+  @Public()
   @HttpCode(200)
   @Patch('address/:cnpj')
   updateAddress(
@@ -91,12 +96,14 @@ export class PartnerController {
     });
   }
 
+  @Public()
   @HttpCode(204)
   @Delete(':cnpj')
   remove(@Param('cnpj') cnpj: string) {
     return this.partnerService.remove(cnpj);
   }
 
+  @Public()
   @HttpCode(204)
   @Post('recovery/:cnpj')
   createCode(@Param('cnpj') cnpj: string) {
@@ -104,6 +111,7 @@ export class PartnerController {
     return this.partnerService.updateRecoveryCode(cnpj, code);
   }
 
+  @Public()
   @HttpCode(200)
   @Post('checkRecoveryCode')
   checkCode(@Body() data: CheckCodeDto): Promise<ResponseDto<boolean>> {
@@ -121,6 +129,7 @@ export class PartnerController {
     });
   }
 
+  @Public()
   @HttpCode(204)
   @Post('logout')
   logout(@GetCurrentKey() cnpj: string) {
@@ -128,6 +137,7 @@ export class PartnerController {
   }
 
   @UseGuards(RtGuard)
+  @Public()
   @HttpCode(200)
   @Post('token/refresh')
   refreshToken(

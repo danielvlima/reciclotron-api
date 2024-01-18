@@ -23,6 +23,7 @@ import { ResponseDto } from 'src/shared/dto/response.dto';
 import { toEcopointRequestDTO } from './mappers';
 import { ApiTags } from '@nestjs/swagger';
 import { ParseDateIsoPipe } from 'src/shared/parsers/ParseDateIsoType';
+import { Public } from 'src/shared/decorators';
 
 @ApiTags('Ações para Ecopontos')
 @Controller('request-ecopoints')
@@ -31,6 +32,7 @@ export class RequestEcopointsController {
     private readonly requestEcopointsService: RequestEcopointsService,
   ) {}
 
+  @Public()
   @Post('create')
   create(@Body() createRequestEcopointDto: CreateRequestEcopointDto) {
     if (createRequestEcopointDto.acao === RequestActionEcopoint.ADICIONAR) {
@@ -43,6 +45,7 @@ export class RequestEcopointsController {
     return this.requestEcopointsService.create(createRequestEcopointDto);
   }
 
+  @Public()
   @HttpCode(200)
   @Post('findAllRequestNewEcopoints')
   findPaginatedNewEcopoints(
@@ -84,6 +87,7 @@ export class RequestEcopointsController {
       });
   }
 
+  @Public()
   @HttpCode(204)
   @Patch('update')
   update(@Body() updateRequestEcopointDto: UpdateRequestEcopointDto) {
@@ -94,6 +98,7 @@ export class RequestEcopointsController {
       });
   }
 
+  @Public()
   @HttpCode(204)
   @Post('cancel')
   cancel(@Body() data: CancelRequestEcopointDto) {

@@ -22,12 +22,14 @@ import {
 import { toCouponsDescDTO } from './mappers';
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
 import { ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/shared/decorators';
 
 @ApiTags('Cupons de Desconto')
 @Controller('discount-coupon')
 export class DiscountCouponController {
   constructor(private readonly discountCouponService: DiscountCouponService) {}
 
+  @Public()
   @Post()
   create(@Body() createDiscountCouponDto: CreateDiscountCouponDto) {
     return this.discountCouponService
@@ -39,6 +41,7 @@ export class DiscountCouponController {
       });
   }
 
+  @Public()
   @HttpCode(200)
   @Post('findAllPartner')
   findAllPartner(@Body() data: PaginatedPartnerCouponsDto) {
@@ -56,6 +59,7 @@ export class DiscountCouponController {
     });
   }
 
+  @Public()
   @HttpCode(200)
   @Post('userFindBySearch')
   userFindBySearch(@Body() data: SearchDiscountCouponDto) {
@@ -66,6 +70,7 @@ export class DiscountCouponController {
     });
   }
 
+  @Public()
   @Get('userFindByRamo')
   userFindByRamo() {
     return this.discountCouponService.findRamos().then(async (tiposDeRamos) => {
@@ -95,6 +100,7 @@ export class DiscountCouponController {
     });
   }
 
+  @Public()
   @HttpCode(204)
   @Patch()
   update(@Body() updateDiscountCouponDto: UpdateDiscountCouponDto) {
@@ -107,6 +113,7 @@ export class DiscountCouponController {
       });
   }
 
+  @Public()
   @HttpCode(204)
   @Delete('/:cnpj/:id')
   remove(

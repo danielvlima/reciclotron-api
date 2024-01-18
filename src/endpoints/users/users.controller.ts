@@ -18,7 +18,7 @@ import { ResponseFactoryModule } from 'src/shared/modules/response-factory/respo
 import { LoginDto } from 'src/shared/dto/login.dto';
 import { CheckCodeDto } from 'src/shared/dto/check-code.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { GetCurrentEntity, GetCurrentKey } from 'src/shared/decorators';
+import { GetCurrentEntity, GetCurrentKey, Public } from 'src/shared/decorators';
 import { Tokens } from 'src/shared/types';
 import { RtGuard } from 'src/shared/guards';
 
@@ -27,6 +27,7 @@ import { RtGuard } from 'src/shared/guards';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Public()
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     createUserDto.senha = CryptoModule.hashPassword(createUserDto.senha);
@@ -37,6 +38,7 @@ export class UsersController {
     });
   }
 
+  @Public()
   @HttpCode(200)
   @Post('login')
   login(@Body() data: LoginDto): Promise<ResponseDto<ResponseUserDto>> {
@@ -46,6 +48,7 @@ export class UsersController {
     });
   }
 
+  @Public()
   @HttpCode(200)
   @Patch()
   update(@Body() updateUserDto: UpdateUserDto) {
@@ -57,12 +60,14 @@ export class UsersController {
     });
   }
 
+  @Public()
   @HttpCode(204)
   @Delete(':cpf')
   remove(@Param('cpf') cpf: string) {
     return this.usersService.remove(cpf);
   }
 
+  @Public()
   @HttpCode(204)
   @Post('recovery/:cpf')
   createCode(@Param('cpf') cpf: string) {
@@ -70,6 +75,7 @@ export class UsersController {
     return this.usersService.updateRecoveryCode(cpf, code);
   }
 
+  @Public()
   @HttpCode(200)
   @Post('checkRecoveryCode')
   checkCode(@Body() data: CheckCodeDto): Promise<ResponseDto<boolean>> {
@@ -87,6 +93,7 @@ export class UsersController {
     });
   }
 
+  @Public()
   @HttpCode(204)
   @Post('logout')
   logout(@GetCurrentKey() cpf: string) {
@@ -94,6 +101,7 @@ export class UsersController {
   }
 
   @UseGuards(RtGuard)
+  @Public()
   @HttpCode(200)
   @Post('token/refresh')
   refreshToken(

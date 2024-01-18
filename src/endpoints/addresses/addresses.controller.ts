@@ -6,12 +6,14 @@ import { ApiTags } from '@nestjs/swagger';
 import { AddressesService } from './addresses.service';
 import { GetPaginatedAddressesDTO, ResponsePaginatedAddressesDTO } from './dto';
 import { toAddressDTO } from './mappers';
+import { Public } from 'src/shared/decorators';
 
 @ApiTags('Endereços')
 @Controller('addresses')
 export class AddressesController {
   constructor(private readonly addressesService: AddressesService) {}
 
+  @Public()
   @HttpCode(200)
   @Post()
   findPaginated(

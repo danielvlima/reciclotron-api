@@ -8,6 +8,7 @@ import {
 } from './dto';
 import { toCouponsPurchasedDTO } from './mappers';
 import { ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/shared/decorators';
 
 @ApiTags('Cupons comprados pelo Usuário')
 @Controller('couponsPurchased')
@@ -16,6 +17,7 @@ export class CouponsPurchasedController {
     private readonly couponsPurchasedService: CouponsPurchasedService,
   ) {}
 
+  @Public()
   @HttpCode(200)
   @Post('filters/:cpf')
   findAll(@Param('cpf') cpf: string): Promise<ResponseDto<string[]>> {
@@ -28,6 +30,7 @@ export class CouponsPurchasedController {
       });
   }
 
+  @Public()
   @HttpCode(200)
   @Post()
   findPaginated(

@@ -21,6 +21,7 @@ import { toEcopontoDTO, toEcopontoDTOFromQuery } from './mappers';
 import { RequestEcopointsService } from '../request-ecopoints/request-ecopoints.service';
 import { toEcopointRequestDTO } from '../request-ecopoints/mappers';
 import { ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/shared/decorators';
 
 @ApiTags('Ecopontos')
 @Controller('ecopoints')
@@ -30,6 +31,7 @@ export class EcopointsController {
     private readonly requestEcopointsService: RequestEcopointsService,
   ) {}
 
+  @Public()
   @Post()
   create(@Body() createEcopointDto: CreateEcopointDto) {
     return this.ecopointsService.create(createEcopointDto).then((value) => {
@@ -39,6 +41,7 @@ export class EcopointsController {
     });
   }
 
+  @Public()
   @HttpCode(200)
   @Post('findPaginated')
   findPaginated(@Body() data: PaginatedEcopointDto) {
@@ -74,6 +77,7 @@ export class EcopointsController {
       });
   }
 
+  @Public()
   @HttpCode(200)
   @Post('findForDeposit')
   findForDeposit(@Body() data: PaginatedEcopointsDepositDto) {
@@ -93,6 +97,7 @@ export class EcopointsController {
       });
   }
 
+  @Public()
   @HttpCode(204)
   @Patch()
   update(@Body() updateEcopointDto: UpdateEcopointDto) {
@@ -103,6 +108,7 @@ export class EcopointsController {
     });
   }
 
+  @Public()
   @HttpCode(204)
   @Delete(':id')
   remove(@Param('id') id: string) {
