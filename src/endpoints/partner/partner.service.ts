@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotImplementedException } from '@nestjs/common';
 import {
   CreatePartnerDto,
   UpdatePartnerDto,
@@ -209,5 +209,13 @@ export class PartnerService {
         cnpj,
       },
     });
+  }
+
+  logout() {
+    throw new NotImplementedException();
+  }
+
+  refreshToken() {
+    throw new NotImplementedException();
   }
 }

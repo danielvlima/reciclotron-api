@@ -82,4 +82,16 @@ export class UsersController {
       return ResponseFactoryModule.generate(false);
     });
   }
+
+  @HttpCode(204)
+  @Post('logout')
+  logout() {
+    this.usersService.logout();
+  }
+
+  @HttpCode(200)
+  @Post('token/refresh')
+  refreshToken(): Promise<ResponseDto<string>> {
+    return this.usersService.refreshToken();
+  }
 }

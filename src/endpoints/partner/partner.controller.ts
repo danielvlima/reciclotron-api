@@ -116,4 +116,16 @@ export class PartnerController {
       return ResponseFactoryModule.generate(false);
     });
   }
+
+  @HttpCode(204)
+  @Post('logout')
+  logout() {
+    this.partnerService.logout();
+  }
+
+  @HttpCode(200)
+  @Post('token/refresh')
+  refreshToken(): Promise<ResponseDto<string>> {
+    return this.partnerService.refreshToken();
+  }
 }
