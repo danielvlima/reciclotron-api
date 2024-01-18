@@ -122,8 +122,18 @@ export class UsersService {
     });
   };
 
-  logout() {
-    throw new NotImplementedException();
+  logout(cpf: string) {
+    return this.prisma.usuarios.updateMany({
+      where: {
+        cpf: cpf,
+        token: {
+          not: null,
+        },
+      },
+      data: {
+        token: null,
+      },
+    });
   }
 
   refreshToken() {

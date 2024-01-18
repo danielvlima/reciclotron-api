@@ -118,9 +118,9 @@ export class PartnerController {
   }
 
   @HttpCode(204)
-  @Post('logout')
-  logout() {
-    this.partnerService.logout();
+  @Post('logout/:cnpj')
+  logout(@Param('cnpj') cnpj: string) {
+    this.partnerService.logout(cnpj).then(() => {});
   }
 
   @HttpCode(200)

@@ -260,8 +260,18 @@ export class PartnerService {
     });
   }
 
-  logout() {
-    throw new NotImplementedException();
+  logout(cnpj: string) {
+    return this.prisma.empresasParceiras.updateMany({
+      where: {
+        cnpj: cnpj,
+        token: {
+          not: null,
+        },
+      },
+      data: {
+        token: null,
+      },
+    });
   }
 
   refreshToken() {

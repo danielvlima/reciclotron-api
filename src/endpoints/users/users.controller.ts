@@ -84,9 +84,9 @@ export class UsersController {
   }
 
   @HttpCode(204)
-  @Post('logout')
-  logout() {
-    this.usersService.logout();
+  @Post('logout/:cpf')
+  logout(@Param('cpf') cpf: string) {
+    return this.usersService.logout(cpf).then(() => {});
   }
 
   @HttpCode(200)
