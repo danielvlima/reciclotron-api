@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto, ResponseUserDto } from './dto';
@@ -19,6 +20,7 @@ import { LoginDto } from 'src/shared/dto/login.dto';
 import { CheckCodeDto } from 'src/shared/dto/check-code.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { GetCurrentKey } from 'src/shared/decorators';
 
 @ApiTags('Usuários')
 @Controller('user')
@@ -87,8 +89,8 @@ export class UsersController {
 
   @UseGuards(AuthGuard['jwt'])
   @HttpCode(204)
-  @Post('logout/:cpf')
-  logout(@Param('cpf') cpf: string) {
+  @Post('logout')
+  logout(@GetCurrentKey() cpf: string) {
     return this.usersService.logout(cpf).then(() => {});
   }
 

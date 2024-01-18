@@ -27,6 +27,7 @@ import { ResponseDto } from 'src/shared/dto/response.dto';
 import { toPartnerDTO } from './mapper';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { GetCurrentKey } from 'src/shared/decorators';
 
 @ApiTags('Empresas Parceiras')
 @Controller('partner')
@@ -121,8 +122,8 @@ export class PartnerController {
 
   @UseGuards(AuthGuard['jwt'])
   @HttpCode(204)
-  @Post('logout/:cnpj')
-  logout(@Param('cnpj') cnpj: string) {
+  @Post('logout')
+  logout(@GetCurrentKey() cnpj: string) {
     this.partnerService.logout(cnpj).then(() => {});
   }
 
