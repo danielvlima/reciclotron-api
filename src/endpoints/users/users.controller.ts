@@ -20,7 +20,7 @@ import { CheckCodeDto } from 'src/shared/dto/check-code.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { GetCurrentEntity, GetCurrentKey } from 'src/shared/decorators';
 import { Tokens } from 'src/shared/types';
-import { AtGuard, RtGuard } from 'src/shared/guards';
+import { RtGuard } from 'src/shared/guards';
 
 @ApiTags('Usuários')
 @Controller('user')
@@ -87,7 +87,6 @@ export class UsersController {
     });
   }
 
-  @UseGuards(AtGuard)
   @HttpCode(204)
   @Post('logout')
   logout(@GetCurrentKey() cpf: string) {
