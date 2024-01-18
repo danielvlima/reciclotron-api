@@ -2,10 +2,52 @@ import { Injectable, NotImplementedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
+import { JwtService } from '@nestjs/jwt';
+import { env } from 'process';
+import { Tokens } from 'src/shared/types';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwtService: JwtService,
+  ) {}
+
+  async getTokens(
+    cpf: string,
+    email: string,
+    userLevel: string,
+  ): Promise<Tokens> {
+    const [at, rt] = await Promise.all([
+      this.jwtService.signAsync(
+        {
+          sub: cpf,
+          email,
+          userLevel,
+        },
+        {
+          secret: env.AT_TOKEN_SECRET,
+          expiresIn: env.AT_EXPIRATION_TOKEN,
+        },
+      ),
+      this.jwtService.signAsync(
+        {
+          sub: cpf,
+          email,
+          userLevel,
+        },
+        {
+          secret: env.RT_TOKEN_SECRET,
+          expiresIn: env.RT_EXPIRATION_TOKEN,
+        },
+      ),
+    ]);
+
+    return {
+      access_token: at,
+      refresh_token: rt,
+    };
+  }
 
   create = (createUserDto: CreateUserDto) => {
     return this.prisma.usuarios.create({
