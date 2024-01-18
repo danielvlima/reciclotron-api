@@ -3,11 +3,12 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { CryptoModule } from 'src/shared/modules/crypto/crypto.module';
 import { CodeGeneratorModule } from 'src/shared/modules/code-generator/code-generator.module';
+import { AtStrategy, RtStrategy } from 'src/shared/strategies';
 
 @Module({
   imports: [CryptoModule, CodeGeneratorModule],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, AtStrategy, RtStrategy],
   exports: [UsersService],
 })
 export class UsersModule {}

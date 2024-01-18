@@ -3,10 +3,11 @@ import { PartnerService } from './partner.service';
 import { PartnerController } from './partner.controller';
 import { CryptoModule } from 'src/shared/modules/crypto/crypto.module';
 import { CodeGeneratorModule } from 'src/shared/modules/code-generator/code-generator.module';
+import { AtStrategy, RtStrategy } from 'src/shared/strategies';
 
 @Module({
   imports: [CryptoModule, CodeGeneratorModule],
   controllers: [PartnerController],
-  providers: [PartnerService],
+  providers: [PartnerService, AtStrategy, RtStrategy],
 })
 export class PartnerModule {}
