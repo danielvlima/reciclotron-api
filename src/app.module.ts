@@ -15,6 +15,7 @@ import { TransactionsModule } from './endpoints/transactions/transactions.module
 import { CompareModule } from './shared/modules/compare/compare.module';
 import { EcopointsModule } from './endpoints/ecopoints/ecopoints.module';
 import { AddressesModule } from './endpoints/addresses/addresses.module';
+import { TokenModule } from './shared/modules/auth/token.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { AddressesModule } from './endpoints/addresses/addresses.module';
     CompareModule,
     EcopointsModule,
     AddressesModule,
+    TokenModule,
   ],
   controllers: [AppController],
   providers: [AppService],

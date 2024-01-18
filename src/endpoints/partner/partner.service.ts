@@ -7,47 +7,11 @@ import {
   FilterOptionsPartnerDto,
 } from './dto';
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
-import { JwtService } from '@nestjs/jwt';
-import { env } from 'process';
-import { Tokens } from 'src/shared/types';
 import { CryptoModule } from 'src/shared/modules/crypto/crypto.module';
 
 @Injectable()
 export class PartnerService {
-  constructor(
-    private prisma: PrismaService,
-    private jwtService: JwtService,
-  ) {}
-
-  async getTokens(cnpj: string, email: string): Promise<Tokens> {
-    const [at, rt] = await Promise.all([
-      this.jwtService.signAsync(
-        {
-          sub: cnpj,
-          email,
-        },
-        {
-          secret: env.AT_TOKEN_SECRET,
-          expiresIn: env.AT_EXPIRATION_TOKEN,
-        },
-      ),
-      this.jwtService.signAsync(
-        {
-          sub: cnpj,
-          email,
-        },
-        {
-          secret: env.RT_TOKEN_SECRET,
-          expiresIn: env.RT_EXPIRATION_TOKEN,
-        },
-      ),
-    ]);
-
-    return {
-      access_token: at,
-      refresh_token: rt,
-    };
-  }
+  constructor(private prisma: PrismaService) {}
 
   async updateRtHash(cnpj: string, rt: string) {
     const hash = CryptoModule.sha256(rt);
