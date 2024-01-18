@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { ForbiddenException, Module } from '@nestjs/common';
 import { createHash, randomBytes } from 'crypto';
 
 @Module({})
@@ -24,7 +24,14 @@ export class CryptoModule {
     const passwordHashed = CryptoModule.sha256(password, passwordSplitted[1]);
 
     if (passwordSplitted[0] !== passwordHashed) {
-      throw Error('Senha Incorreta');
+      throw new ForbiddenException('Senha Incorreta');
+    }
+  };
+
+  static checkRtToken = (entityToken: string, token: string) => {
+    const tokenHashed = CryptoModule.sha256(token);
+    if (entityToken !== tokenHashed) {
+      throw new ForbiddenException('Acesso Negado');
     }
   };
 }

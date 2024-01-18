@@ -6,7 +6,6 @@ import {
   Param,
   Patch,
   Post,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto, ResponseUserDto } from './dto';
@@ -20,7 +19,8 @@ import { LoginDto } from 'src/shared/dto/login.dto';
 import { CheckCodeDto } from 'src/shared/dto/check-code.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { GetCurrentKey } from 'src/shared/decorators';
+import { GetCurrentEntity, GetCurrentKey } from 'src/shared/decorators';
+import { Tokens } from 'src/shared/types';
 
 @ApiTags('Usuários')
 @Controller('user')
@@ -97,7 +97,12 @@ export class UsersController {
   @UseGuards(AuthGuard['jwt-refresh'])
   @HttpCode(200)
   @Post('token/refresh')
-  refreshToken(): Promise<ResponseDto<string>> {
-    return this.usersService.refreshToken();
+  refreshToken(
+    @GetCurrentKey() cpf: string,
+    @GetCurrentEntity('refreshToken') rt: string,
+  ): Promise<ResponseDto<Tokens>> {
+    return this.usersService
+      .refreshToken(cpf, rt)
+      .then((value) => ResponseFactoryModule.generate(value));
   }
 }

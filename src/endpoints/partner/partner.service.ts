@@ -1,4 +1,4 @@
-import { Injectable, NotImplementedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   CreatePartnerDto,
   UpdatePartnerDto,
@@ -8,10 +8,14 @@ import {
 } from './dto';
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
 import { CryptoModule } from 'src/shared/modules/crypto/crypto.module';
+import { TokenService } from 'src/shared/modules/auth/token.service';
 
 @Injectable()
 export class PartnerService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private tokenService: TokenService,
+  ) {}
 
   async updateRtHash(cnpj: string, rt: string) {
     const hash = CryptoModule.sha256(rt);
@@ -238,7 +242,16 @@ export class PartnerService {
     });
   }
 
-  refreshToken() {
-    throw new NotImplementedException();
+  async refreshToken(cnpj: string, rt: string) {
+    const partner = await this.findOneWithCnpj(cnpj);
+    CryptoModule.checkRtToken(partner.token, rt);
+    const tokens = await this.tokenService.getTokens(
+      cnpj,
+      partner.email,
+      'EMPRESA',
+    );
+
+    await this.updateRtHash(cnpj, tokens.refresh_token);
+    return tokens;
   }
 }

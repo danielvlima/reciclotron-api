@@ -27,7 +27,8 @@ import { ResponseDto } from 'src/shared/dto/response.dto';
 import { toPartnerDTO } from './mapper';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { GetCurrentKey } from 'src/shared/decorators';
+import { GetCurrentEntity, GetCurrentKey } from 'src/shared/decorators';
+import { Tokens } from 'src/shared/types';
 
 @ApiTags('Empresas Parceiras')
 @Controller('partner')
@@ -130,7 +131,12 @@ export class PartnerController {
   @UseGuards(AuthGuard['jwt-refresh'])
   @HttpCode(200)
   @Post('token/refresh')
-  refreshToken(): Promise<ResponseDto<string>> {
-    return this.partnerService.refreshToken();
+  refreshToken(
+    @GetCurrentKey() cnpj: string,
+    @GetCurrentEntity('refreshToken') rt: string,
+  ): Promise<ResponseDto<Tokens>> {
+    return this.partnerService
+      .refreshToken(cnpj, rt)
+      .then((value) => ResponseFactoryModule.generate(value));
   }
 }
