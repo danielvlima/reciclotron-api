@@ -10,6 +10,7 @@ import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { env } from 'process';
 import { Tokens } from 'src/shared/types';
+import { CryptoModule } from 'src/shared/modules/crypto/crypto.module';
 
 @Injectable()
 export class PartnerService {
@@ -46,6 +47,18 @@ export class PartnerService {
       access_token: at,
       refresh_token: rt,
     };
+  }
+
+  async updateRtHash(cnpj: string, rt: string) {
+    const hash = CryptoModule.sha256(rt);
+    await this.prisma.empresasParceiras.update({
+      where: {
+        cnpj: cnpj,
+      },
+      data: {
+        token: hash,
+      },
+    });
   }
 
   create(data: CreatePartnerDto) {

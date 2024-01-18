@@ -3,8 +3,11 @@ import { createHash, randomBytes } from 'crypto';
 
 @Module({})
 export class CryptoModule {
-  static sha256 = (text: string, salt: string) => {
-    return createHash('sha256').update(text).update(salt).digest('hex');
+  static sha256 = (text: string, salt?: string) => {
+    if (salt) {
+      return createHash('sha256').update(text).update(salt).digest('hex');
+    }
+    return createHash('sha256').update(text).digest('hex');
   };
 
   static salt = () => {
