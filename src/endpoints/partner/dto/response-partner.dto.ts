@@ -1,5 +1,6 @@
 import { TypePartnerEnum } from '../enum/type-partner.enum';
 import { ResponseAddressDto } from '../../addresses/dto/response-address.dto';
+import { Tokens } from 'src/shared/types';
 
 export class ResponsePartnerDto {
   cnpj: string;
@@ -13,4 +14,5 @@ export class ResponsePartnerDto {
   tipoEmpresa: TypePartnerEnum;
   enderecolojaOnline: string | null;
   endereco: ResponseAddressDto | null;
+  token?: Tokens;
 }

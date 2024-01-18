@@ -1,3 +1,4 @@
+import { Tokens } from 'src/shared/types';
 import { UserGenderEnum } from '../enum/user-gender.enum';
 import { UserLevelEnum } from '../enum/user-level.enum';
 
@@ -10,4 +11,5 @@ export class ResponseUserDto {
   generoUsuario: UserGenderEnum;
   nivelPrivilegio: UserLevelEnum;
   pontos: number;
+  token?: Tokens;
 }
