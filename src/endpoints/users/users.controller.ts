@@ -18,9 +18,9 @@ import { ResponseFactoryModule } from 'src/shared/modules/response-factory/respo
 import { LoginDto } from 'src/shared/dto/login.dto';
 import { CheckCodeDto } from 'src/shared/dto/check-code.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
 import { GetCurrentEntity, GetCurrentKey } from 'src/shared/decorators';
 import { Tokens } from 'src/shared/types';
+import { AtGuard, RtGuard } from 'src/shared/guards';
 
 @ApiTags('Usuários')
 @Controller('user')
@@ -87,14 +87,14 @@ export class UsersController {
     });
   }
 
-  @UseGuards(AuthGuard['jwt'])
+  @UseGuards(AtGuard)
   @HttpCode(204)
   @Post('logout')
   logout(@GetCurrentKey() cpf: string) {
     return this.usersService.logout(cpf).then(() => {});
   }
 
-  @UseGuards(AuthGuard['jwt-refresh'])
+  @UseGuards(RtGuard)
   @HttpCode(200)
   @Post('token/refresh')
   refreshToken(

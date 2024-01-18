@@ -26,9 +26,9 @@ import { ResponseFactoryModule } from 'src/shared/modules/response-factory/respo
 import { ResponseDto } from 'src/shared/dto/response.dto';
 import { toPartnerDTO } from './mapper';
 import { ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
 import { GetCurrentEntity, GetCurrentKey } from 'src/shared/decorators';
 import { Tokens } from 'src/shared/types';
+import { AtGuard, RtGuard } from 'src/shared/guards';
 
 @ApiTags('Empresas Parceiras')
 @Controller('partner')
@@ -121,14 +121,14 @@ export class PartnerController {
     });
   }
 
-  @UseGuards(AuthGuard['jwt'])
+  @UseGuards(AtGuard)
   @HttpCode(204)
   @Post('logout')
   logout(@GetCurrentKey() cnpj: string) {
     this.partnerService.logout(cnpj).then(() => {});
   }
 
-  @UseGuards(AuthGuard['jwt-refresh'])
+  @UseGuards(RtGuard)
   @HttpCode(200)
   @Post('token/refresh')
   refreshToken(
