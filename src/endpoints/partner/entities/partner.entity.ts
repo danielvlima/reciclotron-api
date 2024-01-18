@@ -9,6 +9,7 @@ export class Partner {
   nomeFantasia: string;
   razaoSocial: string;
   senha: string;
+  token: string;
   ramo: string;
   ativo: boolean;
   tipoEmpresa: $Enums.TipoEmpresa;

@@ -13,7 +13,7 @@ model Usuarios {
   email                     String                   @unique
   telefone                  String                   @unique
   nome                      String
-  senha                     String
+  senha                     String                   @db.LongText
   dataAniversario           DateTime
   generoUsuario             GeneroUsuario
   nivelPrivilegio           RegraPriviegio           @default(USUARIO)
@@ -22,6 +22,7 @@ model Usuarios {
   pontos                    Int                      @default(0)
   codigoRecuperacao         String?
   codigoRecuperacaoCriadoEm DateTime?
+  token                     String?                  @db.LongText
   transacoes                Transacoes[]
   cuponsCompradosUsuario    CuponsCompradosUsuario[]
 }
@@ -42,6 +43,7 @@ model EmpresasParceiras {
   codigoRecuperacao         String?
   codigoRecuperacaoCriadoEm DateTime?
   logo                      String?                @db.LongText
+  token                     String?                @db.LongText
   cupons                    CuponsDesconto[]
   endereco                  Enderecos?
   SolicitacoesEcoponto      SolicitacoesEcoponto[]

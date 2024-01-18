@@ -6,6 +6,7 @@ export class User {
   telefone: string;
   nome: string;
   senha: string;
+  token: string;
   pontos: number;
   dataAniversario: Date;
   generoUsuario: $Enums.GeneroUsuario;
