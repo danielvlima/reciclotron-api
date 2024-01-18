@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto, ResponseUserDto } from './dto';
 import { UsersService } from './users.service';
@@ -17,6 +18,7 @@ import { ResponseFactoryModule } from 'src/shared/modules/response-factory/respo
 import { LoginDto } from 'src/shared/dto/login.dto';
 import { CheckCodeDto } from 'src/shared/dto/check-code.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Usuários')
 @Controller('user')
@@ -83,12 +85,14 @@ export class UsersController {
     });
   }
 
+  @UseGuards(AuthGuard['jwt'])
   @HttpCode(204)
   @Post('logout/:cpf')
   logout(@Param('cpf') cpf: string) {
     return this.usersService.logout(cpf).then(() => {});
   }
 
+  @UseGuards(AuthGuard['jwt-refresh'])
   @HttpCode(200)
   @Post('token/refresh')
   refreshToken(): Promise<ResponseDto<string>> {

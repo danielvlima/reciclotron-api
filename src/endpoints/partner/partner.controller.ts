@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   HttpCode,
+  UseGuards,
 } from '@nestjs/common';
 import { PartnerService } from './partner.service';
 import {
@@ -25,6 +26,7 @@ import { ResponseFactoryModule } from 'src/shared/modules/response-factory/respo
 import { ResponseDto } from 'src/shared/dto/response.dto';
 import { toPartnerDTO } from './mapper';
 import { ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Empresas Parceiras')
 @Controller('partner')
@@ -117,12 +119,14 @@ export class PartnerController {
     });
   }
 
+  @UseGuards(AuthGuard['jwt'])
   @HttpCode(204)
   @Post('logout/:cnpj')
   logout(@Param('cnpj') cnpj: string) {
     this.partnerService.logout(cnpj).then(() => {});
   }
 
+  @UseGuards(AuthGuard['jwt-refresh'])
   @HttpCode(200)
   @Post('token/refresh')
   refreshToken(): Promise<ResponseDto<string>> {
