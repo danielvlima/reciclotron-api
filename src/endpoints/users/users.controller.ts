@@ -33,14 +33,19 @@ export class UsersController {
   ) {}
 
   @Public()
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
+  @Post('sign-up')
+  async create(@Body() createUserDto: CreateUserDto) {
     createUserDto.senha = CryptoModule.hashPassword(createUserDto.senha);
-    return this.usersService.create(createUserDto).then((newUser) => {
-      return ResponseFactoryModule.generate<ResponseUserDto>(
-        toUserDTO(newUser),
-      );
-    });
+    const newUser = await this.usersService.create(createUserDto);
+    const token = await this.tokenService.getTokens(
+      newUser.cpf,
+      newUser.email,
+      newUser.nivelPrivilegio.toString(),
+    );
+    await this.usersService.updateRtHash(newUser.cpf, token.refresh_token);
+    const userDto = toUserDTO(newUser);
+    userDto.token = token;
+    return ResponseFactoryModule.generate<ResponseUserDto>(userDto);
   }
 
   @Public()
