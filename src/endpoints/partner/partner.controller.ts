@@ -7,6 +7,7 @@ import {
   Delete,
   HttpCode,
   UseGuards,
+  HttpStatus,
 } from '@nestjs/common';
 import { PartnerService } from './partner.service';
 import {
@@ -29,11 +30,15 @@ import { ApiTags } from '@nestjs/swagger';
 import { GetCurrentEntity, GetCurrentKey, Public } from 'src/shared/decorators';
 import { Tokens } from 'src/shared/types';
 import { RtGuard } from 'src/shared/guards';
+import { TokenService } from 'src/shared/modules/auth/token.service';
 
 @ApiTags('Empresas Parceiras')
 @Controller('partner')
 export class PartnerController {
-  constructor(private readonly partnerService: PartnerService) {}
+  constructor(
+    private readonly partnerService: PartnerService,
+    private tokenService: TokenService,
+  ) {}
 
   @Public()
   @Post()
@@ -42,6 +47,25 @@ export class PartnerController {
     return this.partnerService.create(createPartnerDto).then((newPartner) => {
       return ResponseFactoryModule.generate(toPartnerDTO(newPartner));
     });
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Post('login')
+  async login(
+    @Body() data: LoginDto,
+  ): Promise<ResponseDto<ResponsePartnerDto>> {
+    const partner = await this.partnerService.findOne(data.email);
+    CryptoModule.checkPasssword(partner.senha, data.senha);
+    const token = await this.tokenService.getTokens(
+      partner.cnpj,
+      partner.email,
+      'EMPRESA',
+    );
+    await this.partnerService.updateRtHash(partner.cnpj, token.refresh_token);
+    const partnerDto = toPartnerDTO(partner);
+    partnerDto.token = token;
+    return ResponseFactoryModule.generate(partnerDto);
   }
 
   @Public()
@@ -57,16 +81,6 @@ export class PartnerController {
           empresas: parters.map((el) => toPartnerDTO(el)),
         });
       });
-    });
-  }
-
-  @Public()
-  @HttpCode(200)
-  @Post('login')
-  login(@Body() data: LoginDto): Promise<ResponseDto<ResponsePartnerDto>> {
-    return this.partnerService.findOne(data.email).then((partner) => {
-      CryptoModule.checkPasssword(partner.senha, data.senha);
-      return ResponseFactoryModule.generate(toPartnerDTO(partner));
     });
   }
 

@@ -22,6 +22,7 @@ export class PartnerService {
     await this.prisma.empresasParceiras.update({
       where: {
         cnpj: cnpj,
+        atualizadoEm: new Date(),
       },
       data: {
         token: hash,

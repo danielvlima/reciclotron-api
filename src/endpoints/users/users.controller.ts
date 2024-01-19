@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -21,11 +22,15 @@ import { ApiTags } from '@nestjs/swagger';
 import { GetCurrentEntity, GetCurrentKey, Public } from 'src/shared/decorators';
 import { Tokens } from 'src/shared/types';
 import { RtGuard } from 'src/shared/guards';
+import { TokenService } from 'src/shared/modules/auth/token.service';
 
 @ApiTags('Usuários')
 @Controller('user')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private tokenService: TokenService,
+  ) {}
 
   @Public()
   @Post()
@@ -39,13 +44,20 @@ export class UsersController {
   }
 
   @Public()
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   @Post('login')
-  login(@Body() data: LoginDto): Promise<ResponseDto<ResponseUserDto>> {
-    return this.usersService.findOne(data.email).then((user) => {
-      CryptoModule.checkPasssword(user.senha, data.senha);
-      return ResponseFactoryModule.generate<ResponseUserDto>(toUserDTO(user));
-    });
+  async login(@Body() data: LoginDto): Promise<ResponseDto<ResponseUserDto>> {
+    const user = await this.usersService.findOne(data.email);
+    CryptoModule.checkPasssword(user.senha, data.senha);
+    const token = await this.tokenService.getTokens(
+      user.cpf,
+      user.email,
+      user.nivelPrivilegio.toString(),
+    );
+    await this.usersService.updateRtHash(user.cpf, token.refresh_token);
+    const userDto = toUserDTO(user);
+    userDto.token = token;
+    return ResponseFactoryModule.generate<ResponseUserDto>(userDto);
   }
 
   @Public()
