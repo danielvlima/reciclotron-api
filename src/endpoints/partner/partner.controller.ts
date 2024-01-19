@@ -42,11 +42,11 @@ export class PartnerController {
 
   @Public()
   @Post()
-  create(@Body() createPartnerDto: CreatePartnerDto) {
+  async create(@Body() createPartnerDto: CreatePartnerDto) {
     createPartnerDto.senha = CryptoModule.hashPassword(createPartnerDto.senha);
-    return this.partnerService.create(createPartnerDto).then((newPartner) => {
-      return ResponseFactoryModule.generate(toPartnerDTO(newPartner));
-    });
+    const newPartner = await this.partnerService.create(createPartnerDto);
+    const partnerDto = toPartnerDTO(newPartner);
+    return ResponseFactoryModule.generate(partnerDto);
   }
 
   @Public()
