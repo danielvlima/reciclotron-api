@@ -9,6 +9,9 @@ import {
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
 import { CryptoModule } from 'src/shared/modules/crypto/crypto.module';
 import { TokenService } from 'src/shared/modules/auth/token.service';
+import { Prisma } from '@prisma/client';
+import { NotFoundPartnerException } from 'src/exceptions';
+import { PrismaErrorCode } from 'src/shared/enum';
 
 @Injectable()
 export class PartnerService {
@@ -22,10 +25,10 @@ export class PartnerService {
     await this.prisma.empresasParceiras.update({
       where: {
         cnpj: cnpj,
-        atualizadoEm: new Date(),
       },
       data: {
         token: hash,
+        atualizadoEm: new Date(),
       },
     });
   }
@@ -132,25 +135,39 @@ export class PartnerService {
   }
 
   findOne(email: string) {
-    return this.prisma.empresasParceiras.findFirstOrThrow({
-      where: {
-        email,
-      },
-      include: {
-        endereco: true,
-      },
-    });
+    return this.prisma.empresasParceiras
+      .findFirstOrThrow({
+        where: {
+          email,
+        },
+        include: {
+          endereco: true,
+        },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.NotFoundError) {
+          throw new NotFoundPartnerException();
+        }
+        throw err;
+      });
   }
 
   findOneWithCnpj(cnpj: string) {
-    return this.prisma.empresasParceiras.findFirstOrThrow({
-      where: {
-        cnpj,
-      },
-      include: {
-        endereco: true,
-      },
-    });
+    return this.prisma.empresasParceiras
+      .findFirstOrThrow({
+        where: {
+          cnpj,
+        },
+        include: {
+          endereco: true,
+        },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.NotFoundError) {
+          throw new NotFoundPartnerException();
+        }
+        throw err;
+      });
   }
 
   update(data: UpdatePartnerDto) {

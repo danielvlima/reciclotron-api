@@ -4,6 +4,9 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
 import { CryptoModule } from 'src/shared/modules/crypto/crypto.module';
 import { TokenService } from 'src/shared/modules/auth/token.service';
+import { NotFoundUserException } from 'src/exceptions';
+import { PrismaErrorCode } from 'src/shared/enum';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -20,6 +23,7 @@ export class UsersService {
       },
       data: {
         token: hash,
+        atualizadoEm: new Date(),
       },
     });
   }
@@ -31,19 +35,33 @@ export class UsersService {
   };
 
   findOne = (email: string) => {
-    return this.prisma.usuarios.findFirstOrThrow({
-      where: {
-        email,
-      },
-    });
+    return this.prisma.usuarios
+      .findFirstOrThrow({
+        where: {
+          email,
+        },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.NotFoundError) {
+          throw new NotFoundUserException();
+        }
+        throw err;
+      });
   };
 
   findOneWithCpf = (cpf: string) => {
-    return this.prisma.usuarios.findFirstOrThrow({
-      where: {
-        cpf,
-      },
-    });
+    return this.prisma.usuarios
+      .findFirstOrThrow({
+        where: {
+          cpf,
+        },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.NotFoundError) {
+          throw new NotFoundUserException();
+        }
+        throw err;
+      });
   };
 
   update = (updateUserDto: UpdateUserDto) => {
