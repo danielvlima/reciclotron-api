@@ -6,7 +6,7 @@ import { JwtPayload } from '../types';
 import { RoleLevel } from '../enum';
 
 @Injectable()
-export class UserStrategy extends PassportStrategy(Strategy, 'user') {
+export class PartnerStrategy extends PassportStrategy(Strategy, 'partner') {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -15,7 +15,7 @@ export class UserStrategy extends PassportStrategy(Strategy, 'user') {
   }
 
   validate(payload: JwtPayload) {
-    if (payload.level === RoleLevel.USUARIO) {
+    if (payload.level === RoleLevel.EMPRESA) {
       return payload;
     }
     throw new UnauthorizedException();
