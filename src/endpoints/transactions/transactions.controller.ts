@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Patch, HttpCode, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Patch,
+  HttpCode,
+  Get,
+  UseGuards,
+} from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import {
@@ -20,6 +28,7 @@ import { $Enums } from '@prisma/client';
 import { TransactionStatusEnum } from './enum/transactions-type.enum';
 import { ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/shared/decorators';
+import { UserGuard } from 'src/shared/guards';
 
 @ApiTags('Transações')
 @Controller('transactions')
@@ -92,6 +101,7 @@ export class TransactionsController {
       });
   }
 
+  @UseGuards(UserGuard)
   @Public()
   @HttpCode(200)
   @Post()

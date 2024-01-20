@@ -5,6 +5,7 @@ import { DiscountCouponService } from '../discount-coupon/discount-coupon.servic
 import { CompareModule } from 'src/shared/modules/compare/compare.module';
 import { UsersService } from '../users/users.service';
 import { CouponsPurchasedService } from '../coupons-purchased/coupons-purchased.service';
+import { AtStrategy, UserStrategy } from 'src/shared/strategies';
 
 @Module({
   imports: [CompareModule],
@@ -14,6 +15,8 @@ import { CouponsPurchasedService } from '../coupons-purchased/coupons-purchased.
     DiscountCouponService,
     UsersService,
     CouponsPurchasedService,
+    UserStrategy,
+    AtStrategy,
   ],
 })
 export class TransactionsModule {}
