@@ -5,6 +5,7 @@ import { env } from 'process';
 import { JwtPayload } from '../types';
 import { RoleLevel } from '../enum';
 import { AccessDaniedException } from 'src/exceptions';
+import { CompareModule } from '../modules/compare/compare.module';
 
 @Injectable()
 export class UserStrategy extends PassportStrategy(Strategy, 'user') {
@@ -16,7 +17,10 @@ export class UserStrategy extends PassportStrategy(Strategy, 'user') {
   }
 
   validate(payload: JwtPayload) {
-    if (payload.level === RoleLevel.USUARIO) {
+    if (
+      payload.level === RoleLevel.USUARIO &&
+      CompareModule.isCPF(payload.sub)
+    ) {
       return payload;
     }
     throw new AccessDaniedException();
