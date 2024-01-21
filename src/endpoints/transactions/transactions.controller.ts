@@ -6,6 +6,7 @@ import {
   HttpCode,
   Get,
   UseGuards,
+  HttpStatus,
 } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
@@ -27,8 +28,17 @@ import { CouponsPurchasedService } from '../coupons-purchased/coupons-purchased.
 import { $Enums } from '@prisma/client';
 import { TransactionStatusEnum } from './enum/transactions-type.enum';
 import { ApiTags } from '@nestjs/swagger';
-import { Public } from 'src/shared/decorators';
-import { UserGuard } from 'src/shared/guards';
+import { GetCurrentKey, Public } from 'src/shared/decorators';
+import { AdminGuard, UserGuard } from 'src/shared/guards';
+import { EcopointsService } from '../ecopoints/ecopoints.service';
+import {
+  EffectedTransactionException,
+  InsufficientBalanceException,
+  NoCouponsAvailableException,
+  NotActiveEcopointException,
+  NotCreditTransactionException,
+  StatusNotEffectedUpdateTransactionException,
+} from 'src/exceptions';
 
 @ApiTags('Transações')
 @Controller('transactions')
@@ -37,90 +47,116 @@ export class TransactionsController {
     private readonly transactionsService: TransactionsService,
     private readonly discountCouponService: DiscountCouponService,
     private readonly usersService: UsersService,
+    private readonly ecopointService: EcopointsService,
     private readonly couponsPurchasedService: CouponsPurchasedService,
   ) {}
 
+  @UseGuards(UserGuard)
   @Public()
-  @HttpCode(204)
-  @Post('deposit')
-  deposit(@Body() depositDto: CreateDepositTransactionDto) {
-    return this.transactionsService.createDeposit(depositDto).then((value) => {
-      return ResponseFactoryModule.generate<ResponseTransactionDto>(
-        toTransactionDTO(value),
-      );
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post('user/deposit')
+  async deposit(
+    @GetCurrentKey() cpf: string,
+    @Body() depositDto: CreateDepositTransactionDto,
+  ) {
+    await this.usersService.findOneWithCpf(cpf);
+    const ecopoint = await this.ecopointService.findOne(depositDto.ecopontoId);
+    CompareModule.isNotActive(ecopoint.ativo).catch(() => {
+      throw new NotActiveEcopointException();
     });
-  }
-
-  @Public()
-  @Post('purchase')
-  purchase(@Body() purchaseDto: CreatePurchaseTransactionDto) {
-    return this.discountCouponService
-      .findOne(purchaseDto.cupomId)
-      .then((coupon) => {
-        CompareModule.isGreaterThanOrEqual(
-          coupon.quantidadeDisponiveis,
-          purchaseDto.qtd,
-        );
-        return this.usersService
-          .findOneWithCpf(purchaseDto.usuarioCPF)
-          .then((user) => {
-            CompareModule.isGreaterThanOrEqual(
-              user.pontos,
-              purchaseDto.valorTotal,
-            );
-            return this.transactionsService
-              .createPurchase(purchaseDto)
-              .then(async (newTransaction) => {
-                await this.discountCouponService.update({
-                  id: purchaseDto.cupomId,
-                  quantidadeDisponiveis:
-                    coupon.quantidadeDisponiveis - purchaseDto.qtd,
-                });
-
-                await this.usersService.update({
-                  cpf: user.cpf,
-                  pontos: user.pontos - purchaseDto.valorTotal,
-                });
-
-                const expirationDate = new Date();
-                expirationDate.setDate(expirationDate.getDate() + 30); // TODO: Precisa decidir a quantidade de dias de expiração
-                for (let i = 0; i < purchaseDto.qtd; i++) {
-                  await this.couponsPurchasedService.create({
-                    usuarioCPF: purchaseDto.usuarioCPF,
-                    cupomId: purchaseDto.cupomId,
-                    expiraEm: expirationDate,
-                    criadoEm: new Date(),
-                  });
-                }
-
-                return ResponseFactoryModule.generate<ResponseTransactionDto>(
-                  toTransactionDTO(newTransaction),
-                );
-              });
-          });
-      });
+    return this.transactionsService
+      .createDeposit(cpf, depositDto)
+      .then(() => {});
   }
 
   @UseGuards(UserGuard)
   @Public()
-  @HttpCode(200)
-  @Post()
-  findAll(@Body() data: PaginatedTransaction) {
-    return this.transactionsService.count(data).then((total) => {
-      return this.transactionsService.findAll(data).then((transactions) => {
-        return ResponseFactoryModule.generate<
-          ResponsePaginatedTransactionsDto<ResponseTransactionDto>
-        >({
-          total,
-          transacoes: transactions.map((el) => toTransactionDTO(el)),
-        });
+  @Post('user/purchase')
+  async purchase(
+    @GetCurrentKey() cpf: string,
+    @Body() purchaseDto: CreatePurchaseTransactionDto,
+  ) {
+    const coupon = await this.discountCouponService.findOne(
+      purchaseDto.cupomId,
+    );
+
+    CompareModule.isGreaterThanOrEqual(
+      coupon.quantidadeDisponiveis,
+      purchaseDto.qtd,
+    ).catch(() => {
+      throw new NoCouponsAvailableException();
+    });
+
+    const user = await this.usersService.findOneWithCpf(cpf);
+
+    CompareModule.isGreaterThanOrEqual(
+      user.pontos,
+      purchaseDto.valorTotal,
+    ).catch(() => {
+      throw new InsufficientBalanceException();
+    });
+
+    const newTransaction = await this.transactionsService.createPurchase(
+      cpf,
+      purchaseDto,
+    );
+
+    await this.discountCouponService.update({
+      id: purchaseDto.cupomId,
+      quantidadeDisponiveis: coupon.quantidadeDisponiveis - purchaseDto.qtd,
+    });
+
+    await this.usersService.update({
+      cpf: cpf,
+      pontos: user.pontos - purchaseDto.valorTotal,
+    });
+
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 30); // TODO: Precisa decidir a quantidade de dias de expiração
+    for (let i = 0; i < purchaseDto.qtd; i++) {
+      await this.couponsPurchasedService.create({
+        usuarioCPF: cpf,
+        cupomId: purchaseDto.cupomId,
+        expiraEm: expirationDate,
+        criadoEm: new Date(),
       });
+    }
+
+    return ResponseFactoryModule.generate<ResponseTransactionDto>(
+      toTransactionDTO(newTransaction),
+    );
+  }
+
+  @UseGuards(UserGuard)
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Post('user/get')
+  async findAll(
+    @GetCurrentKey() cpf: string,
+    @Body() data: PaginatedTransaction,
+  ) {
+    const total = await this.transactionsService.count(cpf, data);
+    if (!total) {
+      return ResponseFactoryModule.generate<
+        ResponsePaginatedTransactionsDto<ResponseTransactionDto>
+      >({
+        total,
+        transacoes: [],
+      });
+    }
+    const transactions = await this.transactionsService.findAll(cpf, data);
+    return ResponseFactoryModule.generate<
+      ResponsePaginatedTransactionsDto<ResponseTransactionDto>
+    >({
+      total,
+      transacoes: transactions.map((el) => toTransactionDTO(el)),
     });
   }
 
+  @UseGuards(AdminGuard)
   @Public()
-  @HttpCode(200)
-  @Post('deposit/unconfirmed/get')
+  @HttpCode(HttpStatus.OK)
+  @Post('admin/deposit/unconfirmed/get')
   findAllUnconfirmed(@Body() data: PaginatedUnconfirmedTransaction) {
     return this.transactionsService
       .countUnconfirmed(data.ecopontoId)
@@ -140,9 +176,10 @@ export class TransactionsController {
       });
   }
 
+  @UseGuards(AdminGuard)
   @Public()
-  @HttpCode(200)
-  @Get('deposit/unconfirmed/ecopoints')
+  @HttpCode(HttpStatus.OK)
+  @Get('admin/deposit/unconfirmed/filter/ecopoints')
   findAllUnconfirmedEcopoints() {
     return this.transactionsService
       .findAllUnconfirmedEcopoints()
@@ -153,37 +190,45 @@ export class TransactionsController {
       });
   }
 
+  @UseGuards(AdminGuard)
   @Public()
-  @HttpCode(204)
-  @Patch()
-  update(@Body() updateTransactionDto: UpdateTransactionDto) {
-    return this.transactionsService
-      .findOne(updateTransactionDto.id)
-      .then((transaction) => {
-        CompareModule.notIsEqual(
-          transaction.status,
-          $Enums.StatusTransacao[updateTransactionDto.status],
-        );
-        return this.usersService
-          .findOneWithCpf(transaction.usuarioCPF)
-          .then(async (user) => {
-            if (
-              transaction.tipo === $Enums.TipoTransacao.CREDITO &&
-              updateTransactionDto.status === TransactionStatusEnum.EFETIVADO
-            ) {
-              await this.usersService.update({
-                cpf: transaction.usuarioCPF,
-                pontos: user.pontos + transaction.valorTotal,
-              });
-            }
-            return this.transactionsService
-              .update(updateTransactionDto)
-              .then((value) => {
-                return ResponseFactoryModule.generate<ResponseTransactionDto>(
-                  toTransactionDTO(value),
-                );
-              });
-          });
-      });
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch('admin/deposit/confirm')
+  async update(@Body() updateTransactionDto: UpdateTransactionDto) {
+    const transaction = await this.transactionsService.findOne(
+      updateTransactionDto.id,
+    );
+
+    CompareModule.notIsEqual(
+      transaction.status,
+      $Enums.StatusTransacao.EFETIVADO,
+    ).catch(() => {
+      throw new EffectedTransactionException();
+    });
+
+    CompareModule.notIsEqual(
+      updateTransactionDto.status,
+      TransactionStatusEnum.EFETIVADO,
+    ).catch(() => {
+      throw new StatusNotEffectedUpdateTransactionException();
+    });
+
+    CompareModule.notIsEqual(
+      transaction.tipo,
+      $Enums.TipoTransacao.CREDITO,
+    ).catch(() => {
+      throw new NotCreditTransactionException();
+    });
+
+    const user = await this.usersService.findOneWithCpf(transaction.usuarioCPF);
+
+    await this.usersService.update({
+      cpf: transaction.usuarioCPF,
+      pontos: user.pontos + transaction.valorTotal,
+    });
+
+    await this.transactionsService.update(updateTransactionDto);
+
+    return;
   }
 }

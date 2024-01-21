@@ -5,7 +5,7 @@ import { DiscountCouponService } from '../discount-coupon/discount-coupon.servic
 import { CompareModule } from 'src/shared/modules/compare/compare.module';
 import { UsersService } from '../users/users.service';
 import { CouponsPurchasedService } from '../coupons-purchased/coupons-purchased.service';
-import { AtStrategy, UserStrategy } from 'src/shared/strategies';
+import { AdminStrategy, AtStrategy, UserStrategy } from 'src/shared/strategies';
 
 @Module({
   imports: [CompareModule],
@@ -16,6 +16,7 @@ import { AtStrategy, UserStrategy } from 'src/shared/strategies';
     UsersService,
     CouponsPurchasedService,
     UserStrategy,
+    AdminStrategy,
     AtStrategy,
   ],
 })
