@@ -1,9 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { env } from 'process';
 import { JwtPayload } from '../types';
 import { RoleLevel } from '../enum';
+import { AccessDaniedException } from 'src/exceptions';
 
 @Injectable()
 export class PartnerStrategy extends PassportStrategy(Strategy, 'partner') {
@@ -18,6 +19,6 @@ export class PartnerStrategy extends PassportStrategy(Strategy, 'partner') {
     if (payload.level === RoleLevel.EMPRESA) {
       return payload;
     }
-    throw new UnauthorizedException();
+    throw new AccessDaniedException();
   }
 }
