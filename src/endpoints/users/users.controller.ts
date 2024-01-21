@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -21,7 +22,7 @@ import { CheckCodeDto } from 'src/shared/dto/check-code.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { GetCurrentEntity, GetCurrentKey, Public } from 'src/shared/decorators';
 import { Tokens } from 'src/shared/types';
-import { RtGuard } from 'src/shared/guards';
+import { CpfGuard, RtGuard, UserGuard } from 'src/shared/guards';
 import { TokenService } from 'src/shared/modules/auth/token.service';
 
 @ApiTags('Usuários')
@@ -33,25 +34,9 @@ export class UsersController {
   ) {}
 
   @Public()
-  @Post('sign-up')
-  async create(@Body() createUserDto: CreateUserDto) {
-    createUserDto.senha = CryptoModule.hashPassword(createUserDto.senha);
-    const newUser = await this.usersService.create(createUserDto);
-    const token = await this.tokenService.getTokens(
-      newUser.cpf,
-      newUser.email,
-      newUser.nivelPrivilegio.toString(),
-    );
-    await this.usersService.updateRtHash(newUser.cpf, token.refresh_token);
-    const userDto = toUserDTO(newUser);
-    userDto.token = token;
-    return ResponseFactoryModule.generate<ResponseUserDto>(userDto);
-  }
-
-  @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(@Body() data: LoginDto): Promise<ResponseDto<ResponseUserDto>> {
+  async login(@Body() data: LoginDto): Promise<ResponseDto<Tokens>> {
     const user = await this.usersService.findOne(data.email);
     CryptoModule.checkPasssword(user.senha, data.senha);
     const token = await this.tokenService.getTokens(
@@ -60,14 +45,49 @@ export class UsersController {
       user.nivelPrivilegio.toString(),
     );
     await this.usersService.updateRtHash(user.cpf, token.refresh_token);
-    const userDto = toUserDTO(user);
-    userDto.token = token;
-    return ResponseFactoryModule.generate<ResponseUserDto>(userDto);
+    return ResponseFactoryModule.generate<Tokens>(token);
+  }
+
+  @UseGuards(CpfGuard)
+  @Public()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post('logout')
+  logout(@GetCurrentKey() cpf: string) {
+    return this.usersService.logout(cpf).then(() => {});
   }
 
   @Public()
-  @HttpCode(200)
-  @Patch()
+  @Post('sign-up')
+  async create(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<ResponseDto<Tokens>> {
+    createUserDto.senha = CryptoModule.hashPassword(createUserDto.senha);
+    const newUser = await this.usersService.create(createUserDto);
+    const token = await this.tokenService.getTokens(
+      newUser.cpf,
+      newUser.email,
+      newUser.nivelPrivilegio.toString(),
+    );
+    await this.usersService.updateRtHash(newUser.cpf, token.refresh_token);
+    return ResponseFactoryModule.generate<Tokens>(token);
+  }
+
+  @UseGuards(CpfGuard)
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Get('get')
+  async get(
+    @GetCurrentKey() cpf: string,
+  ): Promise<ResponseDto<ResponseUserDto>> {
+    const user = await this.usersService.findOneWithCpf(cpf);
+    const userDto = toUserDTO(user);
+    return ResponseFactoryModule.generate<ResponseUserDto>(userDto);
+  }
+
+  @UseGuards(UserGuard)
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Patch('update')
   update(@Body() updateUserDto: UpdateUserDto) {
     if (updateUserDto.senha) {
       updateUserDto.senha = CryptoModule.hashPassword(updateUserDto.senha);
@@ -77,15 +97,16 @@ export class UsersController {
     });
   }
 
+  @UseGuards(UserGuard)
   @Public()
-  @HttpCode(204)
-  @Delete(':cpf')
-  remove(@Param('cpf') cpf: string) {
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('remove')
+  remove(@GetCurrentKey() cpf: string) {
     return this.usersService.remove(cpf);
   }
 
   @Public()
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Post('recovery/:cpf')
   createCode(@Param('cpf') cpf: string) {
     const code = CodeGeneratorModule.new();
@@ -93,8 +114,8 @@ export class UsersController {
   }
 
   @Public()
-  @HttpCode(200)
-  @Post('checkRecoveryCode')
+  @HttpCode(HttpStatus.OK)
+  @Post('recovery/check')
   checkCode(@Body() data: CheckCodeDto): Promise<ResponseDto<boolean>> {
     return this.usersService.findOneWithCpf(data.key).then((user) => {
       const now = new Date();
@@ -110,16 +131,9 @@ export class UsersController {
     });
   }
 
-  @Public()
-  @HttpCode(204)
-  @Post('logout')
-  logout(@GetCurrentKey() cpf: string) {
-    return this.usersService.logout(cpf).then(() => {});
-  }
-
   @UseGuards(RtGuard)
   @Public()
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   @Post('token/refresh')
   refreshToken(
     @GetCurrentKey() cpf: string,
