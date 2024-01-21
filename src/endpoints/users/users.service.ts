@@ -95,11 +95,18 @@ export class UsersService {
   };
 
   remove = (cpf: string) => {
-    return this.prisma.usuarios.delete({
-      where: {
-        cpf,
-      },
-    });
+    return this.prisma.usuarios
+      .delete({
+        where: {
+          cpf,
+        },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.NotFoundError) {
+          throw new NotFoundUserException();
+        }
+        throw err;
+      });
   };
 
   logout(cpf: string) {

@@ -239,11 +239,18 @@ export class PartnerService {
   };
 
   remove(cnpj: string) {
-    return this.prisma.empresasParceiras.delete({
-      where: {
-        cnpj,
-      },
-    });
+    return this.prisma.empresasParceiras
+      .delete({
+        where: {
+          cnpj,
+        },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.NotFoundError) {
+          throw new NotFoundPartnerException();
+        }
+        throw err;
+      });
   }
 
   logout(cnpj: string) {
