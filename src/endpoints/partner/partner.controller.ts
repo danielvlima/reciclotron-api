@@ -8,6 +8,7 @@ import {
   HttpCode,
   UseGuards,
   HttpStatus,
+  Get,
 } from '@nestjs/common';
 import { PartnerService } from './partner.service';
 import {
@@ -29,7 +30,7 @@ import { toPartnerDTO } from './mapper';
 import { ApiTags } from '@nestjs/swagger';
 import { GetCurrentEntity, GetCurrentKey, Public } from 'src/shared/decorators';
 import { Tokens } from 'src/shared/types';
-import { RtGuard } from 'src/shared/guards';
+import { AdminGuard, PartnerGuard, RtGuard } from 'src/shared/guards';
 import { TokenService } from 'src/shared/modules/auth/token.service';
 
 @ApiTags('Empresas Parceiras')
@@ -41,20 +42,9 @@ export class PartnerController {
   ) {}
 
   @Public()
-  @Post()
-  async create(@Body() createPartnerDto: CreatePartnerDto) {
-    createPartnerDto.senha = CryptoModule.hashPassword(createPartnerDto.senha);
-    const newPartner = await this.partnerService.create(createPartnerDto);
-    const partnerDto = toPartnerDTO(newPartner);
-    return ResponseFactoryModule.generate(partnerDto);
-  }
-
-  @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(
-    @Body() data: LoginDto,
-  ): Promise<ResponseDto<ResponsePartnerDto>> {
+  async login(@Body() data: LoginDto): Promise<ResponseDto<Tokens>> {
     const partner = await this.partnerService.findOne(data.email);
     CryptoModule.checkPasssword(partner.senha, data.senha);
     const token = await this.tokenService.getTokens(
@@ -63,14 +53,71 @@ export class PartnerController {
       'EMPRESA',
     );
     await this.partnerService.updateRtHash(partner.cnpj, token.refresh_token);
+    return ResponseFactoryModule.generate(token);
+  }
+
+  @UseGuards(PartnerGuard)
+  @Public()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post('logout')
+  logout(@GetCurrentKey() cnpj: string) {
+    this.partnerService.logout(cnpj).then(() => {});
+  }
+
+  @UseGuards(PartnerGuard)
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Get('get')
+  async get(
+    @GetCurrentKey() cnpj: string,
+  ): Promise<ResponseDto<ResponsePartnerDto>> {
+    const partner = await this.partnerService.findOneWithCnpj(cnpj);
     const partnerDto = toPartnerDTO(partner);
-    partnerDto.token = token;
     return ResponseFactoryModule.generate(partnerDto);
   }
 
+  @UseGuards(PartnerGuard)
   @Public()
-  @HttpCode(200)
-  @Post('paginated')
+  @HttpCode(HttpStatus.OK)
+  @Patch('update')
+  update(@Body() updatePartnerDto: UpdatePartnerDto) {
+    if (updatePartnerDto.senha) {
+      updatePartnerDto.senha = CryptoModule.hashPassword(
+        updatePartnerDto.senha,
+      );
+    }
+    return this.partnerService.update(updatePartnerDto).then((partner) => {
+      return ResponseFactoryModule.generate(toPartnerDTO(partner));
+    });
+  }
+
+  @UseGuards(PartnerGuard)
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Patch('update/address')
+  updateAddress(
+    @GetCurrentKey() cnpj: string,
+    @Body() data: UpdateAddressPartnerDto,
+  ) {
+    return this.partnerService.updateAddress(cnpj, data).then((partner) => {
+      return ResponseFactoryModule.generate(toPartnerDTO(partner));
+    });
+  }
+
+  @UseGuards(AdminGuard)
+  @Public()
+  @Post('admin/create')
+  async create(@Body() createPartnerDto: CreatePartnerDto) {
+    createPartnerDto.senha = CryptoModule.hashPassword(createPartnerDto.senha);
+    const newPartner = await this.partnerService.create(createPartnerDto);
+    const partnerDto = toPartnerDTO(newPartner);
+    return ResponseFactoryModule.generate(partnerDto);
+  }
+
+  @UseGuards(AdminGuard)
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Post('admin/paginated')
   findPaginated(
     @Body() data: GetPaginatedPartnerDto,
   ): Promise<ResponseDto<ResponsePaginatedPartnerDto>> {
@@ -84,37 +131,14 @@ export class PartnerController {
     });
   }
 
+  @UseGuards(AdminGuard)
   @Public()
-  @HttpCode(200)
-  @Patch()
-  update(@Body() updatePartnerDto: UpdatePartnerDto) {
-    if (updatePartnerDto.senha) {
-      updatePartnerDto.senha = CryptoModule.hashPassword(
-        updatePartnerDto.senha,
-      );
-    }
-    return this.partnerService.update(updatePartnerDto).then((partner) => {
-      return ResponseFactoryModule.generate(toPartnerDTO(partner));
-    });
-  }
-
-  @Public()
-  @HttpCode(200)
-  @Patch('address/:cnpj')
-  updateAddress(
-    @Param('cnpj') cnpj: string,
-    @Body() data: UpdateAddressPartnerDto,
-  ) {
-    return this.partnerService.updateAddress(cnpj, data).then((partner) => {
-      return ResponseFactoryModule.generate(toPartnerDTO(partner));
-    });
-  }
-
-  @Public()
-  @HttpCode(204)
-  @Delete(':cnpj')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('admin/delete/:cnpj')
   remove(@Param('cnpj') cnpj: string) {
-    return this.partnerService.remove(cnpj);
+    return this.partnerService.remove(cnpj).then((partner) => {
+      return ResponseFactoryModule.generate(toPartnerDTO(partner));
+    });
   }
 
   @Public()
@@ -126,8 +150,8 @@ export class PartnerController {
   }
 
   @Public()
-  @HttpCode(200)
-  @Post('checkRecoveryCode')
+  @HttpCode(HttpStatus.OK)
+  @Post('recovery/check')
   checkCode(@Body() data: CheckCodeDto): Promise<ResponseDto<boolean>> {
     return this.partnerService.findOneWithCnpj(data.key).then((partner) => {
       const now = new Date();
@@ -143,16 +167,9 @@ export class PartnerController {
     });
   }
 
-  @Public()
-  @HttpCode(204)
-  @Post('logout')
-  logout(@GetCurrentKey() cnpj: string) {
-    this.partnerService.logout(cnpj).then(() => {});
-  }
-
   @UseGuards(RtGuard)
   @Public()
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   @Post('token/refresh')
   refreshToken(
     @GetCurrentKey() cnpj: string,

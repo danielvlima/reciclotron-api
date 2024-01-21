@@ -13,6 +13,6 @@ export const toAddressDTO = (a: Address): ResponseAddressDto => {
     cep: a.cep,
     lat: a.lat,
     long: a.long,
-    nomeFantasiaEmpresa: a.empresa.nomeFantasia,
+    nomeFantasiaEmpresa: a.empresa?.nomeFantasia,
   };
 };
