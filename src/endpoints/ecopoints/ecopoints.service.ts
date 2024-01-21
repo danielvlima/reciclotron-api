@@ -6,9 +6,11 @@ import {
   UpdateEcopointDto,
 } from './dto';
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
-import { $Enums } from '@prisma/client';
+import { $Enums, Prisma } from '@prisma/client';
 import { EcopointQuery } from './entities/ecopoint.query.entity';
 import { TypeEcopointEnum } from 'src/shared/enum/type-ecopoint.enum';
+import { PrismaErrorCode } from 'src/shared/enum';
+import { NotFoundEcopointException } from 'src/exceptions';
 
 @Injectable()
 export class EcopointsService {
@@ -149,6 +151,21 @@ export class EcopointsService {
       take: data.take,
       skip: data.skip,
     });
+  }
+
+  findOne(id: string) {
+    return this.prisma.ecopontos
+      .findFirst({
+        where: {
+          id,
+        },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.NotFoundError) {
+          throw new NotFoundEcopointException();
+        }
+        throw err;
+      });
   }
 
   update(updateEcopointDto: UpdateEcopointDto) {

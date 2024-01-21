@@ -7,8 +7,10 @@ import {
   PaginatedUnconfirmedTransaction,
   UpdateTransactionDto,
 } from './dto';
-import { $Enums } from '@prisma/client';
+import { $Enums, Prisma } from '@prisma/client';
 import { TransactionStatusEnum } from './enum/transactions-type.enum';
+import { NotFoundTransactionException } from 'src/exceptions';
+import { PrismaErrorCode } from 'src/shared/enum';
 
 @Injectable()
 export class TransactionsService {
@@ -103,9 +105,17 @@ export class TransactionsService {
   }
 
   findOne(id: number) {
-    return this.prisma.transacoes.findFirstOrThrow({
-      where: { id },
-    });
+    return this.prisma.transacoes
+      .findFirstOrThrow({
+        where: { id },
+        include: { materiaisDepositados: true },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.NotFoundError) {
+          throw new NotFoundTransactionException();
+        }
+        throw err;
+      });
   }
 
   update(updateTransactionDto: UpdateTransactionDto) {

@@ -5,6 +5,9 @@ import {
   UpdateDiscountCouponDto,
   PaginatedPartnerCouponsDto,
 } from './dto';
+import { PrismaErrorCode } from 'src/shared/enum';
+import { Prisma } from '@prisma/client';
+import { NotFoundCouponException } from 'src/exceptions';
 
 @Injectable()
 export class DiscountCouponService {
@@ -179,11 +182,18 @@ export class DiscountCouponService {
   }
 
   findOne(id: number) {
-    return this.prisma.cuponsDesconto.findFirstOrThrow({
-      where: {
-        id,
-      },
-    });
+    return this.prisma.cuponsDesconto
+      .findFirstOrThrow({
+        where: {
+          id,
+        },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.NotFoundError) {
+          throw new NotFoundCouponException();
+        }
+        throw err;
+      });
   }
 
   update(updateDiscountCouponDto: UpdateDiscountCouponDto) {
@@ -205,11 +215,18 @@ export class DiscountCouponService {
   }
 
   remove(cnpj: string, id: number) {
-    return this.prisma.cuponsDesconto.delete({
-      where: {
-        id,
-        cnpjEmpresa: cnpj,
-      },
-    });
+    return this.prisma.cuponsDesconto
+      .delete({
+        where: {
+          id,
+          cnpjEmpresa: cnpj,
+        },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.NotFoundError) {
+          throw new NotFoundCouponException();
+        }
+        throw err;
+      });
   }
 }
