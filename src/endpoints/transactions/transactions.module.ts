@@ -6,6 +6,7 @@ import { CompareModule } from 'src/shared/modules/compare/compare.module';
 import { UsersService } from '../users/users.service';
 import { CouponsPurchasedService } from '../coupons-purchased/coupons-purchased.service';
 import { AdminStrategy, AtStrategy, UserStrategy } from 'src/shared/strategies';
+import { EcopointsService } from '../ecopoints/ecopoints.service';
 
 @Module({
   imports: [CompareModule],
@@ -13,6 +14,7 @@ import { AdminStrategy, AtStrategy, UserStrategy } from 'src/shared/strategies';
   providers: [
     TransactionsService,
     DiscountCouponService,
+    EcopointsService,
     UsersService,
     CouponsPurchasedService,
     UserStrategy,
