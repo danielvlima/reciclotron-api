@@ -9,6 +9,8 @@ import {
   ParseIntPipe,
   Query,
   HttpCode,
+  UseGuards,
+  HttpStatus,
 } from '@nestjs/common';
 import { DiscountCouponService } from './discount-coupon.service';
 import { CreateDiscountCouponDto } from './dto/create-discount-coupon.dto';
@@ -22,15 +24,17 @@ import {
 import { toCouponsDescDTO } from './mappers';
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
 import { ApiTags } from '@nestjs/swagger';
-import { Public } from 'src/shared/decorators';
+import { GetCurrentKey, Public } from 'src/shared/decorators';
+import { PartnerGuard, UserGuard } from 'src/shared/guards';
 
 @ApiTags('Cupons de Desconto')
 @Controller('discount-coupon')
 export class DiscountCouponController {
   constructor(private readonly discountCouponService: DiscountCouponService) {}
 
+  @UseGuards(PartnerGuard)
   @Public()
-  @Post()
+  @Post('create')
   create(@Body() createDiscountCouponDto: CreateDiscountCouponDto) {
     return this.discountCouponService
       .create(createDiscountCouponDto)
@@ -41,27 +45,39 @@ export class DiscountCouponController {
       });
   }
 
+  @UseGuards(PartnerGuard)
   @Public()
-  @HttpCode(200)
-  @Post('findAllPartner')
-  findAllPartner(@Body() data: PaginatedPartnerCouponsDto) {
-    return this.discountCouponService.countPartner(data).then((total) => {
-      return this.discountCouponService
-        .findPaginatedForPartner(data)
-        .then((coupons) => {
-          return ResponseFactoryModule.generate<ResponsePaginatedDiscountCouponDto>(
-            {
-              total,
-              cupons: coupons.map((el) => toCouponsDescDTO(el)),
-            },
-          );
-        });
+  @HttpCode(HttpStatus.OK)
+  @Post('partner/find')
+  async findAllPartner(
+    @GetCurrentKey() cnpj: string,
+    @Body() data: PaginatedPartnerCouponsDto,
+  ) {
+    const total = await this.discountCouponService.countPartner(cnpj, data);
+
+    if (!total) {
+      return ResponseFactoryModule.generate<ResponsePaginatedDiscountCouponDto>(
+        {
+          total,
+          cupons: [],
+        },
+      );
+    }
+
+    const coupons = await this.discountCouponService.findPaginatedForPartner(
+      cnpj,
+      data,
+    );
+    return ResponseFactoryModule.generate<ResponsePaginatedDiscountCouponDto>({
+      total,
+      cupons: coupons.map((el) => toCouponsDescDTO(el)),
     });
   }
 
+  @UseGuards(UserGuard)
   @Public()
-  @HttpCode(200)
-  @Post('userFindBySearch')
+  @HttpCode(HttpStatus.OK)
+  @Post('user/find/search')
   userFindBySearch(@Body() data: SearchDiscountCouponDto) {
     return this.discountCouponService.search(data.value).then((value) => {
       return ResponseFactoryModule.generate<ResponseDiscountCouponDto[]>(
@@ -70,8 +86,9 @@ export class DiscountCouponController {
     });
   }
 
+  @UseGuards(UserGuard)
   @Public()
-  @Get('userFindByRamo')
+  @Get('user/find/ramo')
   userFindByRamo() {
     return this.discountCouponService.findRamos().then(async (tiposDeRamos) => {
       const coupons = new Map<string, ResponseDiscountCouponDto[]>();
@@ -88,7 +105,8 @@ export class DiscountCouponController {
     });
   }
 
-  @Get('userFindAll')
+  @UseGuards(UserGuard)
+  @Get('user/find/all')
   userFindAll(
     @Query('skip', new ParseIntPipe()) skip: number,
     @Query('take', new ParseIntPipe()) take: number,
@@ -100,26 +118,27 @@ export class DiscountCouponController {
     });
   }
 
+  @UseGuards(PartnerGuard)
   @Public()
-  @HttpCode(204)
-  @Patch()
-  update(@Body() updateDiscountCouponDto: UpdateDiscountCouponDto) {
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch('partner/update')
+  update(
+    @GetCurrentKey() cnpj: string,
+    @Body() updateDiscountCouponDto: UpdateDiscountCouponDto,
+  ) {
     return this.discountCouponService
-      .update(updateDiscountCouponDto)
-      .then((value) => {
-        return ResponseFactoryModule.generate<ResponseDiscountCouponDto>(
-          toCouponsDescDTO(value),
-        );
-      });
+      .update(cnpj, updateDiscountCouponDto)
+      .then(() => {});
   }
 
+  @UseGuards(PartnerGuard)
   @Public()
-  @HttpCode(204)
-  @Delete('/:cnpj/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('partner/delete/:id')
   remove(
-    @Param('cnpj') cnpj: string,
+    @GetCurrentKey() cnpj: string,
     @Param('id', new ParseIntPipe()) id: number,
   ) {
-    return this.discountCouponService.remove(cnpj, id);
+    return this.discountCouponService.remove(cnpj, id).then(() => {});
   }
 }

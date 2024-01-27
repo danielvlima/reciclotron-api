@@ -111,7 +111,7 @@ export class DiscountCouponService {
     });
   }
 
-  countPartner(data: PaginatedPartnerCouponsDto) {
+  countPartner(cnpj: string, data: PaginatedPartnerCouponsDto) {
     let filter = {};
     let activeFilter = {};
     switch (data.filterOptions.filtro) {
@@ -134,12 +134,12 @@ export class DiscountCouponService {
 
     return this.prisma.cuponsDesconto.count({
       where: {
-        AND: [{ cnpjEmpresa: { equals: data.cnpj } }, filter, activeFilter],
+        AND: [{ cnpjEmpresa: { equals: cnpj } }, filter, activeFilter],
       },
     });
   }
 
-  findPaginatedForPartner(data: PaginatedPartnerCouponsDto) {
+  findPaginatedForPartner(cnpj: string, data: PaginatedPartnerCouponsDto) {
     let filter = {};
     let activeFilter = {};
     switch (data.filterOptions.filtro) {
@@ -163,7 +163,7 @@ export class DiscountCouponService {
     return this.prisma.cuponsDesconto.findMany({
       where: {
         AND: [
-          { cnpjEmpresa: { equals: data.cnpj } },
+          { cnpjEmpresa: { equals: cnpj } },
           {
             nome: {
               contains: data.filterOptions.busca,
@@ -196,10 +196,11 @@ export class DiscountCouponService {
       });
   }
 
-  update(updateDiscountCouponDto: UpdateDiscountCouponDto) {
+  update(cnpj: string, updateDiscountCouponDto: UpdateDiscountCouponDto) {
     return this.prisma.cuponsDesconto.update({
       where: {
         id: updateDiscountCouponDto.id,
+        cnpjEmpresa: cnpj,
       },
 
       data: {
