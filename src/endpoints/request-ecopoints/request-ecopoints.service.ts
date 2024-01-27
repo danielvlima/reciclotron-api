@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import {
   CancelRequestEcopointDto,
   CreateRequestEcopointDto,
-  PaginatedNewEcopointsRequestDto,
   UpdateRequestEcopointDto,
 } from './dto';
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
@@ -53,15 +52,15 @@ export class RequestEcopointsService {
     });
   }
 
-  findPaginatedNewEcopoints(data: PaginatedNewEcopointsRequestDto) {
+  findPaginatedNewEcopoints(cnpj: string, skip: number, take: number) {
     return this.prisma.solicitacoesEcoponto.findMany({
       where: {
-        cnpjEmpresa: data.cnpj,
+        cnpjEmpresa: cnpj,
         acao: $Enums.TipoSolicitacaoEcoponto.ADICIONAR,
         atendidoEm: null,
       },
-      skip: data.skip,
-      take: data.take,
+      skip: skip,
+      take: take,
     });
   }
 
@@ -161,13 +160,13 @@ export class RequestEcopointsService {
     });
   }
 
-  cancel(data: CancelRequestEcopointDto) {
+  cancel(cnpj: string, data: CancelRequestEcopointDto) {
     return data.ids.forEach(async (element) => {
       await this.prisma.solicitacoesEcoponto.delete({
         where: {
           id: element,
           atendidoEm: { equals: null },
-          cnpjEmpresa: { equals: data.cnpj },
+          cnpjEmpresa: { equals: cnpj },
         },
         include: {
           empresa: true,

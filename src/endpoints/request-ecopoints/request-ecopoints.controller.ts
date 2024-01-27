@@ -8,13 +8,14 @@ import {
   ParseIntPipe,
   ParseBoolPipe,
   Patch,
+  UseGuards,
+  HttpStatus,
 } from '@nestjs/common';
 import { RequestEcopointsService } from './request-ecopoints.service';
 import { CreateRequestEcopointDto } from './dto/create-request-ecopoint.dto';
 import { RequestActionEcopoint } from './enum/request-action-ecopoint.enum';
 import {
   CancelRequestEcopointDto,
-  PaginatedNewEcopointsRequestDto,
   ResponsePaginatedEcopointsRequestDto,
   UpdateRequestEcopointDto,
 } from './dto';
@@ -23,7 +24,8 @@ import { ResponseDto } from 'src/shared/dto/response.dto';
 import { toEcopointRequestDTO } from './mappers';
 import { ApiTags } from '@nestjs/swagger';
 import { ParseDateIsoPipe } from 'src/shared/parsers/ParseDateIsoType';
-import { Public } from 'src/shared/decorators';
+import { GetCurrentKey, Public } from 'src/shared/decorators';
+import { AdminGuard, PartnerGuard } from 'src/shared/guards';
 
 @ApiTags('Ações para Ecopontos')
 @Controller('request-ecopoints')
@@ -32,8 +34,9 @@ export class RequestEcopointsController {
     private readonly requestEcopointsService: RequestEcopointsService,
   ) {}
 
+  @UseGuards(PartnerGuard)
   @Public()
-  @Post('create')
+  @Post('partner/create')
   create(@Body() createRequestEcopointDto: CreateRequestEcopointDto) {
     if (createRequestEcopointDto.acao === RequestActionEcopoint.ADICIONAR) {
       return this.requestEcopointsService
@@ -45,63 +48,89 @@ export class RequestEcopointsController {
     return this.requestEcopointsService.create(createRequestEcopointDto);
   }
 
+  @UseGuards(PartnerGuard)
   @Public()
-  @HttpCode(200)
-  @Post('findAllRequestNewEcopoints')
-  findPaginatedNewEcopoints(
-    @Body() data: PaginatedNewEcopointsRequestDto,
+  @Get('partner/find/new-ecopoints')
+  async findPaginatedNewEcopoints(
+    @GetCurrentKey() cnpj: string,
+    @Query('skip', new ParseIntPipe()) skip: number,
+    @Query('take', new ParseIntPipe()) take: number,
   ): Promise<ResponseDto<ResponsePaginatedEcopointsRequestDto>> {
-    return this.requestEcopointsService
-      .countNewEcopoints(data.cnpj)
-      .then((total) => {
-        return this.requestEcopointsService
-          .findPaginatedNewEcopoints(data)
-          .then((newEcopoints) => {
-            return ResponseFactoryModule.generate({
-              total,
-              ecopontos: newEcopoints.map((el) => toEcopointRequestDTO(el)),
-            });
-          });
+    const total = await this.requestEcopointsService.countNewEcopoints(cnpj);
+
+    if (!total) {
+      return ResponseFactoryModule.generate({
+        total,
+        ecopontos: [],
       });
+    }
+
+    const newEcopoints =
+      await this.requestEcopointsService.findPaginatedNewEcopoints(
+        cnpj,
+        skip,
+        take,
+      );
+
+    return ResponseFactoryModule.generate({
+      total,
+      ecopontos: newEcopoints.map((el) => toEcopointRequestDTO(el)),
+    });
   }
 
-  @Get('findAllRequest')
-  findAll(
+  @UseGuards(AdminGuard)
+  @Get('admin/find')
+  async findAll(
     @Query('skip', new ParseIntPipe()) skip: number,
     @Query('take', new ParseIntPipe()) take: number,
     @Query('adicionarRealizado', new ParseBoolPipe())
     adicionarRealizado: boolean,
     @Query('dia', ParseDateIsoPipe) dia?: string,
   ) {
-    return this.requestEcopointsService
-      .countAllRequests(adicionarRealizado, dia)
-      .then((total) => {
-        return this.requestEcopointsService
-          .findAllPaginated(skip, take, adicionarRealizado, dia)
-          .then((requestEcopoints) => {
-            return ResponseFactoryModule.generate({
-              total,
-              ecopontos: requestEcopoints.map((el) => toEcopointRequestDTO(el)),
-            });
-          });
+    const total = await this.requestEcopointsService.countAllRequests(
+      adicionarRealizado,
+      dia,
+    );
+
+    if (!total) {
+      return ResponseFactoryModule.generate({
+        total,
+        ecopontos: [],
       });
+    }
+
+    const requestEcopoints =
+      await this.requestEcopointsService.findAllPaginated(
+        skip,
+        take,
+        adicionarRealizado,
+        dia,
+      );
+
+    return ResponseFactoryModule.generate({
+      total,
+      ecopontos: requestEcopoints.map((el) => toEcopointRequestDTO(el)),
+    });
   }
 
+  @UseGuards(AdminGuard)
   @Public()
-  @HttpCode(204)
-  @Patch('update')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch('admin/update')
   update(@Body() updateRequestEcopointDto: UpdateRequestEcopointDto) {
     return this.requestEcopointsService
       .update(updateRequestEcopointDto)
-      .then((value) => {
-        return ResponseFactoryModule.generate(toEcopointRequestDTO(value));
-      });
+      .then(() => {});
   }
 
+  @UseGuards(PartnerGuard)
   @Public()
-  @HttpCode(204)
-  @Post('cancel')
-  cancel(@Body() data: CancelRequestEcopointDto) {
-    return this.requestEcopointsService.cancel(data);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post('partner/cancel')
+  cancel(
+    @GetCurrentKey() cnpj: string,
+    @Body() data: CancelRequestEcopointDto,
+  ) {
+    return this.requestEcopointsService.cancel(cnpj, data);
   }
 }
