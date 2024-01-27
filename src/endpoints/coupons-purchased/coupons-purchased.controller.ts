@@ -1,4 +1,11 @@
-import { Controller, Post, Body, Param, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
 import { CouponsPurchasedService } from './coupons-purchased.service';
 import { ResponseDto } from 'src/shared/dto/response.dto';
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
@@ -8,7 +15,8 @@ import {
 } from './dto';
 import { toCouponsPurchasedDTO } from './mappers';
 import { ApiTags } from '@nestjs/swagger';
-import { Public } from 'src/shared/decorators';
+import { GetCurrentKey, Public } from 'src/shared/decorators';
+import { UserGuard } from 'src/shared/guards';
 
 @ApiTags('Cupons comprados pelo Usuário')
 @Controller('couponsPurchased')
@@ -17,10 +25,11 @@ export class CouponsPurchasedController {
     private readonly couponsPurchasedService: CouponsPurchasedService,
   ) {}
 
+  @UseGuards(UserGuard)
   @Public()
-  @HttpCode(200)
-  @Post('filters/:cpf')
-  findAll(@Param('cpf') cpf: string): Promise<ResponseDto<string[]>> {
+  @HttpCode(HttpStatus.OK)
+  @Post('filters')
+  findAll(@GetCurrentKey() cpf: string): Promise<ResponseDto<string[]>> {
     const dateNow = new Date();
     dateNow.setHours(0, 0, 0, 0);
     return this.couponsPurchasedService
@@ -30,25 +39,35 @@ export class CouponsPurchasedController {
       });
   }
 
+  @UseGuards(UserGuard)
   @Public()
-  @HttpCode(200)
-  @Post()
-  findPaginated(
+  @HttpCode(HttpStatus.OK)
+  @Post('get')
+  async findPaginated(
+    @GetCurrentKey() cpf: string,
     @Body() data: GetPaginatedCouponsPurchasedDto,
   ): Promise<ResponseDto<ResponsePaginatedCouponsPurchasedDto>> {
     const dateNow = new Date();
     dateNow.setHours(0, 0, 0, 0);
-    return this.couponsPurchasedService.count(data, dateNow).then((total) => {
-      return this.couponsPurchasedService
-        .findPaginated(data, dateNow)
-        .then((coupons) => {
-          return ResponseFactoryModule.generate<ResponsePaginatedCouponsPurchasedDto>(
-            {
-              total,
-              cupons: coupons.map((el) => toCouponsPurchasedDTO(el)),
-            },
-          );
-        });
-    });
+    const total = await this.couponsPurchasedService.count(cpf, data, dateNow);
+    if (!total) {
+      return ResponseFactoryModule.generate<ResponsePaginatedCouponsPurchasedDto>(
+        {
+          total,
+          cupons: [],
+        },
+      );
+    }
+    const coupons = await this.couponsPurchasedService.findPaginated(
+      cpf,
+      data,
+      dateNow,
+    );
+    return ResponseFactoryModule.generate<ResponsePaginatedCouponsPurchasedDto>(
+      {
+        total,
+        cupons: coupons.map((el) => toCouponsPurchasedDTO(el)),
+      },
+    );
   }
 }
