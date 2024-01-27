@@ -24,7 +24,7 @@ export class AddressesController {
   @UseGuards(AdminGuard)
   @Public()
   @HttpCode(HttpStatus.OK)
-  @Post()
+  @Post('admin/find')
   async findPaginated(
     @Body() data: GetPaginatedAddressesDTO,
   ): Promise<ResponseDto<ResponsePaginatedAddressesDTO>> {
