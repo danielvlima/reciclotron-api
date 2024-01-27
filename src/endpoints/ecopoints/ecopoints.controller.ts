@@ -6,6 +6,8 @@ import {
   Param,
   Delete,
   HttpCode,
+  UseGuards,
+  HttpStatus,
 } from '@nestjs/common';
 import { EcopointsService } from './ecopoints.service';
 import { CreateEcopointDto } from './dto/create-ecopoint.dto';
@@ -22,6 +24,7 @@ import { RequestEcopointsService } from '../request-ecopoints/request-ecopoints.
 import { toEcopointRequestDTO } from '../request-ecopoints/mappers';
 import { ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/shared/decorators';
+import { AdminGuard, UserGuard } from 'src/shared/guards';
 
 @ApiTags('Ecopontos')
 @Controller('ecopoints')
@@ -31,8 +34,9 @@ export class EcopointsController {
     private readonly requestEcopointsService: RequestEcopointsService,
   ) {}
 
+  @UseGuards(AdminGuard)
   @Public()
-  @Post()
+  @Post('admin/create')
   create(@Body() createEcopointDto: CreateEcopointDto) {
     return this.ecopointsService.create(createEcopointDto).then((value) => {
       return ResponseFactoryModule.generate<ResponseEcopointDto>(
@@ -41,81 +45,84 @@ export class EcopointsController {
     });
   }
 
+  @UseGuards(AdminGuard)
   @Public()
-  @HttpCode(200)
-  @Post('findPaginated')
-  findPaginated(@Body() data: PaginatedEcopointDto) {
-    return this.ecopointsService
-      .count(data.busca, data.enderecoId, data.ativo, data.tipo)
-      .then((total) => {
-        return this.ecopointsService
-          .findPaginated(data)
-          .then(async (ecopoints) => {
-            if (data.enderecoId) {
-              const list = ecopoints.map((el) => toEcopontoDTO(el));
-              for (let i = 0; i < list.length; i++) {
-                const action =
-                  await this.requestEcopointsService.findOneRequest(list[i].id);
-                list[i].actionrequest = action
-                  ? toEcopointRequestDTO(action)
-                  : null;
-              }
-              return ResponseFactoryModule.generate<ResponsePaginatedEcopointsDto>(
-                {
-                  total,
-                  ecopontos: list,
-                },
-              );
-            }
-            return ResponseFactoryModule.generate<ResponsePaginatedEcopointsDto>(
-              {
-                total,
-                ecopontos: ecopoints.map((el) => toEcopontoDTO(el)),
-              },
-            );
-          });
+  @HttpCode(HttpStatus.OK)
+  @Post('admin/find/paginated')
+  async findPaginated(@Body() data: PaginatedEcopointDto) {
+    const total = await this.ecopointsService.count(
+      data.busca,
+      data.enderecoId,
+      data.ativo,
+      data.tipo,
+    );
+
+    if (!total) {
+      return ResponseFactoryModule.generate<ResponsePaginatedEcopointsDto>({
+        total,
+        ecopontos: [],
       });
+    }
+
+    const ecopoints = await this.ecopointsService.findPaginated(data);
+
+    if (data.enderecoId) {
+      const list = ecopoints.map((el) => toEcopontoDTO(el));
+      for (let i = 0; i < list.length; i++) {
+        const action = await this.requestEcopointsService.findOneRequest(
+          list[i].id,
+        );
+        list[i].actionrequest = action ? toEcopointRequestDTO(action) : null;
+      }
+      return ResponseFactoryModule.generate<ResponsePaginatedEcopointsDto>({
+        total,
+        ecopontos: list,
+      });
+    }
+    return ResponseFactoryModule.generate<ResponsePaginatedEcopointsDto>({
+      total,
+      ecopontos: ecopoints.map((el) => toEcopontoDTO(el)),
+    });
   }
 
+  @UseGuards(UserGuard)
   @Public()
-  @HttpCode(200)
-  @Post('findForDeposit')
-  findForDeposit(@Body() data: PaginatedEcopointsDepositDto) {
-    return this.ecopointsService
-      .countEcopointsForDeposit(data.hasItemForBox, data.city)
-      .then((total) => {
-        return this.ecopointsService
-          .findPaginatedEcopointsForDeposit(data)
-          .then((ecopoints) => {
-            return ResponseFactoryModule.generate<ResponsePaginatedEcopointsDto>(
-              {
-                total,
-                ecopontos: ecopoints.map((el) => toEcopontoDTOFromQuery(el)),
-              },
-            );
-          });
+  @HttpCode(HttpStatus.OK)
+  @Post('user/find')
+  async findForDeposit(@Body() data: PaginatedEcopointsDepositDto) {
+    const total = await this.ecopointsService.countEcopointsForDeposit(
+      data.hasItemForBox,
+      data.city,
+    );
+
+    if (!total) {
+      return ResponseFactoryModule.generate<ResponsePaginatedEcopointsDto>({
+        total,
+        ecopontos: [],
       });
+    }
+    const ecopoints =
+      await this.ecopointsService.findPaginatedEcopointsForDeposit(data);
+
+    return ResponseFactoryModule.generate<ResponsePaginatedEcopointsDto>({
+      total,
+      ecopontos: ecopoints.map((el) => toEcopontoDTOFromQuery(el)),
+    });
   }
 
+  @UseGuards(AdminGuard)
   @Public()
-  @HttpCode(204)
-  @Patch()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch('admin/update')
   update(@Body() updateEcopointDto: UpdateEcopointDto) {
-    return this.ecopointsService.update(updateEcopointDto).then((value) => {
-      return ResponseFactoryModule.generate<ResponseEcopointDto>(
-        toEcopontoDTO(value),
-      );
-    });
+    return this.ecopointsService.update(updateEcopointDto).then(() => {});
   }
 
+  @UseGuards(AdminGuard)
   @Public()
-  @HttpCode(204)
-  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('admin/delete/:id')
   remove(@Param('id') id: string) {
-    return this.ecopointsService.remove(id).then((value) => {
-      return ResponseFactoryModule.generate<ResponseEcopointDto>(
-        toEcopontoDTO(value),
-      );
-    });
+    return this.ecopointsService.remove(id).then(() => {});
   }
 }
