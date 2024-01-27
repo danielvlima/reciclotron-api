@@ -34,7 +34,7 @@ export class DiscountCouponController {
 
   @UseGuards(PartnerGuard)
   @Public()
-  @Post('create')
+  @Post('partner/create')
   create(@Body() createDiscountCouponDto: CreateDiscountCouponDto) {
     return this.discountCouponService
       .create(createDiscountCouponDto)

@@ -101,7 +101,7 @@ export class TransactionsController {
       purchaseDto,
     );
 
-    await this.discountCouponService.update({
+    await this.discountCouponService.update(coupon.cnpjEmpresa, {
       id: purchaseDto.cupomId,
       quantidadeDisponiveis: coupon.quantidadeDisponiveis - purchaseDto.qtd,
     });
