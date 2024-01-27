@@ -48,7 +48,7 @@ export class EcopointsController {
   @UseGuards(AdminGuard)
   @Public()
   @HttpCode(HttpStatus.OK)
-  @Post('admin/find/paginated')
+  @Post('admin/find')
   async findPaginated(@Body() data: PaginatedEcopointDto) {
     const total = await this.ecopointsService.count(
       data.busca,
