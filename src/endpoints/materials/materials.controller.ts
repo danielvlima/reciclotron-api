@@ -10,6 +10,8 @@ import {
   ParseIntPipe,
   Query,
   ParseBoolPipe,
+  UseGuards,
+  HttpStatus,
 } from '@nestjs/common';
 import { MaterialsService } from './materials.service';
 import {
@@ -22,14 +24,16 @@ import { toMaterialDTO } from './mappers';
 import { ResponseDto } from 'src/shared/dto/response.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/shared/decorators';
+import { AdminGuard, CpfGuard } from 'src/shared/guards';
 
 @ApiTags('Materiais')
 @Controller('materials')
 export class MaterialsController {
   constructor(private readonly materialsService: MaterialsService) {}
 
+  @UseGuards(AdminGuard)
   @Public()
-  @Post()
+  @Post('create')
   create(@Body() createMaterialDto: CreateMaterialDto) {
     return this.materialsService.create(createMaterialDto).then((value) => {
       return ResponseFactoryModule.generate<ResponseMaterialDto>(
@@ -38,8 +42,9 @@ export class MaterialsController {
     });
   }
 
+  @UseGuards(CpfGuard)
   @Public()
-  @Get('all?')
+  @Get('get/all?')
   findAll(
     @Query('ativo', new ParseBoolPipe()) ativo: boolean,
   ): Promise<ResponseDto<ResponseMaterialDto[]>> {
@@ -50,9 +55,10 @@ export class MaterialsController {
     });
   }
 
+  @UseGuards(AdminGuard)
   @Public()
-  @HttpCode(204)
-  @Patch()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch('update')
   update(@Body() updateMaterialDto: UpdateMaterialDto) {
     return this.materialsService.update(updateMaterialDto).then((value) => {
       return ResponseFactoryModule.generate<ResponseMaterialDto>(
@@ -61,9 +67,10 @@ export class MaterialsController {
     });
   }
 
+  @UseGuards(AdminGuard)
   @Public()
-  @HttpCode(204)
-  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('delete/:id')
   remove(@Param('id', new ParseIntPipe()) id: number) {
     return this.materialsService.remove(id).then((value) => {
       return ResponseFactoryModule.generate<ResponseMaterialDto>(
