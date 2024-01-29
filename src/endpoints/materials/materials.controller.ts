@@ -44,7 +44,7 @@ export class MaterialsController {
 
   @UseGuards(CpfGuard)
   @Public()
-  @Get('get/all?')
+  @Get('get/all')
   findAll(
     @Query('ativo', new ParseBoolPipe()) ativo: boolean,
   ): Promise<ResponseDto<ResponseMaterialDto[]>> {
