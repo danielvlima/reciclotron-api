@@ -24,7 +24,7 @@ import { RequestEcopointsService } from '../request-ecopoints/request-ecopoints.
 import { toEcopointRequestDTO } from '../request-ecopoints/mappers';
 import { ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/shared/decorators';
-import { AdminGuard, UserGuard } from 'src/shared/guards';
+import { AdminGuard, PartnerGuard, UserGuard } from 'src/shared/guards';
 
 @ApiTags('Ecopontos')
 @Controller('ecopoints')
@@ -50,6 +50,46 @@ export class EcopointsController {
   @HttpCode(HttpStatus.OK)
   @Post('admin/find')
   async findPaginated(@Body() data: PaginatedEcopointDto) {
+    const total = await this.ecopointsService.count(
+      data.busca,
+      data.enderecoId,
+      data.ativo,
+      data.tipo,
+    );
+
+    if (!total) {
+      return ResponseFactoryModule.generate<ResponsePaginatedEcopointsDto>({
+        total,
+        ecopontos: [],
+      });
+    }
+
+    const ecopoints = await this.ecopointsService.findPaginated(data);
+
+    if (data.enderecoId) {
+      const list = ecopoints.map((el) => toEcopontoDTO(el));
+      for (let i = 0; i < list.length; i++) {
+        const action = await this.requestEcopointsService.findOneRequest(
+          list[i].id,
+        );
+        list[i].actionrequest = action ? toEcopointRequestDTO(action) : null;
+      }
+      return ResponseFactoryModule.generate<ResponsePaginatedEcopointsDto>({
+        total,
+        ecopontos: list,
+      });
+    }
+    return ResponseFactoryModule.generate<ResponsePaginatedEcopointsDto>({
+      total,
+      ecopontos: ecopoints.map((el) => toEcopontoDTO(el)),
+    });
+  }
+
+  @UseGuards(PartnerGuard)
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Post('partner/find')
+  async findPaginatedPartner(@Body() data: PaginatedEcopointDto) {
     const total = await this.ecopointsService.count(
       data.busca,
       data.enderecoId,
