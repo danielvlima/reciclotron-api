@@ -27,21 +27,21 @@ export class EcopointsService {
 
   countEcopointsForDeposit(hasItemForBox: boolean, city?: string) {
     let typeFilter = {};
+    let cityFilter = {};
     if (hasItemForBox) {
       typeFilter = { tipo: { equals: $Enums.TipoEcoponto.BOX } };
+    }
+    if (city) {
+      cityFilter = {
+        enderecos: {
+          cidade: city,
+        },
+      };
     }
     return this.prisma.ecopontos
       .findMany({
         where: {
-          AND: [
-            { ativo: { equals: true } },
-            {
-              enderecos: {
-                cidade: city,
-              },
-            },
-            typeFilter,
-          ],
+          AND: [{ ativo: { equals: true } }, cityFilter, typeFilter],
         },
         include: {
           enderecos: true,

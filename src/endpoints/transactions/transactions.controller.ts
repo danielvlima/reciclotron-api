@@ -22,7 +22,6 @@ import {
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
 import { toTransactionDTO, toUnconfirmedTransactionDTO } from './mappers';
 import { DiscountCouponService } from '../discount-coupon/discount-coupon.service';
-import { CompareModule } from 'src/shared/modules/compare/compare.module';
 import { UsersService } from '../users/users.service';
 import { CouponsPurchasedService } from '../coupons-purchased/coupons-purchased.service';
 import { $Enums } from '@prisma/client';
@@ -61,9 +60,10 @@ export class TransactionsController {
   ) {
     await this.usersService.findOneWithCpf(cpf);
     const ecopoint = await this.ecopointService.findOne(depositDto.ecopontoId);
-    CompareModule.isNotActive(ecopoint.ativo).catch(() => {
+
+    if (!ecopoint.ativo) {
       throw new NotActiveEcopointException();
-    });
+    }
     return this.transactionsService
       .createDeposit(cpf, depositDto)
       .then(() => {});
@@ -80,21 +80,15 @@ export class TransactionsController {
       purchaseDto.cupomId,
     );
 
-    CompareModule.isGreaterThanOrEqual(
-      coupon.quantidadeDisponiveis,
-      purchaseDto.qtd,
-    ).catch(() => {
+    if (!(coupon.quantidadeDisponiveis >= purchaseDto.qtd)) {
       throw new NoCouponsAvailableException();
-    });
+    }
 
     const user = await this.usersService.findOneWithCpf(cpf);
 
-    CompareModule.isGreaterThanOrEqual(
-      user.pontos,
-      purchaseDto.valorTotal,
-    ).catch(() => {
+    if (!(user.pontos >= purchaseDto.valorTotal)) {
       throw new InsufficientBalanceException();
-    });
+    }
 
     const newTransaction = await this.transactionsService.createPurchase(
       cpf,
@@ -199,26 +193,17 @@ export class TransactionsController {
       updateTransactionDto.id,
     );
 
-    CompareModule.notIsEqual(
-      transaction.status,
-      $Enums.StatusTransacao.EFETIVADO,
-    ).catch(() => {
+    if (transaction.status === $Enums.StatusTransacao.EFETIVADO) {
       throw new EffectedTransactionException();
-    });
+    }
 
-    CompareModule.notIsEqual(
-      updateTransactionDto.status,
-      TransactionStatusEnum.EFETIVADO,
-    ).catch(() => {
+    if (updateTransactionDto.status === TransactionStatusEnum.EFETIVADO) {
       throw new StatusNotEffectedUpdateTransactionException();
-    });
+    }
 
-    CompareModule.notIsEqual(
-      transaction.tipo,
-      $Enums.TipoTransacao.CREDITO,
-    ).catch(() => {
+    if (transaction.tipo === $Enums.TipoTransacao.CREDITO) {
       throw new NotCreditTransactionException();
-    });
+    }
 
     const user = await this.usersService.findOneWithCpf(transaction.usuarioCPF);
 

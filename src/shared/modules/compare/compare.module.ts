@@ -2,27 +2,6 @@ import { Module } from '@nestjs/common';
 
 @Module({})
 export class CompareModule {
-  static isGreaterThanOrEqual(a: number, b: number): Promise<void> {
-    if (!(a >= b)) {
-      throw Error('A nao eh maior ou igual que B');
-    }
-    return;
-  }
-
-  static notIsEqual<T>(a: T, b: T): Promise<void> {
-    if (a === b) {
-      throw Error('A eh igual a B');
-    }
-    return;
-  }
-
-  static isNotActive(val: boolean): Promise<void> {
-    if (!val) {
-      throw Error('Não é ativo');
-    }
-    return;
-  }
-
   static isCPF(value: string) {
     let acc = 0;
 
