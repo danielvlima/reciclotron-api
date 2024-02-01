@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Get,
 } from '@nestjs/common';
 import { CouponsPurchasedService } from './coupons-purchased.service';
 import { ResponseDto } from 'src/shared/dto/response.dto';
@@ -28,7 +29,7 @@ export class CouponsPurchasedController {
   @UseGuards(UserGuard)
   @Public()
   @HttpCode(HttpStatus.OK)
-  @Post('filters')
+  @Get('filters')
   findAll(@GetCurrentKey() cpf: string): Promise<ResponseDto<string[]>> {
     const dateNow = new Date();
     dateNow.setHours(0, 0, 0, 0);
