@@ -7,6 +7,7 @@ import { TokenService } from 'src/shared/modules/auth/token.service';
 import { NotFoundUserException } from 'src/exceptions';
 import { PrismaErrorCode } from 'src/shared/enum';
 import { Prisma } from '@prisma/client';
+import { UpdateProfileDataException } from 'src/exceptions/update-profile-data.exception';
 
 @Injectable()
 export class UsersService {
@@ -64,19 +65,41 @@ export class UsersService {
       });
   };
 
-  update = (updateUserDto: UpdateUserDto) => {
-    return this.prisma.usuarios.update({
-      where: {
-        cpf: updateUserDto.cpf,
-      },
+  findOneWithPhone = (phone: string) => {
+    return this.prisma.usuarios
+      .findFirstOrThrow({
+        where: {
+          telefone: phone,
+        },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.NotFoundError) {
+          throw new NotFoundUserException();
+        }
+        throw err;
+      });
+  };
 
-      data: {
-        ...updateUserDto,
-        atualizadoEm: new Date(),
-        codigoRecuperacao: null,
-        codigoRecuperacaoCriadoEm: null,
-      },
-    });
+  update = (updateUserDto: UpdateUserDto) => {
+    return this.prisma.usuarios
+      .update({
+        where: {
+          cpf: updateUserDto.cpf,
+        },
+
+        data: {
+          ...updateUserDto,
+          atualizadoEm: new Date(),
+          codigoRecuperacao: null,
+          codigoRecuperacaoCriadoEm: null,
+        },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.UniqueContrantViolation) {
+          throw new UpdateProfileDataException();
+        }
+        throw err;
+      });
   };
 
   updateRecoveryCode = (cpf: string, code: string) => {

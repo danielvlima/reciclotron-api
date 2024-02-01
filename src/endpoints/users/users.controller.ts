@@ -29,6 +29,11 @@ import { GetCurrentEntity, GetCurrentKey, Public } from 'src/shared/decorators';
 import { Tokens } from 'src/shared/types';
 import { CpfGuard, RtGuard, UserGuard } from 'src/shared/guards';
 import { TokenService } from 'src/shared/modules/auth/token.service';
+import {
+  CpfRegistredException,
+  EmailRegistredException,
+  PhoneRegistredException,
+} from 'src/exceptions';
 
 @ApiTags('Usuários')
 @Controller('user')
@@ -66,6 +71,28 @@ export class UsersController {
   async create(
     @Body() createUserDto: CreateUserDto,
   ): Promise<ResponseDto<Tokens>> {
+    let user = await this.usersService
+      .findOneWithCpf(createUserDto.cpf)
+      .catch(() => null);
+
+    if (user) {
+      throw new CpfRegistredException();
+    }
+
+    user = await this.usersService
+      .findOne(createUserDto.email)
+      .catch(() => null);
+    if (user) {
+      throw new EmailRegistredException();
+    }
+
+    user = await this.usersService
+      .findOneWithPhone(createUserDto.telefone)
+      .catch(() => null);
+    if (user) {
+      throw new PhoneRegistredException();
+    }
+
     createUserDto.senha = CryptoModule.hashPassword(createUserDto.senha);
     const newUser = await this.usersService.create(createUserDto);
     const token = await this.tokenService.getTokens(

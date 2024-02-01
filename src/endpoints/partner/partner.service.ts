@@ -12,6 +12,7 @@ import { TokenService } from 'src/shared/modules/auth/token.service';
 import { Prisma } from '@prisma/client';
 import { NotFoundPartnerException } from 'src/exceptions';
 import { PrismaErrorCode } from 'src/shared/enum';
+import { UpdateProfileDataException } from 'src/exceptions/update-profile-data.exception';
 
 @Injectable()
 export class PartnerService {
@@ -198,29 +199,36 @@ export class PartnerService {
   }
 
   updateAddress(cnpj: string, updateAddress: UpdateAddressPartnerDto) {
-    return this.prisma.empresasParceiras.update({
-      where: {
-        cnpj,
-      },
+    return this.prisma.empresasParceiras
+      .update({
+        where: {
+          cnpj,
+        },
 
-      data: {
-        atualizadoEm: new Date(),
-        endereco: {
-          update: {
-            rua: updateAddress.rua,
-            numero: updateAddress.numero,
-            complemento: updateAddress.complemento,
-            bairro: updateAddress.bairro,
-            cidade: updateAddress.cidade,
-            uf: updateAddress.uf,
-            cep: updateAddress.cep,
+        data: {
+          atualizadoEm: new Date(),
+          endereco: {
+            update: {
+              rua: updateAddress.rua,
+              numero: updateAddress.numero,
+              complemento: updateAddress.complemento,
+              bairro: updateAddress.bairro,
+              cidade: updateAddress.cidade,
+              uf: updateAddress.uf,
+              cep: updateAddress.cep,
+            },
           },
         },
-      },
-      include: {
-        endereco: true,
-      },
-    });
+        include: {
+          endereco: true,
+        },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.UniqueContrantViolation) {
+          throw new UpdateProfileDataException();
+        }
+        throw err;
+      });
   }
 
   updateRecoveryCode = (cnpj: string, code: string) => {
