@@ -1,7 +1,7 @@
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 
-export class CpfRegistredException extends NotFoundException {
+export class PhoneRegistredException extends BadRequestException {
   constructor() {
-    super('CPF já cadastrado');
+    super('Telefone já cadastrado');
   }
 }
