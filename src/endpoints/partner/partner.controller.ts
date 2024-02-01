@@ -18,6 +18,7 @@ import {
   UpdateAddressPartnerDto,
   GetPaginatedPartnerDto,
   ResponsePaginatedPartnerDto,
+  UpdatePasswordPartnerDto,
 } from './dto';
 
 import { LoginDto } from 'src/shared/dto/login.dto';
@@ -142,14 +143,6 @@ export class PartnerController {
   }
 
   @Public()
-  @HttpCode(204)
-  @Post('recovery/:cnpj')
-  createCode(@Param('cnpj') cnpj: string) {
-    const code = CodeGeneratorModule.new();
-    return this.partnerService.updateRecoveryCode(cnpj, code);
-  }
-
-  @Public()
   @HttpCode(HttpStatus.OK)
   @Post('recovery/check')
   checkCode(@Body() data: CheckCodeDto): Promise<ResponseDto<boolean>> {
@@ -165,6 +158,30 @@ export class PartnerController {
       }
       return ResponseFactoryModule.generate(false);
     });
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch('recovery/updatePassword')
+  updatePassword(
+    @Body() data: UpdatePasswordPartnerDto,
+  ): Promise<ResponseDto<ResponsePartnerDto>> {
+    if (data.senha) {
+      data.senha = CryptoModule.hashPassword(data.senha);
+    }
+    return this.partnerService.update(data).then((partner) => {
+      return ResponseFactoryModule.generate<ResponsePartnerDto>(
+        toPartnerDTO(partner),
+      );
+    });
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post('recovery/:cnpj')
+  createCode(@Param('cnpj') cnpj: string) {
+    const code = CodeGeneratorModule.new();
+    return this.partnerService.updateRecoveryCode(cnpj, code);
   }
 
   @UseGuards(RtGuard)

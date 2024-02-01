@@ -10,7 +10,12 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { CreateUserDto, UpdateUserDto, ResponseUserDto } from './dto';
+import {
+  CreateUserDto,
+  UpdateUserDto,
+  ResponseUserDto,
+  UpdatePassWordUserDto,
+} from './dto';
 import { UsersService } from './users.service';
 import { CryptoModule } from 'src/shared/modules/crypto/crypto.module';
 import { CodeGeneratorModule } from 'src/shared/modules/code-generator/code-generator.module';
@@ -106,14 +111,6 @@ export class UsersController {
   }
 
   @Public()
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Post('recovery/:cpf')
-  createCode(@Param('cpf') cpf: string) {
-    const code = CodeGeneratorModule.new();
-    return this.usersService.updateRecoveryCode(cpf, code);
-  }
-
-  @Public()
   @HttpCode(HttpStatus.OK)
   @Post('recovery/check')
   checkCode(@Body() data: CheckCodeDto): Promise<ResponseDto<boolean>> {
@@ -129,6 +126,28 @@ export class UsersController {
       }
       return ResponseFactoryModule.generate(false);
     });
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch('recovery/updatePassword')
+  updatePassword(
+    @Body() data: UpdatePassWordUserDto,
+  ): Promise<ResponseDto<ResponseUserDto>> {
+    if (data.senha) {
+      data.senha = CryptoModule.hashPassword(data.senha);
+    }
+    return this.usersService.update(data).then((user) => {
+      return ResponseFactoryModule.generate<ResponseUserDto>(toUserDTO(user));
+    });
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post('recovery/:cpf')
+  createCode(@Param('cpf') cpf: string) {
+    const code = CodeGeneratorModule.new();
+    return this.usersService.updateRecoveryCode(cpf, code);
   }
 
   @UseGuards(RtGuard)
