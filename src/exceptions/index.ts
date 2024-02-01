@@ -10,3 +10,6 @@ export * from './not-found-coupon.exception';
 export * from './insufficient-balance.exception';
 export * from './no-coupons-available.exception';
 export * from './status-not-effected-update-transaction.exception';
+export * from './cpf-registred.exception';
+export * from './email-registred.exception';
+export * from './phone-registred.exception';
