@@ -17,10 +17,12 @@ export class TokenService {
       this.jwtService.signAsync(payload, {
         secret: env.AT_TOKEN_SECRET,
         expiresIn: env.AT_EXPIRATION_TOKEN,
+        notBefore: 0,
       }),
       this.jwtService.signAsync(payload, {
         secret: env.RT_TOKEN_SECRET,
         expiresIn: env.RT_EXPIRATION_TOKEN,
+        notBefore: 0,
       }),
     ]);
 
