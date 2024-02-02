@@ -1,6 +1,6 @@
 import { AuthGuard } from '@nestjs/passport';
 
-export class RecoveryGuard extends AuthGuard('recovery') {
+export class CpfRecoveryGuard extends AuthGuard('cpf-recovery') {
   constructor() {
     super();
   }

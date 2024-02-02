@@ -3,9 +3,14 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { env } from 'process';
 import { JwtRecoveryPayload } from '../types';
+import { CompareModule } from '../modules/compare/compare.module';
+import { AccessDaniedException } from 'src/exceptions';
 
 @Injectable()
-export class RecoveryStrategy extends PassportStrategy(Strategy, 'recovery') {
+export class CpfRecoveryStrategy extends PassportStrategy(
+  Strategy,
+  'cpf-recovery',
+) {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -14,6 +19,9 @@ export class RecoveryStrategy extends PassportStrategy(Strategy, 'recovery') {
   }
 
   validate(payload: JwtRecoveryPayload) {
-    return payload;
+    if (CompareModule.isCPF(payload.sub)) {
+      return payload;
+    }
+    throw new AccessDaniedException();
   }
 }

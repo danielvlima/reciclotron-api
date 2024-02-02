@@ -1,0 +1,27 @@
+import { Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { env } from 'process';
+import { JwtRecoveryPayload } from '../types';
+import { CompareModule } from '../modules/compare/compare.module';
+import { AccessDaniedException } from 'src/exceptions';
+
+@Injectable()
+export class PartnerRecoveryStrategy extends PassportStrategy(
+  Strategy,
+  'partner-recovery',
+) {
+  constructor() {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: env.RP_EXPIRATION_TOKEN,
+    });
+  }
+
+  validate(payload: JwtRecoveryPayload) {
+    if (CompareModule.isCNPJ(payload.sub)) {
+      return payload;
+    }
+    throw new AccessDaniedException();
+  }
+}
