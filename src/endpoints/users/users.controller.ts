@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Param,
   Patch,
   Post,
   UseGuards,
@@ -27,9 +26,17 @@ import { CheckCodeDto } from 'src/shared/dto/check-code.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { GetCurrentEntity, GetCurrentKey, Public } from 'src/shared/decorators';
 import { Tokens } from 'src/shared/types';
-import { CpfGuard, RtGuard, UserGuard } from 'src/shared/guards';
+import {
+  CpfGuard,
+  CpfRecoveryGuard,
+  RtGuard,
+  UserGuard,
+} from 'src/shared/guards';
 import { TokenService } from 'src/shared/modules/auth/token.service';
 import {
+  AccessDaniedException,
+  CodeCheckedException,
+  CodeUncheckedException,
   CpfRegistredException,
   EmailRegistredException,
   PhoneRegistredException,
@@ -137,44 +144,76 @@ export class UsersController {
     return this.usersService.remove(cpf);
   }
 
+  @UseGuards(CpfRecoveryGuard)
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('recovery/check')
-  checkCode(@Body() data: CheckCodeDto): Promise<ResponseDto<boolean>> {
-    return this.usersService.findOneWithCpf(data.key).then((user) => {
-      const now = new Date();
-      const limitDate = new Date(user.codigoRecuperacaoCriadoEm!);
-      limitDate.setMinutes(limitDate.getMinutes() + 15);
+  async checkCode(
+    @GetCurrentKey() cpf: string,
+    @Body() data: CheckCodeDto,
+  ): Promise<ResponseDto<boolean>> {
+    const user = await this.usersService.findOneWithCpf(cpf);
+    if (user.codigoRecuperacaoVerificado) {
+      throw new CodeCheckedException();
+    }
+    const now = new Date();
+    const limitDate = new Date(user.codigoRecuperacaoCriadoEm!);
+    limitDate.setMinutes(limitDate.getMinutes() + 15);
 
-      if (now.getTime() - limitDate.getTime() < 0) {
-        return ResponseFactoryModule.generate(
-          user.codigoRecuperacao === data.codigo,
-        );
+    if (now.getTime() - limitDate.getTime() < 0) {
+      const response = user.codigoRecuperacao === data.codigo;
+      if (response) {
+        await this.usersService.checkedRecoveryCode(cpf);
       }
-      return ResponseFactoryModule.generate(false);
-    });
+
+      return ResponseFactoryModule.generate(response);
+    }
+    return ResponseFactoryModule.generate(false);
   }
 
+  @UseGuards(CpfRecoveryGuard)
   @Public()
   @HttpCode(HttpStatus.NO_CONTENT)
   @Patch('recovery/updatePassword')
-  updatePassword(
+  async updatePassword(
+    @GetCurrentKey() cpf: string,
     @Body() data: UpdatePassWordUserDto,
   ): Promise<ResponseDto<ResponseUserDto>> {
+    const user = await this.usersService.findOneWithCpf(cpf);
+    if (!user.codigoRecuperacaoVerificado) {
+      throw new CodeUncheckedException();
+    }
     if (data.senha) {
       data.senha = CryptoModule.hashPassword(data.senha);
     }
-    return this.usersService.update(data).then((user) => {
-      return ResponseFactoryModule.generate<ResponseUserDto>(toUserDTO(user));
-    });
+    return this.usersService
+      .update({
+        cpf,
+        senha: data.senha,
+      })
+      .then((user) => {
+        return ResponseFactoryModule.generate<ResponseUserDto>(toUserDTO(user));
+      });
   }
 
   @Public()
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Post('recovery/:cpf')
-  createCode(@Param('cpf') cpf: string) {
+  @HttpCode(HttpStatus.OK)
+  @Post('recovery/new')
+  async createCode(@Body() data: { cpf: string }) {
+    const user = await this.usersService.findOneWithCpf(data.cpf);
+
+    if (user.codigoRecuperacao && user.codigoRecuperacaoCriadoEm) {
+      const now = new Date();
+      const limitDate = new Date(user.codigoRecuperacaoCriadoEm);
+      limitDate.setMinutes(limitDate.getMinutes() + 3);
+      if (now.getTime() - limitDate.getTime() < 0) {
+        throw new AccessDaniedException();
+      }
+    }
     const code = CodeGeneratorModule.new();
-    return this.usersService.updateRecoveryCode(cpf, code);
+    await this.usersService.updateRecoveryCode(data.cpf, code);
+    const token: Tokens = await this.tokenService.getRecoveryTokens(user.cpf);
+    return ResponseFactoryModule.generate<Tokens>(token);
   }
 
   @UseGuards(RtGuard)

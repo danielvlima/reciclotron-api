@@ -92,6 +92,7 @@ export class UsersService {
           atualizadoEm: new Date(),
           codigoRecuperacao: null,
           codigoRecuperacaoCriadoEm: null,
+          codigoRecuperacaoVerificado: null,
         },
       })
       .catch((err: Prisma.PrismaClientKnownRequestError) => {
@@ -113,6 +114,21 @@ export class UsersService {
         codigoRecuperacao: code,
         atualizadoEm: now,
         codigoRecuperacaoCriadoEm: now,
+        codigoRecuperacaoVerificado: false,
+      },
+    });
+  };
+
+  checkedRecoveryCode = (cpf: string) => {
+    const now = new Date();
+    return this.prisma.usuarios.update({
+      where: {
+        cpf,
+      },
+
+      data: {
+        atualizadoEm: now,
+        codigoRecuperacaoVerificado: true,
       },
     });
   };

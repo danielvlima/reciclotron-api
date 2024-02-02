@@ -19,4 +19,5 @@ export class Partner {
   endereco?: Address | null;
   codigoRecuperacao: string | null;
   codigoRecuperacaoCriadoEm: Date | null;
+  codigoRecuperacaoVerificado: boolean | null;
 }

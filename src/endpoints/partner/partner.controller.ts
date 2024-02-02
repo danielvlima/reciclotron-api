@@ -31,8 +31,18 @@ import { toPartnerDTO } from './mapper';
 import { ApiTags } from '@nestjs/swagger';
 import { GetCurrentEntity, GetCurrentKey, Public } from 'src/shared/decorators';
 import { Tokens } from 'src/shared/types';
-import { AdminGuard, PartnerGuard, RtGuard } from 'src/shared/guards';
+import {
+  AdminGuard,
+  PartnerGuard,
+  PartnerRecoveryGuard,
+  RtGuard,
+} from 'src/shared/guards';
 import { TokenService } from 'src/shared/modules/auth/token.service';
+import {
+  AccessDaniedException,
+  CodeCheckedException,
+  CodeUncheckedException,
+} from 'src/exceptions';
 
 @ApiTags('Empresas Parceiras')
 @Controller('partner')
@@ -142,46 +152,80 @@ export class PartnerController {
     });
   }
 
+  @UseGuards(PartnerRecoveryGuard)
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('recovery/check')
-  checkCode(@Body() data: CheckCodeDto): Promise<ResponseDto<boolean>> {
-    return this.partnerService.findOneWithCnpj(data.key).then((partner) => {
-      const now = new Date();
-      const limitDate = new Date(partner.codigoRecuperacaoCriadoEm!);
-      limitDate.setMinutes(limitDate.getMinutes() + 15);
+  async checkCode(
+    @GetCurrentKey() cnpj: string,
+    @Body() data: CheckCodeDto,
+  ): Promise<ResponseDto<boolean>> {
+    const partner = await this.partnerService.findOneWithCnpj(cnpj);
+    if (partner.codigoRecuperacaoVerificado) {
+      throw new CodeCheckedException();
+    }
+    const now = new Date();
+    const limitDate = new Date(partner.codigoRecuperacaoCriadoEm!);
+    limitDate.setMinutes(limitDate.getMinutes() + 15);
 
-      if (now.getTime() - limitDate.getTime() < 0) {
-        return ResponseFactoryModule.generate(
-          partner.codigoRecuperacao === data.codigo,
-        );
+    if (now.getTime() - limitDate.getTime() < 0) {
+      const response = partner.codigoRecuperacao === data.codigo;
+      if (response) {
+        await this.partnerService.checkedRecoveryCode(cnpj);
       }
-      return ResponseFactoryModule.generate(false);
-    });
+
+      return ResponseFactoryModule.generate(response);
+    }
+    return ResponseFactoryModule.generate(false);
   }
 
+  @UseGuards(PartnerRecoveryGuard)
   @Public()
   @HttpCode(HttpStatus.NO_CONTENT)
   @Patch('recovery/updatePassword')
-  updatePassword(
+  async updatePassword(
+    @GetCurrentKey() cnpj: string,
     @Body() data: UpdatePasswordPartnerDto,
   ): Promise<ResponseDto<ResponsePartnerDto>> {
+    const partner = await this.partnerService.findOneWithCnpj(cnpj);
+    if (!partner.codigoRecuperacaoVerificado) {
+      throw new CodeUncheckedException();
+    }
     if (data.senha) {
       data.senha = CryptoModule.hashPassword(data.senha);
     }
-    return this.partnerService.update(data).then((partner) => {
-      return ResponseFactoryModule.generate<ResponsePartnerDto>(
-        toPartnerDTO(partner),
-      );
-    });
+    return this.partnerService
+      .update({
+        cnpj,
+        senha: data.senha,
+      })
+      .then((partner) => {
+        return ResponseFactoryModule.generate<ResponsePartnerDto>(
+          toPartnerDTO(partner),
+        );
+      });
   }
 
   @Public()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Post('recovery/:cnpj')
-  createCode(@Param('cnpj') cnpj: string) {
+  @Post('recovery/new')
+  async createCode(@Body() data: { cnpj: string }) {
+    const partner = await this.partnerService.findOneWithCnpj(data.cnpj);
+
+    if (partner.codigoRecuperacao && partner.codigoRecuperacaoCriadoEm) {
+      const now = new Date();
+      const limitDate = new Date(partner.codigoRecuperacaoCriadoEm);
+      limitDate.setMinutes(limitDate.getMinutes() + 3);
+      if (now.getTime() - limitDate.getTime() < 0) {
+        throw new AccessDaniedException();
+      }
+    }
     const code = CodeGeneratorModule.new();
-    return this.partnerService.updateRecoveryCode(cnpj, code);
+    await this.partnerService.updateRecoveryCode(data.cnpj, code);
+    const token: Tokens = await this.tokenService.getRecoveryTokens(
+      partner.cnpj,
+    );
+    return ResponseFactoryModule.generate<Tokens>(token);
   }
 
   @UseGuards(RtGuard)

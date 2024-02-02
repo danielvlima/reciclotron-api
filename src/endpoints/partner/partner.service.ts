@@ -191,6 +191,7 @@ export class PartnerService {
         atualizadoEm: new Date(),
         codigoRecuperacao: null,
         codigoRecuperacaoCriadoEm: null,
+        codigoRecuperacaoVerificado: null,
       },
       include: {
         endereco: true,
@@ -242,9 +243,24 @@ export class PartnerService {
         codigoRecuperacao: code,
         atualizadoEm: now,
         codigoRecuperacaoCriadoEm: now,
+        codigoRecuperacaoVerificado: false,
       },
     });
   };
+
+  checkedRecoveryCode(cnpj: any) {
+    const now = new Date();
+    return this.prisma.empresasParceiras.update({
+      where: {
+        cnpj,
+      },
+
+      data: {
+        atualizadoEm: now,
+        codigoRecuperacaoVerificado: true,
+      },
+    });
+  }
 
   remove(cnpj: string) {
     return this.prisma.empresasParceiras

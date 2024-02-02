@@ -6,6 +6,7 @@ import { CodeGeneratorModule } from 'src/shared/modules/code-generator/code-gene
 import {
   AdminStrategy,
   AtStrategy,
+  PartnerRecoveryStrategy,
   PartnerStrategy,
   RtStrategy,
 } from 'src/shared/strategies';
@@ -19,6 +20,7 @@ import {
     RtStrategy,
     PartnerStrategy,
     AdminStrategy,
+    PartnerRecoveryStrategy,
   ],
 })
 export class PartnerModule {}

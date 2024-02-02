@@ -15,4 +15,5 @@ export class User {
   atualizadoEm: Date | null;
   codigoRecuperacao: string | null;
   codigoRecuperacaoCriadoEm: Date | null;
+  codigoRecuperacaoVerificado: boolean | null;
 }

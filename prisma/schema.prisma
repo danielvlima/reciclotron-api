@@ -9,44 +9,46 @@ datasource db {
 }
 
 model Usuarios {
-  cpf                       String                   @id @unique @db.VarChar(11)
-  email                     String                   @unique
-  telefone                  String                   @unique
-  nome                      String
-  senha                     String                   @db.LongText
-  dataAniversario           DateTime
-  generoUsuario             GeneroUsuario
-  nivelPrivilegio           RegraPriviegio           @default(USUARIO)
-  criadoEm                  DateTime                 @default(now())
-  atualizadoEm              DateTime?
-  pontos                    Int                      @default(0)
-  codigoRecuperacao         String?
-  codigoRecuperacaoCriadoEm DateTime?
-  token                     String?                  @db.LongText
-  transacoes                Transacoes[]
-  cuponsCompradosUsuario    CuponsCompradosUsuario[]
+  cpf                         String                   @id @unique @db.VarChar(11)
+  email                       String                   @unique
+  telefone                    String                   @unique
+  nome                        String
+  senha                       String                   @db.LongText
+  dataAniversario             DateTime
+  generoUsuario               GeneroUsuario
+  nivelPrivilegio             RegraPriviegio           @default(USUARIO)
+  criadoEm                    DateTime                 @default(now())
+  atualizadoEm                DateTime?
+  pontos                      Int                      @default(0)
+  codigoRecuperacao           String?
+  codigoRecuperacaoCriadoEm   DateTime?
+  token                       String?                  @db.LongText
+  codigoRecuperacaoVerificado Boolean?
+  transacoes                  Transacoes[]
+  cuponsCompradosUsuario      CuponsCompradosUsuario[]
 }
 
 model EmpresasParceiras {
-  cnpj                      String                 @id @unique @db.VarChar(14)
-  email                     String                 @unique
-  telefone                  String                 @unique
-  nomeFantasia              String
-  razaoSocial               String
-  senha                     String                 @db.LongText
-  ramo                      String
-  ativo                     Boolean                @default(true)
-  tipoEmpresa               TipoEmpresa
-  enderecolojaOnline        String?
-  criadoEm                  DateTime               @default(now())
-  atualizadoEm              DateTime?
-  codigoRecuperacao         String?
-  codigoRecuperacaoCriadoEm DateTime?
-  logo                      String?                @db.LongText
-  token                     String?                @db.LongText
-  cupons                    CuponsDesconto[]
-  endereco                  Enderecos?
-  SolicitacoesEcoponto      SolicitacoesEcoponto[]
+  cnpj                        String                 @id @unique @db.VarChar(14)
+  email                       String                 @unique
+  telefone                    String                 @unique
+  nomeFantasia                String
+  razaoSocial                 String
+  senha                       String                 @db.LongText
+  ramo                        String
+  ativo                       Boolean                @default(true)
+  tipoEmpresa                 TipoEmpresa
+  enderecolojaOnline          String?
+  criadoEm                    DateTime               @default(now())
+  atualizadoEm                DateTime?
+  codigoRecuperacao           String?
+  codigoRecuperacaoCriadoEm   DateTime?
+  logo                        String?                @db.LongText
+  token                       String?                @db.LongText
+  codigoRecuperacaoVerificado Boolean?
+  cupons                      CuponsDesconto[]
+  endereco                    Enderecos?
+  SolicitacoesEcoponto        SolicitacoesEcoponto[]
 }
 
 model Enderecos {

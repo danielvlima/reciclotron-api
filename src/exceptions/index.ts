@@ -13,3 +13,5 @@ export * from './status-not-effected-update-transaction.exception';
 export * from './cpf-registred.exception';
 export * from './email-registred.exception';
 export * from './phone-registred.exception';
+export * from './code-checked.exception';
+export * from './code-unchecked.exception';

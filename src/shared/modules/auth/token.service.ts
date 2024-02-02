@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { env } from 'process';
-import { JwtPayload, JwtRecoveryPayload, Tokens } from 'src/shared/types';
+import { JwtPayload, JwtKeyPayload, Tokens } from 'src/shared/types';
 
 @Injectable()
 export class TokenService {
@@ -32,10 +32,9 @@ export class TokenService {
     };
   }
 
-  async getRecoveryTokens(key: string, checked: boolean): Promise<Tokens> {
-    const payload: JwtRecoveryPayload = {
+  async getRecoveryTokens(key: string): Promise<Tokens> {
+    const payload: JwtKeyPayload = {
       sub: key,
-      checked,
     };
     const [at] = await Promise.all([
       this.jwtService.signAsync(payload, {

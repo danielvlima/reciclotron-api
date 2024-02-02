@@ -6,6 +6,7 @@ import { CodeGeneratorModule } from 'src/shared/modules/code-generator/code-gene
 import {
   AdminStrategy,
   AtStrategy,
+  CpfRecoveryStrategy,
   CpfStrategy,
   RtStrategy,
   UserStrategy,
@@ -21,6 +22,7 @@ import {
     UserStrategy,
     AdminStrategy,
     CpfStrategy,
+    CpfRecoveryStrategy,
   ],
   exports: [UsersService],
 })
