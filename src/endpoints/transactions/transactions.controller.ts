@@ -197,11 +197,11 @@ export class TransactionsController {
       throw new EffectedTransactionException();
     }
 
-    if (updateTransactionDto.status === TransactionStatusEnum.EFETIVADO) {
+    if (updateTransactionDto.status !== TransactionStatusEnum.EFETIVADO) {
       throw new StatusNotEffectedUpdateTransactionException();
     }
 
-    if (transaction.tipo === $Enums.TipoTransacao.CREDITO) {
+    if (transaction.tipo !== $Enums.TipoTransacao.CREDITO) {
       throw new NotCreditTransactionException();
     }
 
