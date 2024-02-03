@@ -37,7 +37,6 @@ import {
 } from 'src/shared/guards';
 import { TokenService } from 'src/shared/modules/auth/token.service';
 import {
-  AccessDaniedException,
   CodeCheckedException,
   CodeUncheckedException,
   CpfRegistredException,
@@ -203,19 +202,10 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @Post('recovery/new')
   async createCode(@Body() data: RecoveryDto) {
-    const user = await this.usersService.findOneWithCpf(data.key);
-
-    if (user.codigoRecuperacao && user.codigoRecuperacaoCriadoEm) {
-      const now = new Date();
-      const limitDate = new Date(user.codigoRecuperacaoCriadoEm);
-      limitDate.setMinutes(limitDate.getMinutes() + 3);
-      if (now.getTime() - limitDate.getTime() < 0) {
-        throw new AccessDaniedException();
-      }
-    }
+    await this.usersService.findOneWithCpf(data.key);
     const code = CodeGeneratorModule.new();
     await this.usersService.updateRecoveryCode(data.key, code);
-    const token: Tokens = await this.tokenService.getRecoveryTokens(user.cpf);
+    const token: Tokens = await this.tokenService.getRecoveryTokens(data.key);
     return ResponseFactoryModule.generate<Tokens>(token);
   }
 
