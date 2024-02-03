@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { env } from 'process';
-import { JwtRecoveryPayload } from '../types';
+import { JwtKeyPayload } from '../types';
 import { CompareModule } from '../modules/compare/compare.module';
 import { AccessDaniedException } from 'src/exceptions';
 
@@ -18,7 +18,7 @@ export class PartnerRecoveryStrategy extends PassportStrategy(
     });
   }
 
-  validate(payload: JwtRecoveryPayload) {
+  validate(payload: JwtKeyPayload) {
     if (CompareModule.isCNPJ(payload.sub)) {
       return payload;
     }
