@@ -41,6 +41,7 @@ import {
   CodeUncheckedException,
   CpfRegistredException,
   EmailRegistredException,
+  ExpiredCodeException,
   PhoneRegistredException,
 } from 'src/exceptions';
 
@@ -170,7 +171,7 @@ export class UsersController {
 
       return ResponseFactoryModule.generate(response);
     }
-    return ResponseFactoryModule.generate(false);
+    throw new ExpiredCodeException();
   }
 
   @UseGuards(CpfRecoveryGuard)

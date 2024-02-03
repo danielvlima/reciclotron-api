@@ -15,3 +15,4 @@ export * from './email-registred.exception';
 export * from './phone-registred.exception';
 export * from './code-checked.exception';
 export * from './code-unchecked.exception';
+export * from './expired-code.exception';

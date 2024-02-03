@@ -42,7 +42,11 @@ import {
   RtGuard,
 } from 'src/shared/guards';
 import { TokenService } from 'src/shared/modules/auth/token.service';
-import { CodeCheckedException, CodeUncheckedException } from 'src/exceptions';
+import {
+  CodeCheckedException,
+  CodeUncheckedException,
+  ExpiredCodeException,
+} from 'src/exceptions';
 
 @ApiTags('Empresas Parceiras')
 @Controller('partner')
@@ -176,7 +180,8 @@ export class PartnerController {
 
       return ResponseFactoryModule.generate(response);
     }
-    return ResponseFactoryModule.generate(false);
+
+    throw new ExpiredCodeException();
   }
 
   @UseGuards(PartnerRecoveryGuard)
