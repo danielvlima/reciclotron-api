@@ -15,14 +15,17 @@ import {
   ResponseUserDto,
   UpdatePassWordUserDto,
 } from './dto';
+import {
+  RecoveryDto,
+  CheckCodeDto,
+  LoginDto,
+  ResponseDto,
+} from 'src/shared/dto';
 import { UsersService } from './users.service';
 import { CryptoModule } from 'src/shared/modules/crypto/crypto.module';
 import { CodeGeneratorModule } from 'src/shared/modules/code-generator/code-generator.module';
 import { toUserDTO } from './mappers';
-import { ResponseDto } from 'src/shared/dto/response.dto';
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
-import { LoginDto } from 'src/shared/dto/login.dto';
-import { CheckCodeDto } from 'src/shared/dto/check-code.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { GetCurrentEntity, GetCurrentKey, Public } from 'src/shared/decorators';
 import { Tokens } from 'src/shared/types';
@@ -199,8 +202,8 @@ export class UsersController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('recovery/new')
-  async createCode(@Body() data: { cpf: string }) {
-    const user = await this.usersService.findOneWithCpf(data.cpf);
+  async createCode(@Body() data: RecoveryDto) {
+    const user = await this.usersService.findOneWithCpf(data.key);
 
     if (user.codigoRecuperacao && user.codigoRecuperacaoCriadoEm) {
       const now = new Date();
@@ -211,7 +214,7 @@ export class UsersController {
       }
     }
     const code = CodeGeneratorModule.new();
-    await this.usersService.updateRecoveryCode(data.cpf, code);
+    await this.usersService.updateRecoveryCode(data.key, code);
     const token: Tokens = await this.tokenService.getRecoveryTokens(user.cpf);
     return ResponseFactoryModule.generate<Tokens>(token);
   }

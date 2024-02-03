@@ -20,13 +20,17 @@ import {
   ResponsePaginatedPartnerDto,
   UpdatePasswordPartnerDto,
 } from './dto';
-
-import { LoginDto } from 'src/shared/dto/login.dto';
+import {
+  RecoveryDto,
+  ResponseDto,
+  CheckCodeDto,
+  LoginDto,
+} from 'src/shared/dto';
 import { CryptoModule } from 'src/shared/modules/crypto/crypto.module';
 import { CodeGeneratorModule } from 'src/shared/modules/code-generator/code-generator.module';
-import { CheckCodeDto } from 'src/shared/dto/check-code.dto';
+
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
-import { ResponseDto } from 'src/shared/dto/response.dto';
+
 import { toPartnerDTO } from './mapper';
 import { ApiTags } from '@nestjs/swagger';
 import { GetCurrentEntity, GetCurrentKey, Public } from 'src/shared/decorators';
@@ -209,8 +213,8 @@ export class PartnerController {
   @Public()
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('recovery/new')
-  async createCode(@Body() data: { cnpj: string }) {
-    const partner = await this.partnerService.findOneWithCnpj(data.cnpj);
+  async createCode(@Body() data: RecoveryDto) {
+    const partner = await this.partnerService.findOneWithCnpj(data.key);
 
     if (partner.codigoRecuperacao && partner.codigoRecuperacaoCriadoEm) {
       const now = new Date();
@@ -221,7 +225,7 @@ export class PartnerController {
       }
     }
     const code = CodeGeneratorModule.new();
-    await this.partnerService.updateRecoveryCode(data.cnpj, code);
+    await this.partnerService.updateRecoveryCode(data.key, code);
     const token: Tokens = await this.tokenService.getRecoveryTokens(
       partner.cnpj,
     );
