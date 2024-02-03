@@ -22,5 +22,6 @@ import {
     AdminStrategy,
     PartnerRecoveryStrategy,
   ],
+  exports: [PartnerService],
 })
 export class PartnerModule {}

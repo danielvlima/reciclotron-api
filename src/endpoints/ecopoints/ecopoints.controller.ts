@@ -23,14 +23,16 @@ import { toEcopontoDTO, toEcopontoDTOFromQuery } from './mappers';
 import { RequestEcopointsService } from '../request-ecopoints/request-ecopoints.service';
 import { toEcopointRequestDTO } from '../request-ecopoints/mappers';
 import { ApiTags } from '@nestjs/swagger';
-import { Public } from 'src/shared/decorators';
+import { GetCurrentKey, Public } from 'src/shared/decorators';
 import { AdminGuard, PartnerGuard, UserGuard } from 'src/shared/guards';
+import { PartnerService } from '../partner/partner.service';
 
 @ApiTags('Ecopontos')
 @Controller('ecopoints')
 export class EcopointsController {
   constructor(
     private readonly ecopointsService: EcopointsService,
+    private readonly partnerService: PartnerService,
     private readonly requestEcopointsService: RequestEcopointsService,
   ) {}
 
@@ -89,12 +91,17 @@ export class EcopointsController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('partner/find')
-  async findPaginatedPartner(@Body() data: PaginatedEcopointDto) {
+  async findPaginatedPartner(
+    @GetCurrentKey() cnpj: string,
+    @Body() data: PaginatedEcopointDto,
+  ) {
+    const partner = await this.partnerService.findOneWithCnpj(cnpj);
+    data.enderecoId = Number(partner.endereco.id);
+
     const total = await this.ecopointsService.count(
       data.busca,
       data.enderecoId,
-      data.ativo,
-      data.tipo,
+      true,
     );
 
     if (!total) {
@@ -106,22 +113,16 @@ export class EcopointsController {
 
     const ecopoints = await this.ecopointsService.findPaginated(data);
 
-    if (data.enderecoId) {
-      const list = ecopoints.map((el) => toEcopontoDTO(el));
-      for (let i = 0; i < list.length; i++) {
-        const action = await this.requestEcopointsService.findOneRequest(
-          list[i].id,
-        );
-        list[i].actionrequest = action ? toEcopointRequestDTO(action) : null;
-      }
-      return ResponseFactoryModule.generate<ResponsePaginatedEcopointsDto>({
-        total,
-        ecopontos: list,
-      });
+    const list = ecopoints.map((el) => toEcopontoDTO(el));
+    for (let i = 0; i < list.length; i++) {
+      const action = await this.requestEcopointsService.findOneRequest(
+        list[i].id,
+      );
+      list[i].actionrequest = action ? toEcopointRequestDTO(action) : null;
     }
     return ResponseFactoryModule.generate<ResponsePaginatedEcopointsDto>({
       total,
-      ecopontos: ecopoints.map((el) => toEcopontoDTO(el)),
+      ecopontos: list,
     });
   }
 

@@ -37,15 +37,18 @@ export class RequestEcopointsController {
   @UseGuards(PartnerGuard)
   @Public()
   @Post('partner/create')
-  create(@Body() createRequestEcopointDto: CreateRequestEcopointDto) {
+  create(
+    @GetCurrentKey() cnpj: string,
+    @Body() createRequestEcopointDto: CreateRequestEcopointDto,
+  ) {
     if (createRequestEcopointDto.acao === RequestActionEcopoint.ADICIONAR) {
       return this.requestEcopointsService
-        .createAddEcopoint(createRequestEcopointDto)
+        .createAddEcopoint(cnpj, createRequestEcopointDto)
         .then((value) => {
           return ResponseFactoryModule.generate(toEcopointRequestDTO(value));
         });
     }
-    return this.requestEcopointsService.create(createRequestEcopointDto);
+    return this.requestEcopointsService.create(cnpj, createRequestEcopointDto);
   }
 
   @UseGuards(PartnerGuard)

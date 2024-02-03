@@ -11,11 +11,11 @@ import { $Enums, Prisma } from '@prisma/client';
 export class RequestEcopointsService {
   constructor(private prisma: PrismaService) {}
 
-  create(createRequestEcopointDto: CreateRequestEcopointDto) {
+  create(cnpj: string, createRequestEcopointDto: CreateRequestEcopointDto) {
     return createRequestEcopointDto.ecopontoIds.forEach(async (ecoID) => {
       await this.prisma.solicitacoesEcoponto.create({
         data: {
-          cnpjEmpresa: createRequestEcopointDto.cnpj,
+          cnpjEmpresa: cnpj,
           ecopontoId: ecoID,
           acao: createRequestEcopointDto.acao,
         },
@@ -27,15 +27,22 @@ export class RequestEcopointsService {
     });
   }
 
-  createAddEcopoint(createRequestEcopointDto: CreateRequestEcopointDto) {
+  createAddEcopoint(
+    cnpj: string,
+    createRequestEcopointDto: CreateRequestEcopointDto,
+  ) {
     return this.prisma.solicitacoesEcoponto.create({
       data: {
-        cnpjEmpresa: createRequestEcopointDto.cnpj,
+        cnpjEmpresa: cnpj,
         acao: createRequestEcopointDto.acao,
         tipoEcoponto: createRequestEcopointDto.tipoEcoponto,
       },
       include: {
-        empresa: true,
+        empresa: {
+          select: {
+            endereco: true,
+          },
+        },
       },
     });
   }
@@ -162,16 +169,20 @@ export class RequestEcopointsService {
 
   cancel(cnpj: string, data: CancelRequestEcopointDto) {
     return data.ids.forEach(async (element) => {
-      await this.prisma.solicitacoesEcoponto.delete({
-        where: {
-          id: element,
-          atendidoEm: { equals: null },
-          cnpjEmpresa: { equals: cnpj },
-        },
-        include: {
-          empresa: true,
-        },
-      });
+      await this.prisma.solicitacoesEcoponto
+        .delete({
+          where: {
+            id: element,
+            atendidoEm: { equals: null },
+            cnpjEmpresa: { equals: cnpj },
+          },
+          include: {
+            empresa: true,
+          },
+        })
+        .catch(() => {
+          return null;
+        });
     });
   }
 }

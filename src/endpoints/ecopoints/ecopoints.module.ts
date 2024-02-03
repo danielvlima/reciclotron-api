@@ -7,11 +7,13 @@ import {
   AdminStrategy,
   PartnerStrategy,
 } from 'src/shared/strategies';
+import { PartnerService } from '../partner/partner.service';
 
 @Module({
   controllers: [EcopointsController],
   providers: [
     EcopointsService,
+    PartnerService,
     RequestEcopointsService,
     UserStrategy,
     AdminStrategy,
