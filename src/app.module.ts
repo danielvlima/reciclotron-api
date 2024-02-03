@@ -15,6 +15,9 @@ import { TransactionsModule } from './endpoints/transactions/transactions.module
 import { CompareModule } from './shared/modules/compare/compare.module';
 import { EcopointsModule } from './endpoints/ecopoints/ecopoints.module';
 import { AddressesModule } from './endpoints/addresses/addresses.module';
+import { TokenModule } from './shared/modules/auth/token.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AtGuard } from './shared/guards';
 
 @Module({
   imports: [
@@ -32,8 +35,15 @@ import { AddressesModule } from './endpoints/addresses/addresses.module';
     CompareModule,
     EcopointsModule,
     AddressesModule,
+    TokenModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AtGuard,
+    },
+  ],
 })
 export class AppModule {}

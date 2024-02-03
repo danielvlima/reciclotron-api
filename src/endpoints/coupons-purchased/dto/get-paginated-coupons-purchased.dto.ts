@@ -4,9 +4,6 @@ import { OrderByCouponsPurchasedDto } from './order-by-coupons-purchased.dto';
 
 export class GetPaginatedCouponsPurchasedDto {
   @ApiProperty()
-  usuarioCPF: string;
-
-  @ApiProperty()
   skip: number;
 
   @ApiProperty()

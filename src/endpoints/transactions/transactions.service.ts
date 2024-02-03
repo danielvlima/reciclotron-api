@@ -7,20 +7,22 @@ import {
   PaginatedUnconfirmedTransaction,
   UpdateTransactionDto,
 } from './dto';
-import { $Enums } from '@prisma/client';
+import { $Enums, Prisma } from '@prisma/client';
 import { TransactionStatusEnum } from './enum/transactions-type.enum';
+import { NotFoundTransactionException } from 'src/exceptions';
+import { PrismaErrorCode } from 'src/shared/enum';
 
 @Injectable()
 export class TransactionsService {
   constructor(private prisma: PrismaService) {}
 
-  createDeposit(depositData: CreateDepositTransactionDto) {
+  createDeposit(cpf: string, depositData: CreateDepositTransactionDto) {
     return this.prisma.transacoes.create({
       data: {
         tipo: $Enums.TipoTransacao.CREDITO,
         status: $Enums.StatusTransacao.PENDENTE,
         criadoEm: new Date(),
-        usuarioCPF: depositData.usuarioCPF,
+        usuarioCPF: cpf,
         ecopontoId: depositData.ecopontoId,
         valorTotal: depositData.valorTotal,
         materiaisDepositados: {
@@ -38,7 +40,7 @@ export class TransactionsService {
     });
   }
 
-  createPurchase(purchaseData: CreatePurchaseTransactionDto) {
+  createPurchase(cpf: string, purchaseData: CreatePurchaseTransactionDto) {
     const date = new Date();
     return this.prisma.transacoes.create({
       data: {
@@ -46,7 +48,7 @@ export class TransactionsService {
         status: $Enums.StatusTransacao.EFETIVADO,
         criadoEm: date,
         finalizadoEm: date,
-        usuarioCPF: purchaseData.usuarioCPF,
+        usuarioCPF: cpf,
         valorTotal: purchaseData.valorTotal,
         cupomId: purchaseData.cupomId,
       },
@@ -59,7 +61,7 @@ export class TransactionsService {
     });
   }
 
-  count(data: PaginatedTransaction) {
+  count(cpf: string, data: PaginatedTransaction) {
     let filter = {};
 
     if (data.filterOption.tipo !== 'TODOS') {
@@ -69,7 +71,7 @@ export class TransactionsService {
     return this.prisma.transacoes.count({
       where: {
         AND: [
-          { usuarioCPF: { equals: data.usuarioCPF } },
+          { usuarioCPF: { equals: cpf } },
           { status: { equals: $Enums.StatusTransacao.EFETIVADO } },
           filter,
         ],
@@ -77,7 +79,7 @@ export class TransactionsService {
     });
   }
 
-  findAll(data: PaginatedTransaction) {
+  findAll(cpf: string, data: PaginatedTransaction) {
     let filter = {};
 
     if (data.filterOption.tipo !== 'TODOS') {
@@ -87,7 +89,7 @@ export class TransactionsService {
     return this.prisma.transacoes.findMany({
       where: {
         AND: [
-          { usuarioCPF: { equals: data.usuarioCPF } },
+          { usuarioCPF: { equals: cpf } },
           { status: { equals: $Enums.StatusTransacao.EFETIVADO } },
           filter,
         ],
@@ -103,9 +105,17 @@ export class TransactionsService {
   }
 
   findOne(id: number) {
-    return this.prisma.transacoes.findFirstOrThrow({
-      where: { id },
-    });
+    return this.prisma.transacoes
+      .findFirstOrThrow({
+        where: { id },
+        include: { materiaisDepositados: true },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.NotFoundError) {
+          throw new NotFoundTransactionException();
+        }
+        throw err;
+      });
   }
 
   update(updateTransactionDto: UpdateTransactionDto) {
