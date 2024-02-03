@@ -46,7 +46,13 @@ export class MaterialsController {
   @Public()
   @Get('get/all')
   findAll(
-    @Query('ativo', new ParseBoolPipe()) ativo: boolean,
+    @Query(
+      'ativo',
+      new ParseBoolPipe({
+        optional: true,
+      }),
+    )
+    ativo?: boolean,
   ): Promise<ResponseDto<ResponseMaterialDto[]>> {
     return this.materialsService.findAll(ativo).then((materials) => {
       return ResponseFactoryModule.generate(
