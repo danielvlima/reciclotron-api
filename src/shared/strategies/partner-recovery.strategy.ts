@@ -14,7 +14,7 @@ export class PartnerRecoveryStrategy extends PassportStrategy(
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: env.RP_EXPIRATION_TOKEN,
+      secretOrKey: env.RP_TOKEN_SECRET,
     });
   }
 
