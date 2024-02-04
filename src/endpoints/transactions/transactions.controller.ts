@@ -118,7 +118,11 @@ export class TransactionsController {
       });
     }
 
-    await this.mailerService.sendUserNewPurchase(user.email, user.nome, coupon.nome);
+    await this.mailerService.sendUserNewPurchase(
+      user.email,
+      user.nome,
+      coupon.nome,
+    );
     return ResponseFactoryModule.generate<ResponseTransactionDto>(
       toTransactionDTO(newTransaction),
     );
