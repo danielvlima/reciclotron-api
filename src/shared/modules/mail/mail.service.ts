@@ -25,7 +25,7 @@ export class MailService {
     return await this.sendMail(
       to,
       'Seja bem vindo à plataforma Reciclopontos',
-      'user/sign-up',
+      'sign-up',
       {},
     );
   }
@@ -34,7 +34,7 @@ export class MailService {
     return await this.sendMail(
       to,
       'Seja bem vindo à plataforma Reciclopontos',
-      'user/goodbye',
+      'goodbye',
       { name },
     );
   }
@@ -43,7 +43,7 @@ export class MailService {
     return await this.sendMail(
       to,
       'Seu código de recuperação de senha',
-      'user/forgot-password',
+      'forgot-password',
       { name, code },
     );
   }
@@ -52,7 +52,7 @@ export class MailService {
     return await this.sendMail(
       to,
       'Sua senha da plataforma Reciclopontos foi alterada',
-      'user/password-updated',
+      'password-updated',
       { name },
     );
   }
@@ -61,7 +61,7 @@ export class MailService {
     return await this.sendMail(
       to,
       'Seu perfil da plataforma Reciclopontos foi atualizado',
-      'user/profile-updated',
+      'profile-updated',
       { name },
     );
   }
