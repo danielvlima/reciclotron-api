@@ -75,17 +75,12 @@ export class MailService {
     );
   }
 
-  async sendUserNewPurchase(
-    to: string,
-    name: string,
-    cupomName: string,
-    partnerName: string,
-  ) {
+  async sendUserNewPurchase(to: string, name: string, cupomName: string) {
     return await this.sendMail(
       to,
       'Seu cupom foi comprado com sucesso',
       'user/new-purchase',
-      { name, cupomName, partnerName },
+      { name, cupomName },
     );
   }
 }

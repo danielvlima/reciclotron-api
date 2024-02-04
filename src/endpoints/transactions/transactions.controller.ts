@@ -38,6 +38,7 @@ import {
   NotCreditTransactionException,
   StatusNotEffectedUpdateTransactionException,
 } from 'src/exceptions';
+import { MailService } from 'src/shared/modules/mail/mail.service';
 
 @ApiTags('Transações')
 @Controller('transactions')
@@ -48,6 +49,7 @@ export class TransactionsController {
     private readonly usersService: UsersService,
     private readonly ecopointService: EcopointsService,
     private readonly couponsPurchasedService: CouponsPurchasedService,
+    private mailerService: MailService,
   ) {}
 
   @UseGuards(UserGuard)
@@ -116,6 +118,7 @@ export class TransactionsController {
       });
     }
 
+    await this.mailerService.sendUserNewPurchase(user.email, user.nome, coupon.nome);
     return ResponseFactoryModule.generate<ResponseTransactionDto>(
       toTransactionDTO(newTransaction),
     );
