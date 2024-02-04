@@ -7,6 +7,7 @@ export const toMaterialDTO = (data: Material): ResponseMaterialDto => {
     id: Number(data.id),
     nome: data.nome,
     valor: data.valor,
+    logo: data.logo,
     ehAceitoTipoEcoponto: TypeEcopontoAccepted[data.ehAceitoTipoEcoponto],
   };
 };

@@ -6,8 +6,11 @@ import {
   UpdateEcopointDto,
 } from './dto';
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
-import { $Enums } from '@prisma/client';
+import { $Enums, Prisma } from '@prisma/client';
 import { EcopointQuery } from './entities/ecopoint.query.entity';
+import { TypeEcopointEnum } from 'src/shared/enum/type-ecopoint.enum';
+import { PrismaErrorCode } from 'src/shared/enum';
+import { NotFoundEcopointException } from 'src/exceptions';
 
 @Injectable()
 export class EcopointsService {
@@ -24,21 +27,21 @@ export class EcopointsService {
 
   countEcopointsForDeposit(hasItemForBox: boolean, city?: string) {
     let typeFilter = {};
+    let cityFilter = {};
     if (hasItemForBox) {
       typeFilter = { tipo: { equals: $Enums.TipoEcoponto.BOX } };
+    }
+    if (city) {
+      cityFilter = {
+        enderecos: {
+          cidade: city,
+        },
+      };
     }
     return this.prisma.ecopontos
       .findMany({
         where: {
-          AND: [
-            { ativo: { equals: true } },
-            {
-              enderecos: {
-                cidade: city,
-              },
-            },
-            typeFilter,
-          ],
+          AND: [{ ativo: { equals: true } }, cityFilter, typeFilter],
         },
         include: {
           enderecos: true,
@@ -115,11 +118,17 @@ export class EcopointsService {
     }
   }
 
-  count(search: string, endId?: number, ativo?: boolean) {
+  count(
+    search: string,
+    endId?: number,
+    ativo?: boolean,
+    tipo?: TypeEcopointEnum,
+  ) {
     return this.prisma.ecopontos.count({
       where: {
         ativo: ativo,
         enderecoId: endId,
+        tipo: tipo,
         OR: [{ id: { contains: search } }, { nome: { contains: search } }],
       },
     });
@@ -129,6 +138,7 @@ export class EcopointsService {
     return this.prisma.ecopontos.findMany({
       where: {
         ativo: data.ativo,
+        tipo: data.tipo,
         enderecoId: data.enderecoId,
         OR: [
           { id: { contains: data.busca } },
@@ -141,6 +151,21 @@ export class EcopointsService {
       take: data.take,
       skip: data.skip,
     });
+  }
+
+  findOne(id: string) {
+    return this.prisma.ecopontos
+      .findFirst({
+        where: {
+          id,
+        },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.NotFoundError) {
+          throw new NotFoundEcopointException();
+        }
+        throw err;
+      });
   }
 
   update(updateEcopointDto: UpdateEcopointDto) {

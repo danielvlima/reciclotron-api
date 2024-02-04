@@ -1,5 +1,5 @@
 import { TypePartnerEnum } from '../enum/type-partner.enum';
-import { ResponseAddressDto } from '../../../shared/dto/response-address.dto';
+import { ResponseAddressDto } from '../../addresses/dto/response-address.dto';
 
 export class ResponsePartnerDto {
   cnpj: string;

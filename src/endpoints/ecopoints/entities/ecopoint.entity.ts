@@ -1,5 +1,5 @@
 import { $Enums } from '@prisma/client';
-import { Address } from 'src/shared/entities/address.entity';
+import { Address } from 'src/endpoints/addresses/entities/address.entity';
 
 export class Ecopoint {
   id: string;

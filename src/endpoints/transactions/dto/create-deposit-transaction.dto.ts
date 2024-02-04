@@ -3,9 +3,6 @@ import { DepositMaterialsTransactionDTO } from './deposit-materials-transaction.
 
 export class CreateDepositTransactionDto {
   @ApiProperty()
-  usuarioCPF: string;
-
-  @ApiProperty()
   ecopontoId: string;
 
   @ApiProperty()

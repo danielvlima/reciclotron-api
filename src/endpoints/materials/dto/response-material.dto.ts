@@ -4,5 +4,6 @@ export class ResponseMaterialDto {
   id: number;
   nome: string;
   valor: number;
+  logo: string | null;
   ehAceitoTipoEcoponto: TypeEcopontoAccepted;
 }

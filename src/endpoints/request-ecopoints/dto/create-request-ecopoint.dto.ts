@@ -3,9 +3,6 @@ import { RequestActionEcopoint } from '../enum/request-action-ecopoint.enum';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateRequestEcopointDto {
-  @ApiProperty()
-  cnpj: string;
-
   @ApiProperty({ enum: ['ADICIONAR', 'DEVOLUCAO', 'COLETAR'] })
   acao: RequestActionEcopoint;
 

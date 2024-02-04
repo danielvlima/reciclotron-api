@@ -7,10 +7,32 @@ import {
   FilterOptionsPartnerDto,
 } from './dto';
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
+import { CryptoModule } from 'src/shared/modules/crypto/crypto.module';
+import { TokenService } from 'src/shared/modules/auth/token.service';
+import { Prisma } from '@prisma/client';
+import { NotFoundPartnerException } from 'src/exceptions';
+import { PrismaErrorCode } from 'src/shared/enum';
+import { UpdateProfileDataException } from 'src/exceptions/update-profile-data.exception';
 
 @Injectable()
 export class PartnerService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private tokenService: TokenService,
+  ) {}
+
+  async updateRtHash(cnpj: string, rt: string) {
+    const hash = CryptoModule.sha256(rt);
+    await this.prisma.empresasParceiras.update({
+      where: {
+        cnpj: cnpj,
+      },
+      data: {
+        token: hash,
+        atualizadoEm: new Date(),
+      },
+    });
+  }
 
   create(data: CreatePartnerDto) {
     return this.prisma.empresasParceiras.create({
@@ -114,25 +136,39 @@ export class PartnerService {
   }
 
   findOne(email: string) {
-    return this.prisma.empresasParceiras.findFirstOrThrow({
-      where: {
-        email,
-      },
-      include: {
-        endereco: true,
-      },
-    });
+    return this.prisma.empresasParceiras
+      .findFirstOrThrow({
+        where: {
+          email,
+        },
+        include: {
+          endereco: true,
+        },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.NotFoundError) {
+          throw new NotFoundPartnerException();
+        }
+        throw err;
+      });
   }
 
   findOneWithCnpj(cnpj: string) {
-    return this.prisma.empresasParceiras.findFirstOrThrow({
-      where: {
-        cnpj,
-      },
-      include: {
-        endereco: true,
-      },
-    });
+    return this.prisma.empresasParceiras
+      .findFirstOrThrow({
+        where: {
+          cnpj,
+        },
+        include: {
+          endereco: true,
+        },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.NotFoundError) {
+          throw new NotFoundPartnerException();
+        }
+        throw err;
+      });
   }
 
   update(data: UpdatePartnerDto) {
@@ -155,6 +191,7 @@ export class PartnerService {
         atualizadoEm: new Date(),
         codigoRecuperacao: null,
         codigoRecuperacaoCriadoEm: null,
+        codigoRecuperacaoVerificado: null,
       },
       include: {
         endereco: true,
@@ -163,29 +200,36 @@ export class PartnerService {
   }
 
   updateAddress(cnpj: string, updateAddress: UpdateAddressPartnerDto) {
-    return this.prisma.empresasParceiras.update({
-      where: {
-        cnpj,
-      },
+    return this.prisma.empresasParceiras
+      .update({
+        where: {
+          cnpj,
+        },
 
-      data: {
-        atualizadoEm: new Date(),
-        endereco: {
-          update: {
-            rua: updateAddress.rua,
-            numero: updateAddress.numero,
-            complemento: updateAddress.complemento,
-            bairro: updateAddress.bairro,
-            cidade: updateAddress.cidade,
-            uf: updateAddress.uf,
-            cep: updateAddress.cep,
+        data: {
+          atualizadoEm: new Date(),
+          endereco: {
+            update: {
+              rua: updateAddress.rua,
+              numero: updateAddress.numero,
+              complemento: updateAddress.complemento,
+              bairro: updateAddress.bairro,
+              cidade: updateAddress.cidade,
+              uf: updateAddress.uf,
+              cep: updateAddress.cep,
+            },
           },
         },
-      },
-      include: {
-        endereco: true,
-      },
-    });
+        include: {
+          endereco: true,
+        },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.UniqueContrantViolation) {
+          throw new UpdateProfileDataException();
+        }
+        throw err;
+      });
   }
 
   updateRecoveryCode = (cnpj: string, code: string) => {
@@ -199,15 +243,64 @@ export class PartnerService {
         codigoRecuperacao: code,
         atualizadoEm: now,
         codigoRecuperacaoCriadoEm: now,
+        codigoRecuperacaoVerificado: false,
       },
     });
   };
 
-  remove(cnpj: string) {
-    return this.prisma.empresasParceiras.delete({
+  checkedRecoveryCode(cnpj: any) {
+    const now = new Date();
+    return this.prisma.empresasParceiras.update({
       where: {
         cnpj,
       },
+
+      data: {
+        atualizadoEm: now,
+        codigoRecuperacaoVerificado: true,
+      },
     });
+  }
+
+  remove(cnpj: string) {
+    return this.prisma.empresasParceiras
+      .delete({
+        where: {
+          cnpj,
+        },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.NotFoundError) {
+          throw new NotFoundPartnerException();
+        }
+        throw err;
+      });
+  }
+
+  logout(cnpj: string) {
+    return this.prisma.empresasParceiras.updateMany({
+      where: {
+        cnpj: cnpj,
+        token: {
+          not: null,
+        },
+      },
+      data: {
+        token: null,
+      },
+    });
+  }
+
+  async refreshToken(cnpj: string, rt: string) {
+    const partner = await this.findOneWithCnpj(cnpj);
+    CryptoModule.checkRtToken(partner.token, rt);
+    const tokens = await this.tokenService.getTokens(
+      cnpj,
+      partner.email,
+      'EMPRESA',
+    );
+
+    await this.updateRtHash(cnpj, tokens.refresh_token);
+    return tokens;
   }
 }

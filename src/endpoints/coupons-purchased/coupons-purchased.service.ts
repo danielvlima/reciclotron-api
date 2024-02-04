@@ -47,10 +47,10 @@ export class CouponsPurchasedService {
       .filter((value, index, self) => self.indexOf(value) === index);
   }
 
-  count(data: GetPaginatedCouponsPurchasedDto, dateNow: Date) {
+  count(cpf: string, data: GetPaginatedCouponsPurchasedDto, dateNow: Date) {
     return this.prisma.cuponsCompradosUsuario.count({
       where: {
-        usuarioCPF: data.usuarioCPF,
+        usuarioCPF: cpf,
         expiraEm: { gte: dateNow },
         utilizadoEm: null,
         cupom: {
@@ -62,7 +62,11 @@ export class CouponsPurchasedService {
     });
   }
 
-  findPaginated(data: GetPaginatedCouponsPurchasedDto, dateNow: Date) {
+  findPaginated(
+    cpf: string,
+    data: GetPaginatedCouponsPurchasedDto,
+    dateNow: Date,
+  ) {
     let orderParams = {};
     switch (data.ordem.opcao) {
       case OrderByCouponsPurchasedEnum.ExpiracaoMaisLonga:
@@ -98,7 +102,7 @@ export class CouponsPurchasedService {
         },
       },
       where: {
-        usuarioCPF: data.usuarioCPF,
+        usuarioCPF: cpf,
         expiraEm: { gte: dateNow },
         utilizadoEm: null,
       },

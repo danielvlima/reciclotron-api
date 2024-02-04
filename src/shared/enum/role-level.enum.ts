@@ -1,0 +1,5 @@
+export enum RoleLevel {
+  USUARIO = 'USUARIO',
+  ADMINSTRADOR = 'ADMINSTRADOR',
+  EMPRESA = 'EMPRESA',
+}

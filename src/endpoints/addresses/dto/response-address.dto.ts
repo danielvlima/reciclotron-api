@@ -9,4 +9,5 @@ export class ResponseAddressDto {
   cep: string;
   lat: number;
   long: number;
+  nomeFantasiaEmpresa?: string;
 }
