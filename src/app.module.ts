@@ -15,7 +15,7 @@ import { TransactionsModule } from './endpoints/transactions/transactions.module
 import { CompareModule } from './shared/modules/compare/compare.module';
 import { EcopointsModule } from './endpoints/ecopoints/ecopoints.module';
 import { AddressesModule } from './endpoints/addresses/addresses.module';
-import { MailModule } from './endpoints/mail/mail.module';
+import { MailerModule } from './shared/modules/mailer/mailer.module';
 import { TokenModule } from './shared/modules/auth/token.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './shared/guards';
@@ -36,8 +36,8 @@ import { AtGuard } from './shared/guards';
     CompareModule,
     EcopointsModule,
     AddressesModule,
-    MailModule,
     TokenModule,
+    MailerModule,
   ],
   controllers: [AppController],
   providers: [
