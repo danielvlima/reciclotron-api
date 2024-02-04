@@ -3,7 +3,7 @@ import * as nodemailer from 'nodemailer';
 import { SentMessageInfo } from 'nodemailer/lib/smtp-transport';
 
 @Injectable()
-export class MailerService {
+export class MailService {
   private transporter: nodemailer.Transporter<SentMessageInfo>;
 
   constructor() {
