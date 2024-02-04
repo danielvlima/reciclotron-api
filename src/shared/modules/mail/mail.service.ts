@@ -21,12 +21,12 @@ export class MailService {
     });
   }
 
-  async sendSignUp(to: string) {
+  async sendSignUp(to: string, isPartner: boolean = false) {
     return await this.sendMail(
       to,
       'Seja bem vindo à plataforma Reciclopontos',
       'sign-up',
-      {},
+      { isPartner },
     );
   }
 
