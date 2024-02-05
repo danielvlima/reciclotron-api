@@ -237,10 +237,17 @@ export class TransactionsController {
       pontos: user.pontos + valueTransaction,
     });
 
+    const dayCreated = new Date(transaction.criadoEm);
+
     await this.transactionsService.update(updateTransactionDto);
     this.mailerService.sendUserDepositConfirmed(
       user.email,
       user.nome,
+      `${dayCreated.getDate().toString().padStart(2, '0')}/${(
+        dayCreated.getMonth() + 1
+      )
+        .toString()
+        .padStart(2, '0')}/${dayCreated.getFullYear()}`,
       valueTransaction.toFixed(),
     );
     return;

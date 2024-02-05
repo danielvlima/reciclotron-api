@@ -33,7 +33,7 @@ export class MailService {
     return await this.sendMail(
       to,
       'Seja bem vindo à plataforma Reciclopontos',
-      'sign-up',
+      './sign-up',
       { isPartner },
     );
   }
@@ -42,7 +42,7 @@ export class MailService {
     return await this.sendMail(
       to,
       'Seja bem vindo à plataforma Reciclopontos',
-      'goodbye',
+      './goodbye',
       { name },
     );
   }
@@ -51,7 +51,7 @@ export class MailService {
     return await this.sendMail(
       to,
       'Seu código de recuperação de senha',
-      'forgot-password',
+      './forgot-password',
       { name, code },
     );
   }
@@ -60,7 +60,7 @@ export class MailService {
     return await this.sendMail(
       to,
       'Sua senha da plataforma Reciclopontos foi alterada',
-      'password-updated',
+      './password-updated',
       { name },
     );
   }
@@ -69,17 +69,22 @@ export class MailService {
     return await this.sendMail(
       to,
       'Seu perfil da plataforma Reciclopontos foi atualizado',
-      'profile-updated',
+      './profile-updated',
       { name },
     );
   }
 
-  async sendUserDepositConfirmed(to: string, name: string, value: string) {
+  async sendUserDepositConfirmed(
+    to: string,
+    name: string,
+    day: string,
+    value: string,
+  ) {
     return await this.sendMail(
       to,
       'Seu depósito foi confirmado na plataforma Reciclopontos',
-      'user/deposit-confirmed',
-      { name, value },
+      './user/deposit-confirmed',
+      { name, day, value },
     );
   }
 
@@ -87,7 +92,7 @@ export class MailService {
     return await this.sendMail(
       to,
       'Seu cupom foi comprado com sucesso',
-      'user/new-purchase',
+      './user/new-purchase',
       { name, cupomName },
     );
   }
@@ -102,7 +107,7 @@ export class MailService {
     return await this.sendMail(
       to,
       'Seu depósito foi solicitado com sucesso na plataforma Reciclopontos',
-      'user/new-deposit',
+      './user/new-deposit',
       {
         name,
         materials: materialsDeposit.map((el) => {
