@@ -1,5 +1,13 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
+import { Ecopoint } from 'src/endpoints/ecopoints/entities/ecopoint.entity';
+import { DepositMaterialsTransactionDTO } from 'src/endpoints/transactions/dto';
+
+const format = (value: string, pattern: string) => {
+  let i = 0;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return pattern.replace(/#/g, (_) => value[i++]);
+};
 
 @Injectable()
 export class MailService {
@@ -81,6 +89,40 @@ export class MailService {
       'Seu cupom foi comprado com sucesso',
       'user/new-purchase',
       { name, cupomName },
+    );
+  }
+
+  async sendUserNewDeposit(
+    to: string,
+    name: string,
+    total: string,
+    materialsDeposit: DepositMaterialsTransactionDTO[],
+    ecopoint: Ecopoint,
+  ) {
+    return await this.sendMail(
+      to,
+      'Seu depósito foi solicitado com sucesso na plataforma Reciclopontos',
+      'user/new-deposit',
+      {
+        name,
+        materials: materialsDeposit.map((el) => {
+          return {
+            qtd: el.quantidade.toFixed(),
+            itemName: el.nomeMaterial,
+            pts: el.valorTotal.toFixed(),
+          };
+        }),
+        total,
+        ecoId: ecopoint.id,
+        ecoName: ecopoint.nome,
+        ecoAddress: `${ecopoint.enderecos.rua}, ${ecopoint.enderecos.numero}, ${
+          ecopoint.enderecos.bairro
+        }, ${ecopoint.enderecos.cidade}-${ecopoint.enderecos.uf};${
+          ecopoint.enderecos.complemento
+            ? ` Complemento: ${ecopoint.enderecos.complemento};`
+            : ''
+        } CEP: ${format(ecopoint.enderecos.cep, '#####-###')}`,
+      },
     );
   }
 }

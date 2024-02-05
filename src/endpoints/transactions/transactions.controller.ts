@@ -60,15 +60,23 @@ export class TransactionsController {
     @GetCurrentKey() cpf: string,
     @Body() depositDto: CreateDepositTransactionDto,
   ) {
-    await this.usersService.findOneWithCpf(cpf);
+    const user = await this.usersService.findOneWithCpf(cpf);
     const ecopoint = await this.ecopointService.findOne(depositDto.ecopontoId);
 
     if (!ecopoint.ativo) {
       throw new NotActiveEcopointException();
     }
-    return this.transactionsService
-      .createDeposit(cpf, depositDto)
-      .then(() => {});
+    await this.transactionsService.createDeposit(cpf, depositDto);
+
+    await this.mailerService.sendUserNewDeposit(
+      user.email,
+      user.nome,
+      depositDto.valorTotal.toFixed(),
+      depositDto.materiaisDepositados,
+      ecopoint,
+    );
+
+    return;
   }
 
   @UseGuards(UserGuard)
@@ -200,6 +208,9 @@ export class TransactionsController {
       updateTransactionDto.id,
     );
 
+    const valueTransaction =
+      updateTransactionDto.valorTotal ?? transaction.valorTotal;
+
     if (transaction.status === $Enums.StatusTransacao.EFETIVADO) {
       throw new EffectedTransactionException();
     }
@@ -216,11 +227,15 @@ export class TransactionsController {
 
     await this.usersService.update({
       cpf: transaction.usuarioCPF,
-      pontos: user.pontos + transaction.valorTotal,
+      pontos: user.pontos + valueTransaction,
     });
 
     await this.transactionsService.update(updateTransactionDto);
-
+    this.mailerService.sendUserDepositConfirmed(
+      user.email,
+      user.nome,
+      valueTransaction.toFixed(),
+    );
     return;
   }
 }

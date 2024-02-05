@@ -483,93 +483,95 @@
                       </table>
                     </td>
                   </tr>
-                  <tr>
-                    <td align="left" style="padding: 0; margin: 0; padding-top: 20px; padding-left: 20px; padding-right: 20px;">
-                      <!--[if mso]><table style="width:560px" cellpadding="0" cellspacing="0"><tr><td style="width:70px" valign="top"><![endif]-->
-                      <table cellspacing="0" cellpadding="0" align="left" class="es-left" role="none" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; border-spacing: 0px; float: left;">
-                        <tr>
-                          <td class="es-m-p20b" valign="top" align="center" style="padding: 0; margin: 0; width: 60px;">
-                            <table width="100%" cellspacing="0" cellpadding="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; border-spacing: 0px;">
-                              <tr>
-                                <td align="center" style="padding: 0; margin: 0;">
-                                  <p
-                                    style="
-                                      margin: 0;
-                                      -webkit-text-size-adjust: none;
-                                      -ms-text-size-adjust: none;
-                                      mso-line-height-rule: exactly;
-                                      font-family: 'merriweather sans', 'helvetica neue', helvetica, arial, sans-serif;
-                                      line-height: 24px;
-                                      color: #333333;
-                                      font-size: 16px;
-                                    "
-                                  >
-                                    <b>{qtd} x</b>
-                                  </p>
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                          <td class="es-hidden" style="padding: 0; margin: 0; width: 10px;"></td>
-                        </tr>
-                      </table>
-                      <!--[if mso]></td><td style="width:380px" valign="top"><![endif]-->
-                      <table cellpadding="0" cellspacing="0" class="es-left" align="left" role="none" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; border-spacing: 0px; float: left;">
-                        <tr>
-                          <td align="left" class="es-m-p20b" style="padding: 0; margin: 0; width: 380px;">
-                            <table cellpadding="0" cellspacing="0" width="100%" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; border-spacing: 0px;">
-                              <tr>
-                                <td align="left" style="padding: 0; margin: 0;">
-                                  <p
-                                    style="
-                                      margin: 0;
-                                      -webkit-text-size-adjust: none;
-                                      -ms-text-size-adjust: none;
-                                      mso-line-height-rule: exactly;
-                                      font-family: arial, 'helvetica neue', helvetica, sans-serif;
-                                      line-height: 24px;
-                                      color: #333333;
-                                      font-size: 16px;
-                                    "
-                                  >
-                                    <strong>{</strong><b>nomeItem</b><strong>} :</strong>
-                                  </p>
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                      </table>
-                      <!--[if mso]></td><td style="width:10px"></td><td style="width:100px" valign="top"><![endif]-->
-                      <table cellpadding="0" cellspacing="0" class="es-right" align="right" role="none" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; border-spacing: 0px; float: right;">
-                        <tr>
-                          <td align="left" style="padding: 0; margin: 0; width: 100px;">
-                            <table cellpadding="0" cellspacing="0" width="100%" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; border-spacing: 0px;">
-                              <tr>
-                                <td align="right" style="padding: 0; margin: 0;">
-                                  <p
-                                    style="
-                                      margin: 0;
-                                      -webkit-text-size-adjust: none;
-                                      -ms-text-size-adjust: none;
-                                      mso-line-height-rule: exactly;
-                                      font-family: arial, 'helvetica neue', helvetica, sans-serif;
-                                      line-height: 24px;
-                                      color: #333333;
-                                      font-size: 16px;
-                                    "
-                                  >
-                                    <strong>{pts} Rpts</strong>
-                                  </p>
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                      </table>
-                      <!--[if mso]></td></tr></table><![endif]-->
-                    </td>
-                  </tr>
+                  {{#list materials}}
+                    <tr>
+                      <td align="left" style="padding: 0; margin: 0; padding-top: 20px; padding-left: 20px; padding-right: 20px;">
+                        <!--[if mso]><table style="width:560px" cellpadding="0" cellspacing="0"><tr><td style="width:70px" valign="top"><![endif]-->
+                        <table cellspacing="0" cellpadding="0" align="left" class="es-left" role="none" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; border-spacing: 0px; float: left;">
+                          <tr>
+                            <td class="es-m-p20b" valign="top" align="center" style="padding: 0; margin: 0; width: 60px;">
+                              <table width="100%" cellspacing="0" cellpadding="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; border-spacing: 0px;">
+                                <tr>
+                                  <td align="center" style="padding: 0; margin: 0;">
+                                    <p
+                                      style="
+                                        margin: 0;
+                                        -webkit-text-size-adjust: none;
+                                        -ms-text-size-adjust: none;
+                                        mso-line-height-rule: exactly;
+                                        font-family: 'merriweather sans', 'helvetica neue', helvetica, arial, sans-serif;
+                                        line-height: 24px;
+                                        color: #333333;
+                                        font-size: 16px;
+                                      "
+                                    >
+                                      <b>{{qtd}} x</b>
+                                    </p>
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                            <td class="es-hidden" style="padding: 0; margin: 0; width: 10px;"></td>
+                          </tr>
+                        </table>
+                        <!--[if mso]></td><td style="width:380px" valign="top"><![endif]-->
+                        <table cellpadding="0" cellspacing="0" class="es-left" align="left" role="none" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; border-spacing: 0px; float: left;">
+                          <tr>
+                            <td align="left" class="es-m-p20b" style="padding: 0; margin: 0; width: 380px;">
+                              <table cellpadding="0" cellspacing="0" width="100%" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; border-spacing: 0px;">
+                                <tr>
+                                  <td align="left" style="padding: 0; margin: 0;">
+                                    <p
+                                      style="
+                                        margin: 0;
+                                        -webkit-text-size-adjust: none;
+                                        -ms-text-size-adjust: none;
+                                        mso-line-height-rule: exactly;
+                                        font-family: arial, 'helvetica neue', helvetica, sans-serif;
+                                        line-height: 24px;
+                                        color: #333333;
+                                        font-size: 16px;
+                                      "
+                                    >
+                                      <strong><b>{{itemName}}</b> :</strong>
+                                    </p>
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                        </table>
+                        <!--[if mso]></td><td style="width:10px"></td><td style="width:100px" valign="top"><![endif]-->
+                        <table cellpadding="0" cellspacing="0" class="es-right" align="right" role="none" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; border-spacing: 0px; float: right;">
+                          <tr>
+                            <td align="left" style="padding: 0; margin: 0; width: 100px;">
+                              <table cellpadding="0" cellspacing="0" width="100%" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; border-collapse: collapse; border-spacing: 0px;">
+                                <tr>
+                                  <td align="right" style="padding: 0; margin: 0;">
+                                    <p
+                                      style="
+                                        margin: 0;
+                                        -webkit-text-size-adjust: none;
+                                        -ms-text-size-adjust: none;
+                                        mso-line-height-rule: exactly;
+                                        font-family: arial, 'helvetica neue', helvetica, sans-serif;
+                                        line-height: 24px;
+                                        color: #333333;
+                                        font-size: 16px;
+                                      "
+                                    >
+                                      <strong>{{pts}} Rpts</strong>
+                                    </p>
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                        </table>
+                        <!--[if mso]></td></tr></table><![endif]-->
+                      </td>
+                    </tr>
+                  {{/list}}
                 </table>
               </td>
             </tr>
@@ -641,7 +643,7 @@
                                         font-size: 14px;
                                       "
                                     >
-                                      <strong>{pts} Rpts</strong>
+                                      <strong>{{total}} Rpts</strong>
                                     </p>
                                   </td>
                                 </tr>
