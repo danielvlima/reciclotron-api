@@ -114,12 +114,13 @@ model Materiais {
 }
 
 model MateriaisDepositados {
-  transacaoId BigInt
-  materialId  BigInt
-  quantidade  Int
-  valorTotal  Int
-  material    Materiais  @relation(fields: [materialId], references: [id])
-  transacoes  Transacoes @relation(fields: [transacaoId], references: [id])
+  transacaoId  BigInt
+  materialId   BigInt
+  quantidade   Int
+  nomeMaterial String
+  valorTotal   Int
+  material     Materiais  @relation(fields: [materialId], references: [id])
+  transacoes   Transacoes @relation(fields: [transacaoId], references: [id])
 
   @@id([transacaoId, materialId])
   @@index([materialId])
@@ -128,6 +129,7 @@ model MateriaisDepositados {
 
 model Transacoes {
   id                   BigInt                 @id @default(autoincrement())
+  titulo               String
   usuarioCPF           String
   tipo                 TipoTransacao
   valorTotal           Int
@@ -150,6 +152,8 @@ model CuponsCompradosUsuario {
   id          BigInt         @id @default(autoincrement())
   usuarioCPF  String
   cupomId     BigInt
+  cupomNome   String
+  cupomRegras String         @db.LongText
   criadoEm    DateTime       @default(now())
   expiraEm    DateTime
   utilizadoEm DateTime?

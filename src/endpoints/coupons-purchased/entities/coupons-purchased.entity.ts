@@ -2,14 +2,14 @@ export class CouponsPurchased {
   id: bigint;
   usuarioCPF: string;
   cupomId: bigint;
+  cupomNome: string;
+  cupomRegras: string;
   criadoEm: Date;
   expiraEm: Date;
   cupom: {
-    nome: string;
     empresa: {
       nomeFantasia: string;
       logo: string | null;
     };
-    regras: string;
   };
 }

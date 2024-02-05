@@ -16,7 +16,11 @@ import { PrismaErrorCode } from 'src/shared/enum';
 export class TransactionsService {
   constructor(private prisma: PrismaService) {}
 
-  createDeposit(cpf: string, depositData: CreateDepositTransactionDto) {
+  createDeposit(
+    cpf: string,
+    title: string,
+    depositData: CreateDepositTransactionDto,
+  ) {
     return this.prisma.transacoes.create({
       data: {
         tipo: $Enums.TipoTransacao.CREDITO,
@@ -24,6 +28,7 @@ export class TransactionsService {
         criadoEm: new Date(),
         usuarioCPF: cpf,
         ecopontoId: depositData.ecopontoId,
+        titulo: title,
         valorTotal: depositData.valorTotal,
         materiaisDepositados: {
           createMany: {
@@ -40,7 +45,11 @@ export class TransactionsService {
     });
   }
 
-  createPurchase(cpf: string, purchaseData: CreatePurchaseTransactionDto) {
+  createPurchase(
+    cpf: string,
+    title: string,
+    purchaseData: CreatePurchaseTransactionDto,
+  ) {
     const date = new Date();
     return this.prisma.transacoes.create({
       data: {
@@ -49,6 +58,7 @@ export class TransactionsService {
         criadoEm: date,
         finalizadoEm: date,
         usuarioCPF: cpf,
+        titulo: title,
         valorTotal: purchaseData.valorTotal,
         cupomId: purchaseData.cupomId,
       },
@@ -164,6 +174,7 @@ export class TransactionsService {
           select: {
             materialId: true,
             quantidade: true,
+            nomeMaterial: true,
             transacaoId: true,
             valorTotal: true,
             material: true,

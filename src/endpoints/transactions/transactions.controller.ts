@@ -66,7 +66,11 @@ export class TransactionsController {
     if (!ecopoint.ativo) {
       throw new NotActiveEcopointException();
     }
-    await this.transactionsService.createDeposit(cpf, depositDto);
+    await this.transactionsService.createDeposit(
+      cpf,
+      'Reciclopontos: Novo Depósito',
+      depositDto,
+    );
 
     await this.mailerService.sendUserNewDeposit(
       user.email,
@@ -102,6 +106,7 @@ export class TransactionsController {
 
     const newTransaction = await this.transactionsService.createPurchase(
       cpf,
+      `Resgate Prêmio: ${coupon.nome}`,
       purchaseDto,
     );
 
@@ -121,6 +126,8 @@ export class TransactionsController {
       await this.couponsPurchasedService.create({
         usuarioCPF: cpf,
         cupomId: purchaseDto.cupomId,
+        cupomNome: coupon.nome,
+        cupomRegras: coupon.regras,
         expiraEm: expirationDate,
         criadoEm: new Date(),
       });
