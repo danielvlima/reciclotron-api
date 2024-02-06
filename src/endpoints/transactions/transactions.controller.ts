@@ -25,7 +25,6 @@ import { DiscountCouponService } from '../discount-coupon/discount-coupon.servic
 import { UsersService } from '../users/users.service';
 import { CouponsPurchasedService } from '../coupons-purchased/coupons-purchased.service';
 import { $Enums } from '@prisma/client';
-import { TransactionStatusEnum } from './enum/transactions-type.enum';
 import { ApiTags } from '@nestjs/swagger';
 import { GetCurrentKey, Public } from 'src/shared/decorators';
 import { AdminGuard, UserGuard } from 'src/shared/guards';
@@ -36,9 +35,10 @@ import {
   NoCouponsAvailableException,
   NotActiveEcopointException,
   NotCreditTransactionException,
-  StatusNotEffectedUpdateTransactionException,
+  CancelledTransactionException,
 } from 'src/exceptions';
 import { MailService } from 'src/shared/modules/mail/mail.service';
+import { TransactionStatusEnum } from './enum/transactions-type.enum';
 
 @ApiTags('Transações')
 @Controller('transactions')
@@ -210,7 +210,7 @@ export class TransactionsController {
   @Public()
   @HttpCode(HttpStatus.NO_CONTENT)
   @Patch('admin/deposit/confirm')
-  async update(@Body() updateTransactionDto: UpdateTransactionDto) {
+  async confirm(@Body() updateTransactionDto: UpdateTransactionDto) {
     const transaction = await this.transactionsService.findOne(
       updateTransactionDto.id,
     );
@@ -220,10 +220,6 @@ export class TransactionsController {
 
     if (transaction.status === $Enums.StatusTransacao.EFETIVADO) {
       throw new EffectedTransactionException();
-    }
-
-    if (updateTransactionDto.status !== TransactionStatusEnum.EFETIVADO) {
-      throw new StatusNotEffectedUpdateTransactionException();
     }
 
     if (transaction.tipo !== $Enums.TipoTransacao.CREDITO) {
@@ -239,7 +235,56 @@ export class TransactionsController {
 
     const dayCreated = new Date(transaction.criadoEm);
 
-    await this.transactionsService.update(updateTransactionDto);
+    await this.transactionsService.update(
+      updateTransactionDto,
+      TransactionStatusEnum.EFETIVADO,
+    );
+    this.mailerService.sendUserDepositConfirmed(
+      user.email,
+      user.nome,
+      `${dayCreated.getDate().toString().padStart(2, '0')}/${(
+        dayCreated.getMonth() + 1
+      )
+        .toString()
+        .padStart(2, '0')}/${dayCreated.getFullYear()}`,
+      valueTransaction.toFixed(),
+    );
+    return;
+  }
+
+  @UseGuards(AdminGuard)
+  @Public()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch('admin/deposit/cancel')
+  async cancel(@Body() updateTransactionDto: UpdateTransactionDto) {
+    const transaction = await this.transactionsService.findOne(
+      updateTransactionDto.id,
+    );
+
+    const valueTransaction =
+      updateTransactionDto.valorTotal ?? transaction.valorTotal;
+
+    if (transaction.status === $Enums.StatusTransacao.REJEITADO) {
+      throw new CancelledTransactionException();
+    }
+
+    if (transaction.tipo !== $Enums.TipoTransacao.CREDITO) {
+      throw new NotCreditTransactionException();
+    }
+
+    const user = await this.usersService.findOneWithCpf(transaction.usuarioCPF);
+
+    await this.usersService.update({
+      cpf: transaction.usuarioCPF,
+      pontos: user.pontos + valueTransaction,
+    });
+
+    const dayCreated = new Date(transaction.criadoEm);
+
+    await this.transactionsService.update(
+      updateTransactionDto,
+      TransactionStatusEnum.REJEITADO,
+    );
     this.mailerService.sendUserDepositConfirmed(
       user.email,
       user.nome,

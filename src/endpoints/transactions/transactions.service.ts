@@ -128,9 +128,12 @@ export class TransactionsService {
       });
   }
 
-  update(updateTransactionDto: UpdateTransactionDto) {
+  update(
+    updateTransactionDto: UpdateTransactionDto,
+    status: TransactionStatusEnum,
+  ) {
     let date = new Date();
-    if (updateTransactionDto.status === TransactionStatusEnum.PENDENTE) {
+    if (status === TransactionStatusEnum.PENDENTE) {
       date = null;
     }
 
@@ -139,7 +142,7 @@ export class TransactionsService {
         id: updateTransactionDto.id,
       },
       data: {
-        status: updateTransactionDto.status,
+        status: status,
         finalizadoEm: date,
         valorTotal: updateTransactionDto.valorTotal || undefined,
       },

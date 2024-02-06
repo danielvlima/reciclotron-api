@@ -88,6 +88,20 @@ export class MailService {
     );
   }
 
+  async sendUserDepositCancelled(
+    to: string,
+    name: string,
+    day: string,
+    value: string,
+  ) {
+    return await this.sendMail(
+      to,
+      'Seu depósito foi confirmado na plataforma Reciclopontos',
+      './user/deposit-cancelled',
+      { name, day, value },
+    );
+  }
+
   async sendUserNewPurchase(to: string, name: string, cupomName: string) {
     return await this.sendMail(
       to,
