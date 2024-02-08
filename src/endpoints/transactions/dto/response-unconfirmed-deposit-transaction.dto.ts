@@ -4,6 +4,8 @@ export class ResponseUnconfirmedDepositTransactionDto {
   id: number;
   usuarioCPF: string;
   ecopontoId: string;
+  lat?: number;
+  long?: number;
   valorTotal: number;
   materiaisDepositados: ResponseDepositMaterialsTransactionDTO[];
 }

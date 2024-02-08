@@ -152,6 +152,49 @@ export class TransactionsService {
     });
   }
 
+  userCountUnconfirmed(cpf: string) {
+    return this.prisma.transacoes.count({
+      where: {
+        status: $Enums.StatusTransacao.PENDENTE,
+        tipo: $Enums.TipoTransacao.CREDITO,
+        usuarioCPF: cpf,
+      },
+    });
+  }
+
+  userFindAllUnconfirmed(cpf: string) {
+    return this.prisma.transacoes.findMany({
+      where: {
+        status: $Enums.StatusTransacao.PENDENTE,
+        tipo: $Enums.TipoTransacao.CREDITO,
+        usuarioCPF: cpf,
+      },
+      orderBy: [{ id: 'desc' }],
+      include: {
+        ecoponto: {
+          include: {
+            enderecos: {
+              select: {
+                lat: true,
+                long: true,
+              },
+            },
+          },
+        },
+        materiaisDepositados: {
+          select: {
+            materialId: true,
+            quantidade: true,
+            nomeMaterial: true,
+            transacaoId: true,
+            valorTotal: true,
+            material: true,
+          },
+        },
+      },
+    });
+  }
+
   countUnconfirmed(ecopontoId: string) {
     return this.prisma.transacoes.count({
       where: {

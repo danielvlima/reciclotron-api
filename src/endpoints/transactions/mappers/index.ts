@@ -22,6 +22,8 @@ export const toUnconfirmedTransactionDTO = (
     id: Number(data.id),
     usuarioCPF: data.usuarioCPF,
     ecopontoId: data.ecopontoId!,
+    lat: data.ecoponto?.enderecos.lat,
+    long: data.ecoponto?.enderecos.long,
     valorTotal: data.valorTotal,
     materiaisDepositados: data.materiaisDepositados.map((el) => {
       return {

@@ -11,4 +11,5 @@ export class Transaction {
   valorTotal: number;
   usuarioCPF: string;
   ecopontoId?: string | null;
+  ecoponto?: { enderecos: { lat: number; long: number } } | null;
 }
