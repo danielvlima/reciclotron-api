@@ -169,6 +169,30 @@ export class TransactionsController {
     });
   }
 
+  @UseGuards(UserGuard)
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Get('user/get/unconfirmed')
+  async userFindAllUnconfirmed(@GetCurrentKey() cpf: string) {
+    const total = await this.transactionsService.userCountUnconfirmed(cpf);
+    if (!total) {
+      return ResponseFactoryModule.generate<
+        ResponsePaginatedTransactionsDto<ResponseUnconfirmedDepositTransactionDto>
+      >({
+        total,
+        transacoes: [],
+      });
+    }
+    const transactions =
+      await this.transactionsService.userFindAllUnconfirmed(cpf);
+    return ResponseFactoryModule.generate<
+      ResponsePaginatedTransactionsDto<ResponseUnconfirmedDepositTransactionDto>
+    >({
+      total,
+      transacoes: transactions.map((el) => toUnconfirmedTransactionDTO(el)),
+    });
+  }
+
   @UseGuards(AdminGuard)
   @Public()
   @HttpCode(HttpStatus.OK)
