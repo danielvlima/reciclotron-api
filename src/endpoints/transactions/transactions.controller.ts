@@ -7,6 +7,8 @@ import {
   Get,
   UseGuards,
   HttpStatus,
+  ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
@@ -280,13 +282,8 @@ export class TransactionsController {
   @Public()
   @HttpCode(HttpStatus.NO_CONTENT)
   @Patch('admin/deposit/cancel')
-  async cancel(@Body() updateTransactionDto: UpdateTransactionDto) {
-    const transaction = await this.transactionsService.findOne(
-      updateTransactionDto.id,
-    );
-
-    const valueTransaction =
-      updateTransactionDto.valorTotal ?? transaction.valorTotal;
+  async cancel(@Query('id', new ParseIntPipe()) id: number) {
+    const transaction = await this.transactionsService.findOne(id);
 
     if (transaction.status === $Enums.StatusTransacao.REJEITADO) {
       throw new CancelledTransactionException();
@@ -298,18 +295,13 @@ export class TransactionsController {
 
     const user = await this.usersService.findOneWithCpf(transaction.usuarioCPF);
 
-    await this.usersService.update({
-      cpf: transaction.usuarioCPF,
-      pontos: user.pontos + valueTransaction,
-    });
-
     const dayCreated = new Date(transaction.criadoEm);
 
     await this.transactionsService.update(
-      updateTransactionDto,
+      { id: id },
       TransactionStatusEnum.REJEITADO,
     );
-    this.mailerService.sendUserDepositConfirmed(
+    this.mailerService.sendUserDepositCancelled(
       user.email,
       user.nome,
       `${dayCreated.getDate().toString().padStart(2, '0')}/${(
@@ -317,7 +309,7 @@ export class TransactionsController {
       )
         .toString()
         .padStart(2, '0')}/${dayCreated.getFullYear()}`,
-      valueTransaction.toFixed(),
+      transaction.valorTotal.toFixed(),
     );
     return;
   }
