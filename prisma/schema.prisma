@@ -8,76 +8,176 @@ datasource db {
   relationMode = "prisma"
 }
 
-model CuponsCompradosUsuario {
-  id          BigInt    @id @default(autoincrement())
-  usuarioCPF  String
-  cupomId     BigInt
-  criadoEm    DateTime  @default(now())
-  expiraEm    DateTime
-  utilizadoEm DateTime?
-
-  @@index([cupomId])
-  @@index([usuarioCPF])
-}
-
-model CuponsDesconto {
-  id                    BigInt    @id @default(autoincrement())
-  cnpjEmpresa           String
-  nome                  String
-  valor                 Int
-  ativo                 Boolean   @default(true)
-  regras                String    @db.LongText
-  criadoEm              DateTime  @default(now())
-  atualizadoEm          DateTime?
-  quantidadeDisponiveis Int
-
-  @@index([cnpjEmpresa])
-}
-
-model Ecopontos {
-  id           String         @id @unique
-  nome         String
-  ativo        Boolean        @default(true)
-  criadoEm     DateTime       @default(now())
-  atualizadoEm DateTime?
-  enderecoId   BigInt
-  tipo         Ecopontos_tipo
-
-  @@index([enderecoId])
+model Usuarios {
+  cpf                         String                   @id @unique @db.VarChar(11)
+  email                       String                   @unique
+  telefone                    String                   @unique
+  nome                        String
+  senha                       String                   @db.LongText
+  dataAniversario             DateTime
+  generoUsuario               GeneroUsuario
+  nivelPrivilegio             RegraPriviegio           @default(USUARIO)
+  criadoEm                    DateTime                 @default(now())
+  atualizadoEm                DateTime?
+  pontos                      Int                      @default(0)
+  codigoRecuperacao           String?
+  codigoRecuperacaoCriadoEm   DateTime?
+  token                       String?                  @db.LongText
+  codigoRecuperacaoVerificado Boolean?
+  transacoes                  Transacoes[]
+  cuponsCompradosUsuario      CuponsCompradosUsuario[]
 }
 
 model EmpresasParceiras {
-  cnpj                      String                        @id @unique @db.VarChar(14)
-  email                     String                        @unique
-  telefone                  String                        @unique
-  nomeFantasia              String
-  razaoSocial               String
-  senha                     String                        @db.LongText
-  ramo                      String
-  ativo                     Boolean                       @default(true)
-  tipoEmpresa               EmpresasParceiras_tipoEmpresa
-  enderecolojaOnline        String?
-  criadoEm                  DateTime                      @default(now())
-  atualizadoEm              DateTime?
-  codigoRecuperacao         String?
-  codigoRecuperacaoCriadoEm DateTime?
-  logo                      String?                       @db.LongText
+  cnpj                        String                 @id @unique @db.VarChar(14)
+  email                       String                 @unique
+  telefone                    String                 @unique
+  nomeFantasia                String
+  razaoSocial                 String
+  senha                       String                 @db.LongText
+  ramo                        String
+  ativo                       Boolean                @default(true)
+  tipoEmpresa                 TipoEmpresa
+  enderecolojaOnline          String?
+  criadoEm                    DateTime               @default(now())
+  atualizadoEm                DateTime?
+  codigoRecuperacao           String?
+  codigoRecuperacaoCriadoEm   DateTime?
+  logo                        String?                @db.LongText
+  token                       String?                @db.LongText
+  codigoRecuperacaoVerificado Boolean?
+  cupons                      CuponsDesconto[]
+  endereco                    Enderecos?
+  SolicitacoesEcoponto        SolicitacoesEcoponto[]
 }
 
 model Enderecos {
-  id          BigInt @id @default(autoincrement())
+  id          BigInt            @id @default(autoincrement())
   rua         String
   numero      String
   complemento String
   bairro      String
   cidade      String
-  uf          String @db.VarChar(2)
-  cep         String @db.VarChar(8)
+  uf          String            @db.VarChar(2)
+  cep         String            @db.VarChar(8)
   lat         Float
   long        Float
-  cnpjEmpresa String @unique
+  cnpjEmpresa String            @unique
+  ecoponto    Ecopontos[]
+  empresa     EmpresasParceiras @relation(fields: [cnpjEmpresa], references: [cnpj])
 
   @@index([cnpjEmpresa])
+}
+
+model CuponsDesconto {
+  id                     BigInt                   @id @default(autoincrement())
+  cnpjEmpresa            String
+  nome                   String
+  valor                  Int
+  ativo                  Boolean                  @default(true)
+  regras                 String                   @db.LongText
+  criadoEm               DateTime                 @default(now())
+  atualizadoEm           DateTime?
+  quantidadeDisponiveis  Int
+  transacoes             Transacoes[]
+  empresa                EmpresasParceiras        @relation(fields: [cnpjEmpresa], references: [cnpj])
+  cuponsCompradosUsuario CuponsCompradosUsuario[]
+
+  @@index([cnpjEmpresa])
+}
+
+model Ecopontos {
+  id                   String                 @id @unique
+  nome                 String
+  ativo                Boolean                @default(true)
+  criadoEm             DateTime               @default(now())
+  atualizadoEm         DateTime?
+  enderecoId           BigInt
+  tipo                 TipoEcoponto
+  transacoes           Transacoes[]
+  enderecos            Enderecos              @relation(fields: [enderecoId], references: [id])
+  SolicitacoesEcoponto SolicitacoesEcoponto[]
+
+  @@index([enderecoId])
+}
+
+model Materiais {
+  id                   BigInt                     @id @default(autoincrement())
+  nome                 String                     @unique
+  valor                Int
+  ativo                Boolean                    @default(true)
+  criadoEm             DateTime                   @default(now())
+  atualizadoEm         DateTime?
+  ehAceitoTipoEcoponto TipoEcopontoAceitaMaterial
+  logo                 String?                    @db.LongText
+  materiaisDepositados MateriaisDepositados[]
+}
+
+model MateriaisDepositados {
+  transacaoId  BigInt
+  materialId   BigInt
+  quantidade   Int
+  nomeMaterial String
+  valorTotal   Int
+  material     Materiais  @relation(fields: [materialId], references: [id])
+  transacoes   Transacoes @relation(fields: [transacaoId], references: [id])
+
+  @@id([transacaoId, materialId])
+  @@index([materialId])
+  @@index([transacaoId])
+}
+
+model Transacoes {
+  id                   BigInt                 @id @default(autoincrement())
+  titulo               String
+  usuarioCPF           String
+  tipo                 TipoTransacao
+  valorTotal           Int
+  cupomId              BigInt?
+  ecopontoId           String?
+  criadoEm             DateTime               @default(now())
+  status               StatusTransacao
+  finalizadoEm         DateTime?
+  materiaisDepositados MateriaisDepositados[]
+  cupom                CuponsDesconto?        @relation(fields: [cupomId], references: [id])
+  ecoponto             Ecopontos?             @relation(fields: [ecopontoId], references: [id])
+  usuario              Usuarios               @relation(fields: [usuarioCPF], references: [cpf])
+
+  @@index([cupomId])
+  @@index([usuarioCPF])
+  @@index([ecopontoId])
+}
+
+model CuponsCompradosUsuario {
+  id          BigInt         @id @default(autoincrement())
+  usuarioCPF  String
+  cupomId     BigInt
+  cupomNome   String
+  cupomRegras String         @db.LongText
+  criadoEm    DateTime       @default(now())
+  expiraEm    DateTime
+  utilizadoEm DateTime?
+  usuario     Usuarios       @relation(fields: [usuarioCPF], references: [cpf])
+  cupom       CuponsDesconto @relation(fields: [cupomId], references: [id])
+
+  @@index([cupomId])
+  @@index([usuarioCPF])
+}
+
+model SolicitacoesEcoponto {
+  id           BigInt                  @id @default(autoincrement())
+  acao         TipoSolicitacaoEcoponto
+  cnpjEmpresa  String
+  tipoEcoponto TipoEcoponto?
+  ecopontoId   String?
+  criadoEm     DateTime                @default(now())
+  atendidoEm   DateTime?
+  agendadoPara DateTime?
+  ecoponto     Ecopontos?              @relation(fields: [ecopontoId], references: [id])
+  empresa      EmpresasParceiras       @relation(fields: [cnpjEmpresa], references: [cnpj])
+
+  @@index([cnpjEmpresa])
+  @@index([ecopontoId])
 }
 
 model Log {
@@ -86,90 +186,12 @@ model Log {
   acao        String   @db.LongText
 }
 
-model Materiais {
-  id                   BigInt                         @id @default(autoincrement())
-  nome                 String                         @unique
-  valor                Int
-  ativo                Boolean                        @default(true)
-  criadoEm             DateTime                       @default(now())
-  atualizadoEm         DateTime?
-  ehAceitoTipoEcoponto Materiais_ehAceitoTipoEcoponto
+enum RegraPriviegio {
+  USUARIO
+  ADMINSTRADOR
 }
 
-model MateriaisDepositados {
-  transacaoId BigInt
-  materialId  BigInt
-  quantidade  Int
-  valorTotal  Int
-
-  @@id([transacaoId, materialId])
-  @@index([materialId])
-  @@index([transacaoId])
-}
-
-model Transacoes {
-  id           BigInt            @id @default(autoincrement())
-  usuarioCPF   String
-  tipo         Transacoes_tipo
-  valorTotal   Int
-  cupomId      BigInt?
-  ecopontoId   String?
-  criadoEm     DateTime          @default(now())
-  status       Transacoes_status
-  finalizadoEm DateTime?
-
-  @@index([cupomId])
-  @@index([ecopontoId])
-  @@index([usuarioCPF])
-}
-
-model Usuarios {
-  cpf                       String                   @id @unique @db.VarChar(11)
-  email                     String                   @unique
-  telefone                  String                   @unique
-  nome                      String
-  senha                     String
-  dataAniversario           DateTime
-  generoUsuario             Usuarios_generoUsuario
-  nivelPrivilegio           Usuarios_nivelPrivilegio @default(USUARIO)
-  criadoEm                  DateTime                 @default(now())
-  atualizadoEm              DateTime?
-  pontos                    Int                      @default(0)
-  codigoRecuperacao         String?
-  codigoRecuperacaoCriadoEm DateTime?
-}
-
-model SolicitacoesEcoponto {
-  id           BigInt                             @id @default(autoincrement())
-  acao         SolicitacoesEcoponto_acao
-  cnpjEmpresa  String
-  tipoEcoponto SolicitacoesEcoponto_tipoEcoponto?
-  ecopontoId   String?
-  criadoEm     DateTime                           @default(now())
-  atendidoEm   DateTime?
-  agendadoPara DateTime?
-
-  @@index([cnpjEmpresa])
-  @@index([ecopontoId])
-}
-
-enum Transacoes_tipo {
-  CREDITO
-  DEBITO
-}
-
-enum Ecopontos_tipo {
-  TOTEM
-  BOX
-}
-
-enum Materiais_ehAceitoTipoEcoponto {
-  TOTEM
-  BOX
-  TODOS
-}
-
-enum Usuarios_generoUsuario {
+enum GeneroUsuario {
   HOMEM_CIS
   HOMEM_TRANS
   MULHER_CIS
@@ -177,30 +199,36 @@ enum Usuarios_generoUsuario {
   NAO_BINARIO
 }
 
-enum Transacoes_status {
-  PENDENTE
-  EFETIVADO
-  REJEITADO
-}
-
-enum Usuarios_nivelPrivilegio {
-  USUARIO
-  ADMINSTRADOR
-}
-
-enum EmpresasParceiras_tipoEmpresa {
+enum TipoEmpresa {
   FISICA
   ONLINE
   AMBOS
 }
 
-enum SolicitacoesEcoponto_acao {
+enum TipoEcoponto {
+  TOTEM
+  BOX
+}
+
+enum TipoEcopontoAceitaMaterial {
+  TOTEM
+  BOX
+  TODOS
+}
+
+enum TipoTransacao {
+  CREDITO
+  DEBITO
+}
+
+enum StatusTransacao {
+  PENDENTE
+  EFETIVADO
+  REJEITADO
+}
+
+enum TipoSolicitacaoEcoponto {
   ADICIONAR
   DEVOLUCAO
   COLETAR
-}
-
-enum SolicitacoesEcoponto_tipoEcoponto {
-  TOTEM
-  BOX
 }
