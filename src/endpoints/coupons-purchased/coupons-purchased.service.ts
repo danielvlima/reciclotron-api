@@ -15,6 +15,8 @@ export class CouponsPurchasedService {
       data: {
         usuarioCPF: data.usuarioCPF,
         cupomId: data.cupomId,
+        cupomNome: data.cupomNome,
+        cupomRegras: data.cupomRegras,
         expiraEm: data.expiraEm,
         criadoEm: data.criadoEm,
       },

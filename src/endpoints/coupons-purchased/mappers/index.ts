@@ -10,9 +10,9 @@ export const toCouponsPurchasedDTO = (
     cupomId: Number(data.cupomId),
     criadoEm: data.criadoEm,
     expiraEm: data.expiraEm,
-    titulo: data.cupom.nome,
+    titulo: data.cupomNome,
     empresa: data.cupom.empresa.nomeFantasia,
-    regras: data.cupom.regras,
+    regras: data.cupomRegras,
     logo: data.cupom.empresa.logo ?? '',
   };
 };

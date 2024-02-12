@@ -16,7 +16,11 @@ import { PrismaErrorCode } from 'src/shared/enum';
 export class TransactionsService {
   constructor(private prisma: PrismaService) {}
 
-  createDeposit(cpf: string, depositData: CreateDepositTransactionDto) {
+  createDeposit(
+    cpf: string,
+    title: string,
+    depositData: CreateDepositTransactionDto,
+  ) {
     return this.prisma.transacoes.create({
       data: {
         tipo: $Enums.TipoTransacao.CREDITO,
@@ -24,6 +28,7 @@ export class TransactionsService {
         criadoEm: new Date(),
         usuarioCPF: cpf,
         ecopontoId: depositData.ecopontoId,
+        titulo: title,
         valorTotal: depositData.valorTotal,
         materiaisDepositados: {
           createMany: {
@@ -40,7 +45,11 @@ export class TransactionsService {
     });
   }
 
-  createPurchase(cpf: string, purchaseData: CreatePurchaseTransactionDto) {
+  createPurchase(
+    cpf: string,
+    title: string,
+    purchaseData: CreatePurchaseTransactionDto,
+  ) {
     const date = new Date();
     return this.prisma.transacoes.create({
       data: {
@@ -49,6 +58,7 @@ export class TransactionsService {
         criadoEm: date,
         finalizadoEm: date,
         usuarioCPF: cpf,
+        titulo: title,
         valorTotal: purchaseData.valorTotal,
         cupomId: purchaseData.cupomId,
       },
@@ -118,9 +128,12 @@ export class TransactionsService {
       });
   }
 
-  update(updateTransactionDto: UpdateTransactionDto) {
+  update(
+    updateTransactionDto: UpdateTransactionDto,
+    status: TransactionStatusEnum,
+  ) {
     let date = new Date();
-    if (updateTransactionDto.status === TransactionStatusEnum.PENDENTE) {
+    if (status === TransactionStatusEnum.PENDENTE) {
       date = null;
     }
 
@@ -129,12 +142,55 @@ export class TransactionsService {
         id: updateTransactionDto.id,
       },
       data: {
-        status: updateTransactionDto.status,
+        status: status,
         finalizadoEm: date,
         valorTotal: updateTransactionDto.valorTotal || undefined,
       },
       include: {
         materiaisDepositados: true,
+      },
+    });
+  }
+
+  userCountUnconfirmed(cpf: string) {
+    return this.prisma.transacoes.count({
+      where: {
+        status: $Enums.StatusTransacao.PENDENTE,
+        tipo: $Enums.TipoTransacao.CREDITO,
+        usuarioCPF: cpf,
+      },
+    });
+  }
+
+  userFindAllUnconfirmed(cpf: string) {
+    return this.prisma.transacoes.findMany({
+      where: {
+        status: $Enums.StatusTransacao.PENDENTE,
+        tipo: $Enums.TipoTransacao.CREDITO,
+        usuarioCPF: cpf,
+      },
+      orderBy: [{ id: 'desc' }],
+      include: {
+        ecoponto: {
+          include: {
+            enderecos: {
+              select: {
+                lat: true,
+                long: true,
+              },
+            },
+          },
+        },
+        materiaisDepositados: {
+          select: {
+            materialId: true,
+            quantidade: true,
+            nomeMaterial: true,
+            transacaoId: true,
+            valorTotal: true,
+            material: true,
+          },
+        },
       },
     });
   }
@@ -164,6 +220,7 @@ export class TransactionsService {
           select: {
             materialId: true,
             quantidade: true,
+            nomeMaterial: true,
             transacaoId: true,
             valorTotal: true,
             material: true,

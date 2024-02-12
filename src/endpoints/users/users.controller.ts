@@ -44,6 +44,7 @@ import {
   ExpiredCodeException,
   PhoneRegistredException,
 } from 'src/exceptions';
+import { MailService } from 'src/shared/modules/mail/mail.service';
 
 @ApiTags('Usuários')
 @Controller('user')
@@ -51,6 +52,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private tokenService: TokenService,
+    private mailerService: MailService,
   ) {}
 
   @Public()
@@ -111,6 +113,7 @@ export class UsersController {
       newUser.nivelPrivilegio.toString(),
     );
     await this.usersService.updateRtHash(newUser.cpf, token.refresh_token);
+    await this.mailerService.sendSignUp(newUser.email);
     return ResponseFactoryModule.generate<Tokens>(token);
   }
 
@@ -130,21 +133,27 @@ export class UsersController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Patch('update')
-  update(@Body() updateUserDto: UpdateUserDto) {
+  async update(@Body() updateUserDto: UpdateUserDto) {
     if (updateUserDto.senha) {
       updateUserDto.senha = CryptoModule.hashPassword(updateUserDto.senha);
     }
-    return this.usersService.update(updateUserDto).then((user) => {
-      return ResponseFactoryModule.generate<ResponseUserDto>(toUserDTO(user));
-    });
+    const user = await this.usersService.update(updateUserDto);
+    if (updateUserDto.senha) {
+      await this.mailerService.sendPasswordUpdated(user.email, user.nome);
+    } else {
+      await this.mailerService.sendProfileUpdated(user.email, user.nome);
+    }
+    return ResponseFactoryModule.generate<ResponseUserDto>(toUserDTO(user));
   }
 
   @UseGuards(UserGuard)
   @Public()
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('remove')
-  remove(@GetCurrentKey() cpf: string) {
-    return this.usersService.remove(cpf);
+  async remove(@GetCurrentKey() cpf: string) {
+    const user = await this.usersService.remove(cpf);
+    await this.mailerService.sendGoodbye(user.email, user.nome);
+    return;
   }
 
   @UseGuards(CpfRecoveryGuard)
@@ -181,7 +190,7 @@ export class UsersController {
   async updatePassword(
     @GetCurrentKey() cpf: string,
     @Body() data: UpdatePassWordUserDto,
-  ): Promise<ResponseDto<ResponseUserDto>> {
+  ) {
     const user = await this.usersService.findOneWithCpf(cpf);
     if (!user.codigoRecuperacaoVerificado) {
       throw new CodeUncheckedException();
@@ -189,24 +198,24 @@ export class UsersController {
     if (data.senha) {
       data.senha = CryptoModule.hashPassword(data.senha);
     }
-    return this.usersService
-      .update({
-        cpf,
-        senha: data.senha,
-      })
-      .then((user) => {
-        return ResponseFactoryModule.generate<ResponseUserDto>(toUserDTO(user));
-      });
+    await this.usersService.update({
+      cpf,
+      senha: data.senha,
+    });
+
+    await this.mailerService.sendPasswordUpdated(user.email, user.nome);
+    return;
   }
 
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('recovery/new')
   async createCode(@Body() data: RecoveryDto) {
-    await this.usersService.findOneWithCpf(data.key);
+    const user = await this.usersService.findOneWithCpf(data.key);
     const code = CodeGeneratorModule.new();
     await this.usersService.updateRecoveryCode(data.key, code);
     const token: Tokens = await this.tokenService.getRecoveryTokens(data.key);
+    await this.mailerService.sendForgotPassword(user.email, user.nome, code);
     return ResponseFactoryModule.generate<Tokens>(token);
   }
 

@@ -159,6 +159,9 @@ export class EcopointsService {
         where: {
           id,
         },
+        include: {
+          enderecos: true,
+        },
       })
       .catch((err: Prisma.PrismaClientKnownRequestError) => {
         if (err.code === PrismaErrorCode.NotFoundError) {

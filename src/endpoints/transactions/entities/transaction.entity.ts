@@ -6,8 +6,10 @@ export class Transaction {
   materiaisDepositados: MateriaisDepositados[];
   cupom?: { nome: string } | null;
   id: bigint;
+  titulo: string;
   finalizadoEm: Date | null;
   valorTotal: number;
   usuarioCPF: string;
   ecopontoId?: string | null;
+  ecoponto?: { enderecos: { lat: number; long: number } } | null;
 }

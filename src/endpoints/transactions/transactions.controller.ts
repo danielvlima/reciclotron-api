@@ -7,6 +7,8 @@ import {
   Get,
   UseGuards,
   HttpStatus,
+  ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
@@ -25,7 +27,6 @@ import { DiscountCouponService } from '../discount-coupon/discount-coupon.servic
 import { UsersService } from '../users/users.service';
 import { CouponsPurchasedService } from '../coupons-purchased/coupons-purchased.service';
 import { $Enums } from '@prisma/client';
-import { TransactionStatusEnum } from './enum/transactions-type.enum';
 import { ApiTags } from '@nestjs/swagger';
 import { GetCurrentKey, Public } from 'src/shared/decorators';
 import { AdminGuard, UserGuard } from 'src/shared/guards';
@@ -36,8 +37,10 @@ import {
   NoCouponsAvailableException,
   NotActiveEcopointException,
   NotCreditTransactionException,
-  StatusNotEffectedUpdateTransactionException,
+  CancelledTransactionException,
 } from 'src/exceptions';
+import { MailService } from 'src/shared/modules/mail/mail.service';
+import { TransactionStatusEnum } from './enum/transactions-type.enum';
 
 @ApiTags('Transações')
 @Controller('transactions')
@@ -48,6 +51,7 @@ export class TransactionsController {
     private readonly usersService: UsersService,
     private readonly ecopointService: EcopointsService,
     private readonly couponsPurchasedService: CouponsPurchasedService,
+    private mailerService: MailService,
   ) {}
 
   @UseGuards(UserGuard)
@@ -58,15 +62,27 @@ export class TransactionsController {
     @GetCurrentKey() cpf: string,
     @Body() depositDto: CreateDepositTransactionDto,
   ) {
-    await this.usersService.findOneWithCpf(cpf);
+    const user = await this.usersService.findOneWithCpf(cpf);
     const ecopoint = await this.ecopointService.findOne(depositDto.ecopontoId);
 
     if (!ecopoint.ativo) {
       throw new NotActiveEcopointException();
     }
-    return this.transactionsService
-      .createDeposit(cpf, depositDto)
-      .then(() => {});
+    await this.transactionsService.createDeposit(
+      cpf,
+      'Reciclopontos: Novo Depósito',
+      depositDto,
+    );
+
+    await this.mailerService.sendUserNewDeposit(
+      user.email,
+      user.nome,
+      depositDto.valorTotal.toFixed(),
+      depositDto.materiaisDepositados,
+      ecopoint,
+    );
+
+    return;
   }
 
   @UseGuards(UserGuard)
@@ -92,6 +108,7 @@ export class TransactionsController {
 
     const newTransaction = await this.transactionsService.createPurchase(
       cpf,
+      `Resgate Prêmio: ${coupon.nome}`,
       purchaseDto,
     );
 
@@ -111,11 +128,18 @@ export class TransactionsController {
       await this.couponsPurchasedService.create({
         usuarioCPF: cpf,
         cupomId: purchaseDto.cupomId,
+        cupomNome: coupon.nome,
+        cupomRegras: coupon.regras,
         expiraEm: expirationDate,
         criadoEm: new Date(),
       });
     }
 
+    await this.mailerService.sendUserNewPurchase(
+      user.email,
+      user.nome,
+      coupon.nome,
+    );
     return ResponseFactoryModule.generate<ResponseTransactionDto>(
       toTransactionDTO(newTransaction),
     );
@@ -144,6 +168,30 @@ export class TransactionsController {
     >({
       total,
       transacoes: transactions.map((el) => toTransactionDTO(el)),
+    });
+  }
+
+  @UseGuards(UserGuard)
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Get('user/get/unconfirmed')
+  async userFindAllUnconfirmed(@GetCurrentKey() cpf: string) {
+    const total = await this.transactionsService.userCountUnconfirmed(cpf);
+    if (!total) {
+      return ResponseFactoryModule.generate<
+        ResponsePaginatedTransactionsDto<ResponseUnconfirmedDepositTransactionDto>
+      >({
+        total,
+        transacoes: [],
+      });
+    }
+    const transactions =
+      await this.transactionsService.userFindAllUnconfirmed(cpf);
+    return ResponseFactoryModule.generate<
+      ResponsePaginatedTransactionsDto<ResponseUnconfirmedDepositTransactionDto>
+    >({
+      total,
+      transacoes: transactions.map((el) => toUnconfirmedTransactionDTO(el)),
     });
   }
 
@@ -188,17 +236,16 @@ export class TransactionsController {
   @Public()
   @HttpCode(HttpStatus.NO_CONTENT)
   @Patch('admin/deposit/confirm')
-  async update(@Body() updateTransactionDto: UpdateTransactionDto) {
+  async confirm(@Body() updateTransactionDto: UpdateTransactionDto) {
     const transaction = await this.transactionsService.findOne(
       updateTransactionDto.id,
     );
 
+    const valueTransaction =
+      updateTransactionDto.valorTotal ?? transaction.valorTotal;
+
     if (transaction.status === $Enums.StatusTransacao.EFETIVADO) {
       throw new EffectedTransactionException();
-    }
-
-    if (updateTransactionDto.status !== TransactionStatusEnum.EFETIVADO) {
-      throw new StatusNotEffectedUpdateTransactionException();
     }
 
     if (transaction.tipo !== $Enums.TipoTransacao.CREDITO) {
@@ -209,11 +256,61 @@ export class TransactionsController {
 
     await this.usersService.update({
       cpf: transaction.usuarioCPF,
-      pontos: user.pontos + transaction.valorTotal,
+      pontos: user.pontos + valueTransaction,
     });
 
-    await this.transactionsService.update(updateTransactionDto);
+    const dayCreated = new Date(transaction.criadoEm);
 
+    await this.transactionsService.update(
+      updateTransactionDto,
+      TransactionStatusEnum.EFETIVADO,
+    );
+    this.mailerService.sendUserDepositConfirmed(
+      user.email,
+      user.nome,
+      `${dayCreated.getDate().toString().padStart(2, '0')}/${(
+        dayCreated.getMonth() + 1
+      )
+        .toString()
+        .padStart(2, '0')}/${dayCreated.getFullYear()}`,
+      valueTransaction.toFixed(),
+    );
+    return;
+  }
+
+  @UseGuards(AdminGuard)
+  @Public()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch('admin/deposit/cancel')
+  async cancel(@Query('id', new ParseIntPipe()) id: number) {
+    const transaction = await this.transactionsService.findOne(id);
+
+    if (transaction.status === $Enums.StatusTransacao.REJEITADO) {
+      throw new CancelledTransactionException();
+    }
+
+    if (transaction.tipo !== $Enums.TipoTransacao.CREDITO) {
+      throw new NotCreditTransactionException();
+    }
+
+    const user = await this.usersService.findOneWithCpf(transaction.usuarioCPF);
+
+    const dayCreated = new Date(transaction.criadoEm);
+
+    await this.transactionsService.update(
+      { id: id },
+      TransactionStatusEnum.REJEITADO,
+    );
+    this.mailerService.sendUserDepositCancelled(
+      user.email,
+      user.nome,
+      `${dayCreated.getDate().toString().padStart(2, '0')}/${(
+        dayCreated.getMonth() + 1
+      )
+        .toString()
+        .padStart(2, '0')}/${dayCreated.getFullYear()}`,
+      transaction.valorTotal.toFixed(),
+    );
     return;
   }
 }

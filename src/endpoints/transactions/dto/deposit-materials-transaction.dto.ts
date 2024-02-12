@@ -7,6 +7,9 @@ export class DepositMaterialsTransactionDTO {
   materialId: number;
 
   @ApiProperty()
+  nomeMaterial: string;
+
+  @ApiProperty()
   quantidade: number;
 
   @ApiProperty()
