@@ -196,29 +196,47 @@ export class PartnerService {
     });
   }
 
-  updateAddress(cnpj: string, updateAddress: UpdateAddressPartnerDto) {
-    return this.prisma.empresasParceiras
-      .update({
+  async updateAddress(cnpj: string, updateAddress: UpdateAddressPartnerDto) {
+    const partner = await this.prisma.empresasParceiras.findFirst({
+      where: {
+        cnpj,
+      },
+    });
+
+    if (!partner) {
+      throw new UpdateProfileDataException();
+    }
+
+    this.prisma.enderecos
+      .upsert({
         where: {
-          cnpj,
+          cnpjEmpresa: cnpj,
+        },
+        update: {
+          rua: updateAddress.rua,
+          numero: updateAddress.numero,
+          complemento: updateAddress.complemento,
+          bairro: updateAddress.bairro,
+          cidade: updateAddress.cidade,
+          uf: updateAddress.uf,
+          cep: updateAddress.cep,
+          lat: updateAddress.lat,
+          long: updateAddress.long,
         },
 
-        data: {
-          atualizadoEm: new Date(),
-          endereco: {
-            update: {
-              rua: updateAddress.rua,
-              numero: updateAddress.numero,
-              complemento: updateAddress.complemento,
-              bairro: updateAddress.bairro,
-              cidade: updateAddress.cidade,
-              uf: updateAddress.uf,
-              cep: updateAddress.cep,
-            },
+        create: {
+          rua: updateAddress.rua,
+          numero: updateAddress.numero,
+          complemento: updateAddress.complemento,
+          bairro: updateAddress.bairro,
+          cidade: updateAddress.cidade,
+          uf: updateAddress.uf,
+          cep: updateAddress.cep,
+          lat: updateAddress.lat,
+          long: updateAddress.long,
+          empresa: {
+            connect: partner,
           },
-        },
-        include: {
-          endereco: true,
         },
       })
       .catch((err: Prisma.PrismaClientKnownRequestError) => {
@@ -227,6 +245,8 @@ export class PartnerService {
         }
         throw err;
       });
+
+    return partner;
   }
 
   updateRecoveryCode = (cnpj: string, code: string) => {
