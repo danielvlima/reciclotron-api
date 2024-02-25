@@ -47,9 +47,6 @@ export class PartnerService {
         ativo: data.ativo,
         tipoEmpresa: data.tipoEmpresa,
         enderecolojaOnline: data.enderecolojaOnline,
-        endereco: {
-          create: data.endereco,
-        },
       },
       include: {
         endereco: true,
