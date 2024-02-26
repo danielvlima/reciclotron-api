@@ -42,9 +42,11 @@ import {
   CpfRegistredException,
   EmailRegistredException,
   ExpiredCodeException,
+  PasswordLengthException,
   PhoneRegistredException,
 } from 'src/exceptions';
 import { MailService } from 'src/shared/modules/mail/mail.service';
+import { env } from 'process';
 
 @ApiTags('Usuários')
 @Controller('user')
@@ -105,6 +107,9 @@ export class UsersController {
       throw new PhoneRegistredException();
     }
 
+    if (createUserDto.senha.length < Number(env.PASSWORD_LENGTH)) {
+      throw new PasswordLengthException();
+    }
     createUserDto.senha = CryptoModule.hashPassword(createUserDto.senha);
     const newUser = await this.usersService.create(createUserDto);
     const token = await this.tokenService.getTokens(
@@ -135,6 +140,9 @@ export class UsersController {
   @Patch('update')
   async update(@Body() updateUserDto: UpdateUserDto) {
     if (updateUserDto.senha) {
+      if (updateUserDto.senha.length < Number(env.PASSWORD_LENGTH)) {
+        throw new PasswordLengthException();
+      }
       updateUserDto.senha = CryptoModule.hashPassword(updateUserDto.senha);
     }
     const user = await this.usersService.update(updateUserDto);

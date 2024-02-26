@@ -48,8 +48,10 @@ import {
   CodeCheckedException,
   CodeUncheckedException,
   ExpiredCodeException,
+  PasswordLengthException,
 } from 'src/exceptions';
 import { MailService } from 'src/shared/modules/mail/mail.service';
+import { env } from 'process';
 
 @ApiTags('Empresas Parceiras')
 @Controller('partner')
@@ -101,6 +103,9 @@ export class PartnerController {
   @Patch('update')
   async update(@Body() updatePartnerDto: UpdatePartnerDto) {
     if (updatePartnerDto.senha) {
+      if (updatePartnerDto.senha.length < Number(env.PASSWORD_LENGTH)) {
+        throw new PasswordLengthException();
+      }
       updatePartnerDto.senha = CryptoModule.hashPassword(
         updatePartnerDto.senha,
       );
@@ -140,6 +145,9 @@ export class PartnerController {
   @Public()
   @Post('admin/create')
   async create(@Body() createPartnerDto: CreatePartnerDto) {
+    if (createPartnerDto.senha.length < Number(env.PASSWORD_LENGTH)) {
+      throw new PasswordLengthException();
+    }
     createPartnerDto.senha = CryptoModule.hashPassword(createPartnerDto.senha);
     const newPartner = await this.partnerService.create(createPartnerDto);
     const partnerDto = toPartnerDTO(newPartner);
