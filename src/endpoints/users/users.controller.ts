@@ -204,6 +204,9 @@ export class UsersController {
       throw new CodeUncheckedException();
     }
     if (data.senha) {
+      if (data.senha.length < Number(env.PASSWORD_LENGTH)) {
+        throw new PasswordLengthException();
+      }
       data.senha = CryptoModule.hashPassword(data.senha);
     }
     await this.usersService.update({
