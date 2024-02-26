@@ -64,25 +64,30 @@ export class PartnerService {
       });
     }
 
-    if (data.ativo) {
+    if (data.ativo !== undefined) {
       filter.push({
         ativo: {
           equals: data.ativo,
         },
       });
     }
+
     return this.prisma.empresasParceiras.count({
       where: {
-        OR: [
+        AND: [
           {
-            nomeFantasia: {
-              contains: data.nome ?? '',
-            },
-          },
-          {
-            ramo: {
-              contains: data.ramo ?? '',
-            },
+            OR: [
+              {
+                nomeFantasia: {
+                  contains: data.nome ?? '',
+                },
+              },
+              {
+                ramo: {
+                  contains: data.ramo ?? '',
+                },
+              },
+            ],
           },
           ...filter,
         ],
@@ -100,7 +105,7 @@ export class PartnerService {
       });
     }
 
-    if (data.filtro.ativo) {
+    if (data.filtro.ativo !== undefined) {
       filter.push({
         ativo: {
           equals: data.filtro.ativo,
@@ -110,16 +115,20 @@ export class PartnerService {
 
     return this.prisma.empresasParceiras.findMany({
       where: {
-        OR: [
+        AND: [
           {
-            nomeFantasia: {
-              contains: data.filtro.nome ?? '',
-            },
-          },
-          {
-            ramo: {
-              contains: data.filtro.ramo ?? '',
-            },
+            OR: [
+              {
+                nomeFantasia: {
+                  contains: data.filtro.nome ?? '',
+                },
+              },
+              {
+                ramo: {
+                  contains: data.filtro.ramo ?? '',
+                },
+              },
+            ],
           },
           ...filter,
         ],
