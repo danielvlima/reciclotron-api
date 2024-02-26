@@ -19,6 +19,7 @@ import {
   GetPaginatedPartnerDto,
   ResponsePaginatedPartnerDto,
   UpdatePasswordPartnerDto,
+  UpdatePartnerWithAdmDto,
 } from './dto';
 import {
   RecoveryDto,
@@ -43,6 +44,7 @@ import {
 } from 'src/shared/guards';
 import { TokenService } from 'src/shared/modules/auth/token.service';
 import {
+  AccessDaniedException,
   CodeCheckedException,
   CodeUncheckedException,
   ExpiredCodeException,
@@ -160,6 +162,25 @@ export class PartnerController {
         });
       });
     });
+  }
+
+  @UseGuards(AdminGuard)
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Patch('admin/update')
+  async adminUpdate(@Body() updatePartnerDto: UpdatePartnerWithAdmDto) {
+    if (updatePartnerDto.senha) {
+      throw new AccessDaniedException();
+    }
+    if (updatePartnerDto.newCnpj) {
+      await this.partnerService.findOneWithCnpj(updatePartnerDto.newCnpj);
+    }
+
+    const partner = await this.partnerService.update(
+      updatePartnerDto,
+      updatePartnerDto.newCnpj,
+    );
+    return ResponseFactoryModule.generate(toPartnerDTO(partner));
   }
 
   @UseGuards(AdminGuard)

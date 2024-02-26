@@ -168,32 +168,40 @@ export class PartnerService {
       });
   }
 
-  update(data: UpdatePartnerDto) {
-    return this.prisma.empresasParceiras.update({
-      where: {
-        cnpj: data.cnpj,
-      },
+  update(data: UpdatePartnerDto, newCnpj?: string) {
+    return this.prisma.empresasParceiras
+      .update({
+        where: {
+          cnpj: data.cnpj,
+        },
 
-      data: {
-        logo: data.logo || undefined,
-        email: data.email || undefined,
-        senha: data.senha || undefined,
-        telefone: data.telefone || undefined,
-        nomeFantasia: data.nomeFantasia || undefined,
-        razaoSocial: data.razaoSocial || undefined,
-        ramo: data.ramo || undefined,
-        ativo: data.ativo || undefined,
-        tipoEmpresa: data.tipoEmpresa || undefined,
-        enderecolojaOnline: data.enderecolojaOnline || undefined,
-        atualizadoEm: new Date(),
-        codigoRecuperacao: null,
-        codigoRecuperacaoCriadoEm: null,
-        codigoRecuperacaoVerificado: null,
-      },
-      include: {
-        endereco: true,
-      },
-    });
+        data: {
+          cnpj: newCnpj || undefined,
+          logo: data.logo || undefined,
+          email: data.email || undefined,
+          senha: data.senha || undefined,
+          telefone: data.telefone || undefined,
+          nomeFantasia: data.nomeFantasia || undefined,
+          razaoSocial: data.razaoSocial || undefined,
+          ramo: data.ramo || undefined,
+          ativo: data.ativo || undefined,
+          tipoEmpresa: data.tipoEmpresa || undefined,
+          enderecolojaOnline: data.enderecolojaOnline || undefined,
+          atualizadoEm: new Date(),
+          codigoRecuperacao: null,
+          codigoRecuperacaoCriadoEm: null,
+          codigoRecuperacaoVerificado: null,
+        },
+        include: {
+          endereco: true,
+        },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.UniqueContrantViolation) {
+          throw new UpdateProfileDataException();
+        }
+        throw err;
+      });
   }
 
   async updateAddress(cnpj: string, updateAddress: UpdateAddressPartnerDto) {
