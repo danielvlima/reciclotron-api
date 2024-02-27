@@ -78,13 +78,18 @@ export class PartnerService {
           {
             OR: [
               {
+                cnpj: {
+                  contains: data.busca ?? '',
+                },
+              },
+              {
                 nomeFantasia: {
-                  contains: data.nome ?? '',
+                  contains: data.busca ?? '',
                 },
               },
               {
                 ramo: {
-                  contains: data.ramo ?? '',
+                  contains: data.busca ?? '',
                 },
               },
             ],
@@ -119,13 +124,18 @@ export class PartnerService {
           {
             OR: [
               {
+                cnpj: {
+                  contains: data.filtro.busca ?? '',
+                },
+              },
+              {
                 nomeFantasia: {
-                  contains: data.filtro.nome ?? '',
+                  contains: data.filtro.busca ?? '',
                 },
               },
               {
                 ramo: {
-                  contains: data.filtro.ramo ?? '',
+                  contains: data.filtro.busca ?? '',
                 },
               },
             ],
@@ -193,7 +203,7 @@ export class PartnerService {
           nomeFantasia: data.nomeFantasia || undefined,
           razaoSocial: data.razaoSocial || undefined,
           ramo: data.ramo || undefined,
-          ativo: data.ativo || undefined,
+          ativo: data.ativo,
           tipoEmpresa: data.tipoEmpresa || undefined,
           enderecolojaOnline: data.enderecolojaOnline || undefined,
           atualizadoEm: new Date(),
