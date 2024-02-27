@@ -19,6 +19,7 @@ import {
   GetPaginatedPartnerDto,
   ResponsePaginatedPartnerDto,
   UpdatePasswordPartnerDto,
+  UpdatePartnerWithAdmDto,
 } from './dto';
 import {
   RecoveryDto,
@@ -43,11 +44,14 @@ import {
 } from 'src/shared/guards';
 import { TokenService } from 'src/shared/modules/auth/token.service';
 import {
+  AccessDaniedException,
   CodeCheckedException,
   CodeUncheckedException,
   ExpiredCodeException,
+  PasswordLengthException,
 } from 'src/exceptions';
 import { MailService } from 'src/shared/modules/mail/mail.service';
+import { env } from 'process';
 
 @ApiTags('Empresas Parceiras')
 @Controller('partner')
@@ -99,6 +103,9 @@ export class PartnerController {
   @Patch('update')
   async update(@Body() updatePartnerDto: UpdatePartnerDto) {
     if (updatePartnerDto.senha) {
+      if (updatePartnerDto.senha.length < Number(env.PASSWORD_LENGTH)) {
+        throw new PasswordLengthException();
+      }
       updatePartnerDto.senha = CryptoModule.hashPassword(
         updatePartnerDto.senha,
       );
@@ -138,6 +145,9 @@ export class PartnerController {
   @Public()
   @Post('admin/create')
   async create(@Body() createPartnerDto: CreatePartnerDto) {
+    if (createPartnerDto.senha.length < Number(env.PASSWORD_LENGTH)) {
+      throw new PasswordLengthException();
+    }
     createPartnerDto.senha = CryptoModule.hashPassword(createPartnerDto.senha);
     const newPartner = await this.partnerService.create(createPartnerDto);
     const partnerDto = toPartnerDTO(newPartner);
@@ -160,6 +170,25 @@ export class PartnerController {
         });
       });
     });
+  }
+
+  @UseGuards(AdminGuard)
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Patch('admin/update')
+  async adminUpdate(@Body() updatePartnerDto: UpdatePartnerWithAdmDto) {
+    if (updatePartnerDto.senha) {
+      throw new AccessDaniedException();
+    }
+    if (updatePartnerDto.newCnpj) {
+      await this.partnerService.findOneWithCnpj(updatePartnerDto.newCnpj);
+    }
+
+    const partner = await this.partnerService.update(
+      updatePartnerDto,
+      updatePartnerDto.newCnpj,
+    );
+    return ResponseFactoryModule.generate(toPartnerDTO(partner));
   }
 
   @UseGuards(AdminGuard)
@@ -213,6 +242,9 @@ export class PartnerController {
       throw new CodeUncheckedException();
     }
     if (data.senha) {
+      if (data.senha.length < Number(env.PASSWORD_LENGTH)) {
+        throw new PasswordLengthException();
+      }
       data.senha = CryptoModule.hashPassword(data.senha);
     }
     await this.partnerService.update({

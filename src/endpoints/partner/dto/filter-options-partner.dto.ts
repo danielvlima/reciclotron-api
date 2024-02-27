@@ -3,10 +3,7 @@ import { TypePartnerEnum } from '../enum/type-partner.enum';
 
 export class FilterOptionsPartnerDto {
   @ApiProperty()
-  nome?: string;
-
-  @ApiProperty()
-  ramo?: string;
+  busca?: string;
 
   @ApiProperty({
     enum: ['FISICA', 'ONLINE', 'AMBOS'],

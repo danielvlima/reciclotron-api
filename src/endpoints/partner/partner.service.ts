@@ -47,9 +47,6 @@ export class PartnerService {
         ativo: data.ativo,
         tipoEmpresa: data.tipoEmpresa,
         enderecolojaOnline: data.enderecolojaOnline,
-        endereco: {
-          create: data.endereco,
-        },
       },
       include: {
         endereco: true,
@@ -67,25 +64,35 @@ export class PartnerService {
       });
     }
 
-    if (data.ativo) {
+    if (data.ativo !== undefined) {
       filter.push({
         ativo: {
           equals: data.ativo,
         },
       });
     }
+
     return this.prisma.empresasParceiras.count({
       where: {
-        OR: [
+        AND: [
           {
-            nomeFantasia: {
-              contains: data.nome ?? '',
-            },
-          },
-          {
-            ramo: {
-              contains: data.ramo ?? '',
-            },
+            OR: [
+              {
+                cnpj: {
+                  contains: data.busca ?? '',
+                },
+              },
+              {
+                nomeFantasia: {
+                  contains: data.busca ?? '',
+                },
+              },
+              {
+                ramo: {
+                  contains: data.busca ?? '',
+                },
+              },
+            ],
           },
           ...filter,
         ],
@@ -103,7 +110,7 @@ export class PartnerService {
       });
     }
 
-    if (data.filtro.ativo) {
+    if (data.filtro.ativo !== undefined) {
       filter.push({
         ativo: {
           equals: data.filtro.ativo,
@@ -113,16 +120,25 @@ export class PartnerService {
 
     return this.prisma.empresasParceiras.findMany({
       where: {
-        OR: [
+        AND: [
           {
-            nomeFantasia: {
-              contains: data.filtro.nome ?? '',
-            },
-          },
-          {
-            ramo: {
-              contains: data.filtro.ramo ?? '',
-            },
+            OR: [
+              {
+                cnpj: {
+                  contains: data.filtro.busca ?? '',
+                },
+              },
+              {
+                nomeFantasia: {
+                  contains: data.filtro.busca ?? '',
+                },
+              },
+              {
+                ramo: {
+                  contains: data.filtro.busca ?? '',
+                },
+              },
+            ],
           },
           ...filter,
         ],
@@ -171,54 +187,29 @@ export class PartnerService {
       });
   }
 
-  update(data: UpdatePartnerDto) {
-    return this.prisma.empresasParceiras.update({
-      where: {
-        cnpj: data.cnpj,
-      },
-
-      data: {
-        logo: data.logo || undefined,
-        email: data.email || undefined,
-        senha: data.senha || undefined,
-        telefone: data.telefone || undefined,
-        nomeFantasia: data.nomeFantasia || undefined,
-        razaoSocial: data.razaoSocial || undefined,
-        ramo: data.ramo || undefined,
-        ativo: data.ativo || undefined,
-        tipoEmpresa: data.tipoEmpresa || undefined,
-        enderecolojaOnline: data.enderecolojaOnline || undefined,
-        atualizadoEm: new Date(),
-        codigoRecuperacao: null,
-        codigoRecuperacaoCriadoEm: null,
-        codigoRecuperacaoVerificado: null,
-      },
-      include: {
-        endereco: true,
-      },
-    });
-  }
-
-  updateAddress(cnpj: string, updateAddress: UpdateAddressPartnerDto) {
+  update(data: UpdatePartnerDto, newCnpj?: string) {
     return this.prisma.empresasParceiras
       .update({
         where: {
-          cnpj,
+          cnpj: data.cnpj,
         },
 
         data: {
+          cnpj: newCnpj || undefined,
+          logo: data.logo || undefined,
+          email: data.email || undefined,
+          senha: data.senha || undefined,
+          telefone: data.telefone || undefined,
+          nomeFantasia: data.nomeFantasia || undefined,
+          razaoSocial: data.razaoSocial || undefined,
+          ramo: data.ramo || undefined,
+          ativo: data.ativo,
+          tipoEmpresa: data.tipoEmpresa || undefined,
+          enderecolojaOnline: data.enderecolojaOnline || undefined,
           atualizadoEm: new Date(),
-          endereco: {
-            update: {
-              rua: updateAddress.rua,
-              numero: updateAddress.numero,
-              complemento: updateAddress.complemento,
-              bairro: updateAddress.bairro,
-              cidade: updateAddress.cidade,
-              uf: updateAddress.uf,
-              cep: updateAddress.cep,
-            },
-          },
+          codigoRecuperacao: null,
+          codigoRecuperacaoCriadoEm: null,
+          codigoRecuperacaoVerificado: null,
         },
         include: {
           endereco: true,
@@ -230,6 +221,59 @@ export class PartnerService {
         }
         throw err;
       });
+  }
+
+  async updateAddress(cnpj: string, updateAddress: UpdateAddressPartnerDto) {
+    const partner = await this.prisma.empresasParceiras.findFirst({
+      where: {
+        cnpj,
+      },
+    });
+
+    if (!partner) {
+      throw new UpdateProfileDataException();
+    }
+
+    this.prisma.enderecos
+      .upsert({
+        where: {
+          cnpjEmpresa: cnpj,
+        },
+        update: {
+          rua: updateAddress.rua,
+          numero: updateAddress.numero,
+          complemento: updateAddress.complemento,
+          bairro: updateAddress.bairro,
+          cidade: updateAddress.cidade,
+          uf: updateAddress.uf,
+          cep: updateAddress.cep,
+          lat: updateAddress.lat,
+          long: updateAddress.long,
+        },
+
+        create: {
+          rua: updateAddress.rua,
+          numero: updateAddress.numero,
+          complemento: updateAddress.complemento,
+          bairro: updateAddress.bairro,
+          cidade: updateAddress.cidade,
+          uf: updateAddress.uf,
+          cep: updateAddress.cep,
+          lat: updateAddress.lat,
+          long: updateAddress.long,
+          empresa: {
+            connect: partner,
+          },
+        },
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.UniqueContrantViolation) {
+          throw new UpdateProfileDataException();
+        }
+        throw err;
+      });
+
+    return partner;
   }
 
   updateRecoveryCode = (cnpj: string, code: string) => {

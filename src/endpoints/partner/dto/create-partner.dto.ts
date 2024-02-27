@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { TypePartnerEnum } from '../enum/type-partner.enum';
-import { CreateAddressPartnerDTO } from './create-address-partner.dto';
 
 export class CreatePartnerDto {
   @ApiProperty()
@@ -37,7 +36,4 @@ export class CreatePartnerDto {
 
   @ApiProperty()
   enderecolojaOnline: string | null;
-
-  @ApiProperty()
-  endereco: CreateAddressPartnerDTO;
 }

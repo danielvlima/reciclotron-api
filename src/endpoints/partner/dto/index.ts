@@ -8,3 +8,4 @@ export * from './filter-options-partner.dto';
 export * from './get-paginated-partner.dto';
 export * from './response-paginated-partner.dto';
 export * from './update-password-partner.dto';
+export * from './update-partner-with-adm.dto';
