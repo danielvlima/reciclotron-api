@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { $Enums } from '@prisma/client';
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
+import { UserGenderEnum } from '../users/enum/user-gender.enum';
+import { FieldCountDto } from './dto';
+import { TypeEcopointEnum } from 'src/shared/enum';
 
 @Injectable()
 export class StaticsService {
@@ -90,8 +93,58 @@ export class StaticsService {
     });
   }
 
-  countAllUsers() {
-    return this.prisma.usuarios.count();
+  countAllActiveEcopointsByType() {
+    return this.prisma.ecopontos
+      .groupBy({
+        by: ['tipo'],
+        _count: { tipo: true },
+        where: {
+          ativo: true,
+        },
+      })
+      .then((responseQuery) => {
+        return responseQuery.map<FieldCountDto>((el) => {
+          return {
+            campo: TypeEcopointEnum[el.tipo],
+            total: el._count.tipo,
+          };
+        });
+      });
+  }
+
+  countAllUsers(initialDate?: Date, finalDate?: Date) {
+    return this.prisma.usuarios.count({
+      where: {
+        nivelPrivilegio: $Enums.RegraPriviegio.USUARIO,
+        criadoEm: {
+          gte: initialDate,
+          lte: finalDate,
+        },
+      },
+    });
+  }
+
+  countAllUsersByGender(initialDate?: Date, finalDate?: Date) {
+    return this.prisma.usuarios
+      .groupBy({
+        by: ['generoUsuario'],
+        _count: { generoUsuario: true },
+        where: {
+          nivelPrivilegio: $Enums.RegraPriviegio.USUARIO,
+          criadoEm: {
+            gte: initialDate,
+            lte: finalDate,
+          },
+        },
+      })
+      .then((responseQuery) => {
+        return responseQuery.map<FieldCountDto>((el) => {
+          return {
+            campo: UserGenderEnum[el.generoUsuario],
+            total: el._count.generoUsuario,
+          };
+        });
+      });
   }
 
   countAllReciclopointsGenerated(initialDate: Date, finalDate: Date) {
