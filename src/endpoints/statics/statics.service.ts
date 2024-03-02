@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { $Enums } from '@prisma/client';
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
 
 @Injectable()
 export class StaticsService {
   constructor(private prisma: PrismaService) {}
 
-  allRedeemedCoupons(cnpj: string, initialDate: Date, finalDate: Date) {
+  countAllRedeemedCoupons(initialDate: Date, finalDate: Date, cnpj?: string) {
     return this.prisma.cuponsCompradosUsuario.count({
       where: {
         cupom: {
@@ -19,7 +20,7 @@ export class StaticsService {
     });
   }
 
-  allUtilizedCoupons(cnpj: string, initialDate: Date, finalDate: Date) {
+  countAllUtilizedCoupons(initialDate: Date, finalDate: Date, cnpj?: string) {
     return this.prisma.cuponsCompradosUsuario.count({
       where: {
         cupom: {
@@ -34,7 +35,11 @@ export class StaticsService {
     });
   }
 
-  allUserRedeemedCoupons(cnpj: string, initialDate: Date, finalDate: Date) {
+  countAllUserRedeemedCoupons(
+    cnpj: string,
+    initialDate: Date,
+    finalDate: Date,
+  ) {
     return this.prisma.cuponsCompradosUsuario.findMany({
       where: {
         cupom: {
@@ -49,7 +54,11 @@ export class StaticsService {
     });
   }
 
-  allUserUtilizedCoupons(cnpj: string, initialDate: Date, finalDate: Date) {
+  countAllUserUtilizedCoupons(
+    cnpj: string,
+    initialDate: Date,
+    finalDate: Date,
+  ) {
     return this.prisma.cuponsCompradosUsuario.findMany({
       where: {
         cupom: {
@@ -62,6 +71,43 @@ export class StaticsService {
         },
       },
       distinct: ['usuarioCPF'],
+    });
+  }
+
+  countAllActiveParners() {
+    return this.prisma.empresasParceiras.count({
+      where: {
+        ativo: true,
+      },
+    });
+  }
+
+  countAllActiveEcopoints() {
+    return this.prisma.ecopontos.count({
+      where: {
+        ativo: true,
+      },
+    });
+  }
+
+  countAllUsers() {
+    return this.prisma.usuarios.count();
+  }
+
+  countAllReciclopointsGenerated(initialDate: Date, finalDate: Date) {
+    return this.prisma.transacoes.aggregate({
+      _sum: {
+        valorTotal: true,
+      },
+      where: {
+        tipo: $Enums.TipoTransacao.CREDITO,
+        status: $Enums.StatusTransacao.EFETIVADO,
+        finalizadoEm: {
+          not: null,
+          gte: initialDate,
+          lte: finalDate,
+        },
+      },
     });
   }
 
