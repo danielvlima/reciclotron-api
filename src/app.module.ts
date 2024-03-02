@@ -19,6 +19,7 @@ import { MailModule } from './shared/modules/mail/mail.module';
 import { TokenModule } from './shared/modules/auth/token.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './shared/guards';
+import { StaticsModule } from './endpoints/statics/statics.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { AtGuard } from './shared/guards';
     AddressesModule,
     TokenModule,
     MailModule,
+    StaticsModule,
   ],
   controllers: [AppController],
   providers: [
