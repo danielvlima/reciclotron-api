@@ -23,6 +23,31 @@ export class StaticsService {
     });
   }
 
+  listAllRedeemedCoupons(initialDate: Date, finalDate: Date, cnpj: string) {
+    return this.prisma.cuponsCompradosUsuario
+      .groupBy({
+        by: ['cupomNome'],
+        _count: true,
+        where: {
+          cupom: {
+            cnpjEmpresa: cnpj,
+          },
+          criadoEm: {
+            gte: initialDate,
+            lte: finalDate,
+          },
+        },
+      })
+      .then((responseQuery) => {
+        return responseQuery.map<FieldCountDto>((el) => {
+          return {
+            campo: el.cupomNome,
+            total: el._count,
+          };
+        });
+      });
+  }
+
   countAllUtilizedCoupons(initialDate: Date, finalDate: Date, cnpj?: string) {
     return this.prisma.cuponsCompradosUsuario.count({
       where: {
@@ -36,6 +61,32 @@ export class StaticsService {
         },
       },
     });
+  }
+
+  listAllUtilizedCoupons(initialDate: Date, finalDate: Date, cnpj: string) {
+    return this.prisma.cuponsCompradosUsuario
+      .groupBy({
+        by: ['cupomNome'],
+        _count: true,
+        where: {
+          cupom: {
+            cnpjEmpresa: cnpj,
+          },
+          utilizadoEm: {
+            not: null,
+            gte: initialDate,
+            lte: finalDate,
+          },
+        },
+      })
+      .then((responseQuery) => {
+        return responseQuery.map<FieldCountDto>((el) => {
+          return {
+            campo: el.cupomNome,
+            total: el._count,
+          };
+        });
+      });
   }
 
   countAllUserRedeemedCoupons(
