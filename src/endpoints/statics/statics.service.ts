@@ -48,6 +48,52 @@ export class StaticsService {
       });
   }
 
+  listAllRedeemedCouponsByUser(
+    initialDate: Date,
+    finalDate: Date,
+    cnpj: string,
+  ) {
+    const list = [];
+
+    const genders = Object.values(UserGenderEnum);
+
+    genders.forEach(async (g) => {
+      const result = await this.prisma.cuponsCompradosUsuario
+        .groupBy({
+          by: ['cupomNome'],
+          _count: true,
+          where: {
+            cupom: {
+              cnpjEmpresa: cnpj,
+            },
+            usuario: {
+              generoUsuario: g,
+            },
+            criadoEm: {
+              gte: initialDate,
+              lte: finalDate,
+            },
+          },
+        })
+        .then((responseQuery) => {
+          return responseQuery.map<FieldCountDto>((el) => {
+            return {
+              campo: el.cupomNome,
+              total: el._count,
+            };
+          });
+        });
+      if (result.length) {
+        list.push({
+          genero: g,
+          lista: result,
+        });
+      }
+    });
+
+    return list;
+  }
+
   countAllUtilizedCoupons(initialDate: Date, finalDate: Date, cnpj?: string) {
     return this.prisma.cuponsCompradosUsuario.count({
       where: {
@@ -87,6 +133,53 @@ export class StaticsService {
           };
         });
       });
+  }
+
+  listAllUtilizedCouponsByUser(
+    initialDate: Date,
+    finalDate: Date,
+    cnpj: string,
+  ) {
+    const list = [];
+
+    const genders = Object.values(UserGenderEnum);
+
+    genders.forEach(async (g) => {
+      const result = await this.prisma.cuponsCompradosUsuario
+        .groupBy({
+          by: ['cupomNome'],
+          _count: true,
+          where: {
+            cupom: {
+              cnpjEmpresa: cnpj,
+            },
+            usuario: {
+              generoUsuario: g,
+            },
+            utilizadoEm: {
+              not: null,
+              gte: initialDate,
+              lte: finalDate,
+            },
+          },
+        })
+        .then((responseQuery) => {
+          return responseQuery.map<FieldCountDto>((el) => {
+            return {
+              campo: el.cupomNome,
+              total: el._count,
+            };
+          });
+        });
+      if (result.length) {
+        list.push({
+          genero: g,
+          lista: result,
+        });
+      }
+    });
+
+    return list;
   }
 
   countAllUserRedeemedCoupons(
@@ -134,6 +227,39 @@ export class StaticsService {
         ativo: true,
       },
     });
+  }
+
+  async listAllActiveParnersByRamoAndCity() {
+    const address = await this.prisma.enderecos.groupBy({
+      by: ['cidade', 'uf'],
+    });
+
+    let list = [];
+
+    address.forEach(async (a) => {
+      const results = await this.prisma.empresasParceiras.groupBy({
+        by: ['ramo'],
+        _count: true,
+        where: {
+          ativo: true,
+          endereco: {
+            cidade: a.cidade,
+            uf: a.uf,
+          },
+        },
+      });
+
+      const _list = results.map((r) => {
+        return {
+          cidade: `${a.cidade} - ${a.uf}`,
+          ramo: r.ramo,
+          total: r._count,
+        };
+      });
+      list = list.concat(_list);
+    });
+
+    return list;
   }
 
   countAllActiveEcopoints() {
