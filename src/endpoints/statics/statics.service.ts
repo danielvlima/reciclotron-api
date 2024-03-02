@@ -1,11 +1,68 @@
 import { Injectable } from '@nestjs/common';
-import { CreateStaticDto } from './dto/create-static.dto';
-import { UpdateStaticDto } from './dto/update-static.dto';
+import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
 
 @Injectable()
 export class StaticsService {
-  create(createStaticDto: CreateStaticDto) {
-    return 'This action adds a new static';
+  constructor(private prisma: PrismaService) {}
+
+  allRedeemedCoupons(cnpj: string, initialDate: Date, finalDate: Date) {
+    return this.prisma.cuponsCompradosUsuario.count({
+      where: {
+        cupom: {
+          cnpjEmpresa: cnpj,
+        },
+        criadoEm: {
+          gte: initialDate,
+          lte: finalDate,
+        },
+      },
+    });
+  }
+
+  allUtilizedCoupons(cnpj: string, initialDate: Date, finalDate: Date) {
+    return this.prisma.cuponsCompradosUsuario.count({
+      where: {
+        cupom: {
+          cnpjEmpresa: cnpj,
+        },
+        utilizadoEm: {
+          not: null,
+          gte: initialDate,
+          lte: finalDate,
+        },
+      },
+    });
+  }
+
+  allUserRedeemedCoupons(cnpj: string, initialDate: Date, finalDate: Date) {
+    return this.prisma.cuponsCompradosUsuario.findMany({
+      where: {
+        cupom: {
+          cnpjEmpresa: cnpj,
+        },
+        criadoEm: {
+          gte: initialDate,
+          lte: finalDate,
+        },
+      },
+      distinct: ['usuarioCPF'],
+    });
+  }
+
+  allUserUtilizedCoupons(cnpj: string, initialDate: Date, finalDate: Date) {
+    return this.prisma.cuponsCompradosUsuario.findMany({
+      where: {
+        cupom: {
+          cnpjEmpresa: cnpj,
+        },
+        utilizadoEm: {
+          not: null,
+          gte: initialDate,
+          lte: finalDate,
+        },
+      },
+      distinct: ['usuarioCPF'],
+    });
   }
 
   findAll() {
@@ -14,13 +71,5 @@ export class StaticsService {
 
   findOne(id: number) {
     return `This action returns a #${id} static`;
-  }
-
-  update(id: number, updateStaticDto: UpdateStaticDto) {
-    return `This action updates a #${id} static`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} static`;
   }
 }
