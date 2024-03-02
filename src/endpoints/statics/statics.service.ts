@@ -148,7 +148,7 @@ export class StaticsService {
     return this.prisma.ecopontos
       .groupBy({
         by: ['tipo'],
-        _count: { tipo: true },
+        _count: true,
         where: {
           ativo: true,
         },
@@ -157,7 +157,7 @@ export class StaticsService {
         return responseQuery.map<FieldCountDto>((el) => {
           return {
             campo: TypeEcopointEnum[el.tipo],
-            total: el._count.tipo,
+            total: el._count,
           };
         });
       });
@@ -179,7 +179,7 @@ export class StaticsService {
     return this.prisma.usuarios
       .groupBy({
         by: ['generoUsuario'],
-        _count: { generoUsuario: true },
+        _count: true,
         where: {
           nivelPrivilegio: $Enums.RegraPriviegio.USUARIO,
           criadoEm: {
@@ -192,7 +192,7 @@ export class StaticsService {
         return responseQuery.map<FieldCountDto>((el) => {
           return {
             campo: UserGenderEnum[el.generoUsuario],
-            total: el._count.generoUsuario,
+            total: el._count,
           };
         });
       });
