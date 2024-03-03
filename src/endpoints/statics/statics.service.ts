@@ -367,6 +367,57 @@ export class StaticsService {
       });
   }
 
+  async listMaterialsByEcopoints(initialDate: Date, finalDate: Date) {
+    const ecopoints = await this.prisma.transacoes.groupBy({
+      by: ['ecopontoId'],
+      where: {
+        finalizadoEm: {
+          not: null,
+          gte: initialDate,
+          lte: finalDate,
+        },
+        status: $Enums.StatusTransacao.EFETIVADO,
+        tipo: $Enums.TipoTransacao.CREDITO,
+      },
+    });
+
+    const list = [];
+
+    ecopoints.forEach(async (eco) => {
+      const response = await this.prisma.materiaisDepositados
+        .groupBy({
+          by: ['nomeMaterial'],
+          _count: true,
+          where: {
+            transacoes: {
+              finalizadoEm: {
+                not: null,
+                gte: initialDate,
+                lte: finalDate,
+              },
+              status: $Enums.StatusTransacao.EFETIVADO,
+              ecopontoId: eco.ecopontoId,
+            },
+          },
+        })
+        .then((responseQuery) => {
+          return responseQuery.map<FieldCountDto>((el) => {
+            return {
+              campo: el.nomeMaterial,
+              total: el._count,
+            };
+          });
+        });
+
+      list.push({
+        ecopontoID: eco.ecopontoId,
+        lista: response,
+      });
+    });
+
+    return list;
+  }
+
   findAll() {
     return `This action returns all statics`;
   }
