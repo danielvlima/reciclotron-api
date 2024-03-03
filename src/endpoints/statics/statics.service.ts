@@ -341,6 +341,32 @@ export class StaticsService {
     });
   }
 
+  listMaterials(initialDate: Date, finalDate: Date) {
+    return this.prisma.materiaisDepositados
+      .groupBy({
+        by: ['nomeMaterial'],
+        _count: true,
+        where: {
+          transacoes: {
+            finalizadoEm: {
+              not: null,
+              gte: initialDate,
+              lte: finalDate,
+            },
+            status: $Enums.StatusTransacao.EFETIVADO,
+          },
+        },
+      })
+      .then((responseQuery) => {
+        return responseQuery.map<FieldCountDto>((el) => {
+          return {
+            campo: el.nomeMaterial,
+            total: el._count,
+          };
+        });
+      });
+  }
+
   findAll() {
     return `This action returns all statics`;
   }
