@@ -17,7 +17,7 @@ export class StaticsService {
         },
         criadoEm: {
           gte: initialDate,
-          lte: finalDate,
+          lt: finalDate,
         },
       },
     });
@@ -34,7 +34,7 @@ export class StaticsService {
           },
           criadoEm: {
             gte: initialDate,
-            lte: finalDate,
+            lt: finalDate,
           },
         },
       })
@@ -71,7 +71,7 @@ export class StaticsService {
             },
             criadoEm: {
               gte: initialDate,
-              lte: finalDate,
+              lt: finalDate,
             },
           },
         })
@@ -103,7 +103,7 @@ export class StaticsService {
         utilizadoEm: {
           not: null,
           gte: initialDate,
-          lte: finalDate,
+          lt: finalDate,
         },
       },
     });
@@ -121,7 +121,7 @@ export class StaticsService {
           utilizadoEm: {
             not: null,
             gte: initialDate,
-            lte: finalDate,
+            lt: finalDate,
           },
         },
       })
@@ -159,7 +159,7 @@ export class StaticsService {
             utilizadoEm: {
               not: null,
               gte: initialDate,
-              lte: finalDate,
+              lt: finalDate,
             },
           },
         })
@@ -183,9 +183,9 @@ export class StaticsService {
   }
 
   countAllUserRedeemedCoupons(
-    cnpj: string,
     initialDate: Date,
     finalDate: Date,
+    cnpj: string,
   ) {
     return this.prisma.cuponsCompradosUsuario.findMany({
       where: {
@@ -194,7 +194,7 @@ export class StaticsService {
         },
         criadoEm: {
           gte: initialDate,
-          lte: finalDate,
+          lt: finalDate,
         },
       },
       distinct: ['usuarioCPF'],
@@ -202,9 +202,9 @@ export class StaticsService {
   }
 
   countAllUserUtilizedCoupons(
-    cnpj: string,
     initialDate: Date,
     finalDate: Date,
+    cnpj: string,
   ) {
     return this.prisma.cuponsCompradosUsuario.findMany({
       where: {
@@ -214,7 +214,7 @@ export class StaticsService {
         utilizadoEm: {
           not: null,
           gte: initialDate,
-          lte: finalDate,
+          lt: finalDate,
         },
       },
       distinct: ['usuarioCPF'],
@@ -295,7 +295,7 @@ export class StaticsService {
         nivelPrivilegio: $Enums.RegraPriviegio.USUARIO,
         criadoEm: {
           gte: initialDate,
-          lte: finalDate,
+          lt: finalDate,
         },
       },
     });
@@ -310,7 +310,7 @@ export class StaticsService {
           nivelPrivilegio: $Enums.RegraPriviegio.USUARIO,
           criadoEm: {
             gte: initialDate,
-            lte: finalDate,
+            lt: finalDate,
           },
         },
       })
@@ -335,7 +335,7 @@ export class StaticsService {
         finalizadoEm: {
           not: null,
           gte: initialDate,
-          lte: finalDate,
+          lt: finalDate,
         },
       },
     });
@@ -351,7 +351,7 @@ export class StaticsService {
             finalizadoEm: {
               not: null,
               gte: initialDate,
-              lte: finalDate,
+              lt: finalDate,
             },
             status: $Enums.StatusTransacao.EFETIVADO,
           },
@@ -374,7 +374,7 @@ export class StaticsService {
         finalizadoEm: {
           not: null,
           gte: initialDate,
-          lte: finalDate,
+          lt: finalDate,
         },
         status: $Enums.StatusTransacao.EFETIVADO,
         tipo: $Enums.TipoTransacao.CREDITO,
@@ -393,7 +393,7 @@ export class StaticsService {
               finalizadoEm: {
                 not: null,
                 gte: initialDate,
-                lte: finalDate,
+                lt: finalDate,
               },
               status: $Enums.StatusTransacao.EFETIVADO,
               ecopontoId: eco.ecopontoId,
