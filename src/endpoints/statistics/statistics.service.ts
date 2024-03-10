@@ -6,7 +6,7 @@ import { FieldCountDto } from './dto';
 import { TypeEcopointEnum } from 'src/shared/enum';
 
 @Injectable()
-export class StaticsService {
+export class StatisticsService {
   constructor(private prisma: PrismaService) {}
 
   countAllRedeemedCoupons(initialDate: Date, finalDate: Date, cnpj?: string) {
@@ -419,7 +419,7 @@ export class StaticsService {
   }
 
   findAll() {
-    return `This action returns all statics`;
+    return `This action returns all statistics`;
   }
 
   findOne(id: number) {

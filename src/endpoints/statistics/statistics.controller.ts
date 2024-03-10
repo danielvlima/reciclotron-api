@@ -6,14 +6,14 @@ import {
   UseGuards,
   Body,
 } from '@nestjs/common';
-import { StaticsService } from './statics.service';
+import { StatisticsService } from './statistics.service';
 import { ApiTags } from '@nestjs/swagger';
 import { AdminGuard, PartnerGuard } from 'src/shared/guards';
 import { GetCurrentKey, Public } from 'src/shared/decorators';
-import { FieldCountDto, StaticsDatesDto } from './dto';
+import { FieldCountDto, StatisticsDatesDto } from './dto';
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
 
-const convertToDate = (data: StaticsDatesDto) => {
+const convertToDate = (data: StatisticsDatesDto) => {
   const initialDate = new Date(data.anoInicial, data.mesInicial - 1, 1);
   const finalDate =
     data.mesFinal !== undefined && data.anoFinal !== undefined
@@ -27,35 +27,38 @@ const convertToDate = (data: StaticsDatesDto) => {
 };
 
 @ApiTags('Estatísticas')
-@Controller('statics')
-export class StaticsController {
-  constructor(private readonly staticsService: StaticsService) {}
+@Controller('statistics')
+export class StatisticsController {
+  constructor(private readonly statisticsService: StatisticsService) {}
 
   @UseGuards(AdminGuard)
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('partner')
-  async partner(@GetCurrentKey() cnpj: string, @Body() data: StaticsDatesDto) {
+  async partner(
+    @GetCurrentKey() cnpj: string,
+    @Body() data: StatisticsDatesDto,
+  ) {
     const dates = convertToDate(data);
 
-    const totalPurchased = await this.staticsService.countAllRedeemedCoupons(
+    const totalPurchased = await this.statisticsService.countAllRedeemedCoupons(
       dates.initial,
       dates.final,
       cnpj,
     );
-    const totalUtilized = await this.staticsService.countAllUtilizedCoupons(
+    const totalUtilized = await this.statisticsService.countAllUtilizedCoupons(
       dates.initial,
       dates.final,
       cnpj,
     );
     const totalUserPurchased =
-      await this.staticsService.countAllUserRedeemedCoupons(
+      await this.statisticsService.countAllUserRedeemedCoupons(
         dates.initial,
         dates.final,
         cnpj,
       );
     const totalUserUtilized =
-      await this.staticsService.countAllUserUtilizedCoupons(
+      await this.statisticsService.countAllUserUtilizedCoupons(
         dates.initial,
         dates.final,
         cnpj,
@@ -85,28 +88,30 @@ export class StaticsController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('admin')
-  async admin(@Body() data: StaticsDatesDto) {
+  async admin(@Body() data: StatisticsDatesDto) {
     const dates = convertToDate(data);
 
-    const toalRpts = await this.staticsService.countAllReciclopointsGenerated(
+    const toalRpts =
+      await this.statisticsService.countAllReciclopointsGenerated(
+        dates.initial,
+        dates.final,
+      );
+    const totalPurchased = await this.statisticsService.countAllRedeemedCoupons(
       dates.initial,
       dates.final,
     );
-    const totalPurchased = await this.staticsService.countAllRedeemedCoupons(
+    const totalUtilized = await this.statisticsService.countAllUtilizedCoupons(
       dates.initial,
       dates.final,
     );
-    const totalUtilized = await this.staticsService.countAllUtilizedCoupons(
+    const totalUsers = await this.statisticsService.countAllUsers(
       dates.initial,
       dates.final,
     );
-    const totalUsers = await this.staticsService.countAllUsers(
-      dates.initial,
-      dates.final,
-    );
-    const totalPartners = await this.staticsService.countAllActiveParners();
+    const totalPartners = await this.statisticsService.countAllActiveParners();
 
-    const totalEcopoints = await this.staticsService.countAllActiveEcopoints();
+    const totalEcopoints =
+      await this.statisticsService.countAllActiveEcopoints();
     return ResponseFactoryModule.generate<FieldCountDto[]>([
       {
         campo: 'Total de Reciclopontos gerados;',
