@@ -20,6 +20,7 @@ import { TokenModule } from './shared/modules/auth/token.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './shared/guards';
 import { StatisticsModule } from './endpoints/statistics/statistics.module';
+import { PdfModule } from './shared/modules/pdf/pdf.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { StatisticsModule } from './endpoints/statistics/statistics.module';
     TokenModule,
     MailModule,
     StatisticsModule,
+    PdfModule,
   ],
   controllers: [AppController],
   providers: [
