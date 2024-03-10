@@ -31,7 +31,7 @@ const convertToDate = (data: StatisticsDatesDto) => {
 export class StatisticsController {
   constructor(private readonly statisticsService: StatisticsService) {}
 
-  @UseGuards(AdminGuard)
+  @UseGuards(PartnerGuard)
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('partner')
@@ -84,7 +84,7 @@ export class StatisticsController {
     ]);
   }
 
-  @UseGuards(PartnerGuard)
+  @UseGuards(AdminGuard)
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('admin')
