@@ -114,8 +114,8 @@ export class StatisticsController {
       await this.statisticsService.countAllActiveEcopoints();
     return ResponseFactoryModule.generate<FieldCountDto[]>([
       {
-        campo: 'Total de Reciclopontos gerados;',
-        total: toalRpts._sum.valorTotal,
+        campo: 'Total de Reciclopontos gerados',
+        total: toalRpts._sum.valorTotal ?? 0,
       },
       {
         campo: 'Total de cupons resgatados',
