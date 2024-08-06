@@ -307,18 +307,28 @@ export class PartnerService {
   }
 
   remove(cnpj: string) {
-    return this.prisma.empresasParceiras
-      .delete({
+    return this.prisma.$transaction([
+      this.prisma.cuponsDesconto.updateMany({
         where: {
-          cnpj,
+          cnpjEmpresa: cnpj,
         },
-      })
-      .catch((err: Prisma.PrismaClientKnownRequestError) => {
-        if (err.code === PrismaErrorCode.NotFoundError) {
-          throw new NotFoundPartnerException();
+        data: {
+          cnpjEmpresa: null,
+          ativo: false,
+        },
+      }),
+      this.prisma.empresasParceiras.delete({
+        where: {
+          cnpj
         }
-        throw err;
-      });
+      }),
+    ])
+    .catch((err: Prisma.PrismaClientKnownRequestError) => {
+      if (err.code === PrismaErrorCode.NotFoundError) {
+        throw new NotFoundPartnerException();
+      }
+      throw err;
+    });
   }
 
   logout(cnpj: string) {
