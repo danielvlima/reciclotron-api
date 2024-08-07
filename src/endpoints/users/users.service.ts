@@ -134,35 +134,18 @@ export class UsersService {
   };
 
   remove = (cpf: string) => {
-    return this.prisma.$transaction([
-      this.prisma.cuponsCompradosUsuario.updateMany({
-        where: {
-          usuarioCPF: cpf,
-        },
-        data: {
-          usuarioCPF: null,
-        }
-      }),
-      this.prisma.transacoes.updateMany({
-        where: {
-          usuarioCPF: cpf,
-        },
-        data: {
-          usuarioCPF: null,
-        },
-      }),
-      this.prisma.usuarios.delete({
+    return this.prisma.usuarios
+      .delete({
         where: {
           cpf,
         },
-      }),
-    ])
-    .catch((err: Prisma.PrismaClientKnownRequestError) => {
-      if (err.code === PrismaErrorCode.NotFoundError) {
-        throw new NotFoundUserException();
-      }
-      throw err;
-    });
+      })
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.NotFoundError) {
+          throw new NotFoundUserException();
+        }
+        throw err;
+      });
   };
 
   logout(cpf: string) {
