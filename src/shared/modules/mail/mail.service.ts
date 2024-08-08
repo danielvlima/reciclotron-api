@@ -111,6 +111,33 @@ export class MailService {
     );
   }
 
+  async sendUserCouponUsed(to: string, name: string, cupomName: string, day: string) {
+    return await this.sendMail(
+      to,
+      'Seu cupom foi utilizado!',
+      './user/coupon-used',
+      { name, cupomName, day },
+    );
+  }
+
+  async sendUserCouponWillExpire(to: string, name: string, cupomName: string) {
+    return await this.sendMail(
+      to,
+      'Seu cupom vai expirar',
+      './user/coupon-will-expire',
+      { name, cupomName },
+    );
+  }
+
+  async sendUserCouponExpired(to: string, name: string, cupomName: string) {
+    return await this.sendMail(
+      to,
+      'Seu cupom expirou',
+      './user/coupon-expired',
+      { name, cupomName },
+    );
+  }
+
   async sendUserNewDeposit(
     to: string,
     name: string,
@@ -144,4 +171,193 @@ export class MailService {
       },
     );
   }
+
+  async sendPartnerCollectionDone(to: string, ecopoint: Ecopoint) {
+    return await this.sendMail(
+      to,
+      'Coleta realizada',
+      './partner/collection-done',
+      {
+        ecoId: ecopoint.id,
+        ecoName: ecopoint.nome,
+        ecoAddress: `${ecopoint.enderecos.rua}, ${ecopoint.enderecos.numero}, ${
+          ecopoint.enderecos.bairro
+        }, ${ecopoint.enderecos.cidade}-${ecopoint.enderecos.uf};${
+          ecopoint.enderecos.complemento
+            ? ` Complemento: ${ecopoint.enderecos.complemento};`
+            : ''
+        } CEP: ${format(ecopoint.enderecos.cep, '#####-###')}`,
+      },
+    );
+  }
+
+  async sendPartnerCouponOver(to: string, couponName: string) {
+    return await this.sendMail(
+      to,
+      'Seus cupons acabaram!',
+      './partner/coupon-over',
+      { couponName },
+    );
+  }
+
+  async sendPartnerCouponUsed(to: string, couponName: string) {
+    return await this.sendMail(
+      to,
+      'Seu cupom foi utilizado!',
+      './partner/coupon-used',
+      { couponName },
+    );
+  }
+
+  async sendPartnerEcopointReturned(to: string, ecopoint: Ecopoint) {
+    return await this.sendMail(
+      to,
+      'Ecoponto devolvido',
+      './partner/ecopoint-returned',
+      {
+        ecoId: ecopoint.id,
+        ecoName: ecopoint.nome,
+        ecoAddress: `${ecopoint.enderecos.rua}, ${ecopoint.enderecos.numero}, ${
+          ecopoint.enderecos.bairro
+        }, ${ecopoint.enderecos.cidade}-${ecopoint.enderecos.uf};${
+          ecopoint.enderecos.complemento
+            ? ` Complemento: ${ecopoint.enderecos.complemento};`
+            : ''
+        } CEP: ${format(ecopoint.enderecos.cep, '#####-###')}`,
+      },
+    );
+  }
+
+  async sendPartnerEcopointSent(to: string, ecopoint: Ecopoint) {
+    return await this.sendMail(
+      to,
+      'Ecoponto enviado',
+      './partner/ecopoint-sent',
+      {
+        ecoId: ecopoint.id,
+        ecoName: ecopoint.nome,
+        ecoAddress: `${ecopoint.enderecos.rua}, ${ecopoint.enderecos.numero}, ${
+          ecopoint.enderecos.bairro
+        }, ${ecopoint.enderecos.cidade}-${ecopoint.enderecos.uf};${
+          ecopoint.enderecos.complemento
+            ? ` Complemento: ${ecopoint.enderecos.complemento};`
+            : ''
+        } CEP: ${format(ecopoint.enderecos.cep, '#####-###')}`,
+      },
+    );
+  }
+
+  async sendPartnerRequestedCollection(to: string) {
+    return await this.sendMail(
+      to,
+      'Coleta solicitada',
+      './partner/requested-collection',
+      { },
+    );
+  }
+
+  async sendPartnerRequestedEcopointReturn(to: string) {
+    return await this.sendMail(
+      to,
+      'Devolução de Ecoponto solicitada',
+      './partner/requested-ecopoint-return',
+      { },
+    );
+  }
+
+  async sendPartnerRequestedNewEcopoint(to: string, type: string) {
+    return await this.sendMail(
+      to,
+      'Novo Ecoponto solicitado',
+      './partner/requested-new-ecopoint',
+      { type },
+    );
+  }
+
+  async sendPartnerRequestScheduled(to: string, requestType: string, day: string) {
+    return await this.sendMail(
+      to,
+      'Sua solicitação foi agendada',
+      './partner/request-scheduled',
+      { requestType, day },
+    );
+  }
+
+  async sendAdminEcopointRegistered(to: string, ecopoint: Ecopoint) {
+    return await this.sendMail(
+      to,
+      'Ecoponto Cadastrado',
+      './admin/ecopoint-registered',
+      {
+        ecoId: ecopoint.id,
+        ecoName: ecopoint.nome,
+        ecoAddress: `${ecopoint.enderecos.rua}, ${ecopoint.enderecos.numero}, ${
+          ecopoint.enderecos.bairro
+        }, ${ecopoint.enderecos.cidade}-${ecopoint.enderecos.uf};${
+          ecopoint.enderecos.complemento
+            ? ` Complemento: ${ecopoint.enderecos.complemento};`
+            : ''
+        } CEP: ${format(ecopoint.enderecos.cep, '#####-###')}`,
+      },
+    );
+  }
+
+  async sendAdminEcopointRemoved(to: string, ecopoint: Ecopoint) {
+    return await this.sendMail(
+      to,
+      'Ecoponto Removido',
+      './admin/ecopoint-removed',
+      {
+        ecoId: ecopoint.id,
+        ecoName: ecopoint.nome,
+        ecoAddress: `${ecopoint.enderecos.rua}, ${ecopoint.enderecos.numero}, ${
+          ecopoint.enderecos.bairro
+        }, ${ecopoint.enderecos.cidade}-${ecopoint.enderecos.uf};${
+          ecopoint.enderecos.complemento
+            ? ` Complemento: ${ecopoint.enderecos.complemento};`
+            : ''
+        } CEP: ${format(ecopoint.enderecos.cep, '#####-###')}`,
+      },
+    );
+  }
+
+  async sendAdminNewDeposit(to: string, ecopoint: Ecopoint) {
+    return await this.sendMail(
+      to,
+      'Novo Depósito',
+      './admin/new-deposit',
+      {
+        ecoId: ecopoint.id,
+        ecoName: ecopoint.nome
+      },
+    );
+  }
+
+  async sendAdminNewRequest(to: string, requestType: string, partnerName: string) {
+    return await this.sendMail(
+      to,
+      'Nova Solicitação',
+      './admin/new-request',
+      { requestType, partnerName },
+    );
+  }
+
+  async sendAdminPartnerRegistered(to: string, partnerName: string) {
+    return await this.sendMail(
+      to,
+      'Empresa Parceira Cadastrada',
+      './admin/partner-registered',
+      { partnerName },
+    );
+  }
+
+  async sendAdminPartnerRemoved(to: string, partnerName: string) {
+    return await this.sendMail(
+      to,
+      'Empresa Parceira Removida',
+      './admin/partner-removed',
+      { partnerName },
+    );
+  }
+
 }
