@@ -14,7 +14,7 @@ export class MailService {
   constructor(private readonly mailerService: MailerService) {}
 
   async sendMail(
-    to: string,
+    to: string | string[],
     subject: string,
     template: string,
     context: {
@@ -283,7 +283,7 @@ export class MailService {
     );
   }
 
-  async sendAdminEcopointRegistered(to: string, ecopoint: Ecopoint) {
+  async sendAdminEcopointRegistered(to: string | string[], ecopoint: Ecopoint) {
     return await this.sendMail(
       to,
       'Ecoponto Cadastrado',
@@ -302,7 +302,7 @@ export class MailService {
     );
   }
 
-  async sendAdminEcopointRemoved(to: string, ecopoint: Ecopoint) {
+  async sendAdminEcopointRemoved(to: string | string[], ecopoint: Ecopoint) {
     return await this.sendMail(
       to,
       'Ecoponto Removido',
@@ -321,7 +321,7 @@ export class MailService {
     );
   }
 
-  async sendAdminNewDeposit(to: string, ecopoint: Ecopoint) {
+  async sendAdminNewDeposit(to: string | string[], ecopoint: Ecopoint) {
     return await this.sendMail(
       to,
       'Novo Depósito',
@@ -333,7 +333,7 @@ export class MailService {
     );
   }
 
-  async sendAdminNewRequest(to: string, requestType: string, partnerName: string) {
+  async sendAdminNewRequest(to: string | string[], requestType: string, partnerName: string) {
     return await this.sendMail(
       to,
       'Nova Solicitação',
@@ -342,7 +342,7 @@ export class MailService {
     );
   }
 
-  async sendAdminPartnerRegistered(to: string, partnerName: string) {
+  async sendAdminPartnerRegistered(to: string | string[], partnerName: string) {
     return await this.sendMail(
       to,
       'Empresa Parceira Cadastrada',
@@ -351,7 +351,7 @@ export class MailService {
     );
   }
 
-  async sendAdminPartnerRemoved(to: string, partnerName: string) {
+  async sendAdminPartnerRemoved(to: string | string[], partnerName: string) {
     return await this.sendMail(
       to,
       'Empresa Parceira Removida',
