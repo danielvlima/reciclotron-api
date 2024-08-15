@@ -44,7 +44,7 @@ export class EcopointsController {
   @Public()
   @Post('admin/create')
   async create(@Body() createEcopointDto: CreateEcopointDto) {
-    const adminEmail = await this.usersService.getAdminEmails()
+    const adminEmail = await this.usersService.getAdminEmails();
 
     const ecopoint = await this.ecopointsService.create(createEcopointDto);
     const responseDto = toEcopontoDTO(ecopoint);
@@ -170,7 +170,11 @@ export class EcopointsController {
   @Public()
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('admin/delete/:id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string) {
+    const adminEmail = await this.usersService.getAdminEmails();
+    const ecopoint = await this.ecopointsService.findOne(id);
+
+    await this.mailerService.sendAdminEcopointRemoved(adminEmail,ecopoint);
     return this.ecopointsService.remove(id).then(() => {});
   }
 }
