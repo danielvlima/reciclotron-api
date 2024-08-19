@@ -120,12 +120,12 @@ export class MailService {
     );
   }
 
-  async sendUserCouponWillExpire(to: string, name: string, cupomName: string) {
+  async sendUserCouponWillExpire(to: string, name: string, cupomName: string, remaining: string) {
     return await this.sendMail(
       to,
       'Seu cupom vai expirar',
       './user/coupon-will-expire',
-      { name, cupomName },
+      { name, cupomName, remaining },
     );
   }
 
