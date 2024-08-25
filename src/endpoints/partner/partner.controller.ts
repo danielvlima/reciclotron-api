@@ -11,6 +11,7 @@ import {
   Get,
 } from '@nestjs/common';
 import { PartnerService } from './partner.service';
+import { UsersService } from 'src/endpoints/users/users.service';
 import {
   CreatePartnerDto,
   ResponsePartnerDto,
@@ -60,6 +61,7 @@ export class PartnerController {
     private readonly partnerService: PartnerService,
     private tokenService: TokenService,
     private mailerService: MailService,
+    private usersService: UsersService,
   ) {}
 
   @Public()
@@ -152,6 +154,9 @@ export class PartnerController {
     const newPartner = await this.partnerService.create(createPartnerDto);
     const partnerDto = toPartnerDTO(newPartner);
     await this.mailerService.sendSignUp(newPartner.email, true);
+    const adminMail = await this.usersService.getAdminEmails();
+    await this.mailerService.sendAdminPartnerRegistered(adminMail,newPartner.nomeFantasia);
+    
     return ResponseFactoryModule.generate(partnerDto);
   }
 
@@ -198,6 +203,8 @@ export class PartnerController {
   async remove(@Param('cnpj') cnpj: string) {
     const partner = await this.partnerService.remove(cnpj);
     await this.mailerService.sendGoodbye(partner.email, partner.nomeFantasia);
+    const adminMail = await this.usersService.getAdminEmails();
+    await this.mailerService.sendAdminPartnerRemoved(adminMail,partner.nomeFantasia);
     return;
   }
 

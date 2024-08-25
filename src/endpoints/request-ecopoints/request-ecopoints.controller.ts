@@ -26,27 +26,45 @@ import { ApiTags } from '@nestjs/swagger';
 import { ParseDateIsoPipe } from 'src/shared/parsers/ParseDateIsoType';
 import { GetCurrentKey, Public } from 'src/shared/decorators';
 import { AdminGuard, PartnerGuard } from 'src/shared/guards';
+import { UsersService } from 'src/endpoints/users/users.service';
+import { MailService } from 'src/shared/modules/mail/mail.service';
+import { PartnerService } from 'src/endpoints/partner/partner.service';
 
 @ApiTags('Ações para Ecopontos')
 @Controller('request-ecopoints')
 export class RequestEcopointsController {
   constructor(
     private readonly requestEcopointsService: RequestEcopointsService,
+    private mailerService: MailService,
+    private usersService: UsersService,
+    private partnerService: PartnerService,
   ) {}
 
   @UseGuards(PartnerGuard)
   @Public()
   @Post('partner/create')
-  create(
+  async create(
     @GetCurrentKey() cnpj: string,
     @Body() createRequestEcopointDto: CreateRequestEcopointDto,
   ) {
+    const adminMail = await this.usersService.getAdminEmails()
+    const partner = await this.partnerService.findOneWithCnpj(cnpj)
     if (createRequestEcopointDto.acao === RequestActionEcopoint.ADICIONAR) {
+      this.mailerService.sendAdminNewRequest(adminMail,'Novo Ecoponto',partner.nomeFantasia)
       return this.requestEcopointsService
         .createAddEcopoint(cnpj, createRequestEcopointDto)
         .then((value) => {
+          this.mailerService.sendPartnerRequestedNewEcopoint(partner.email,createRequestEcopointDto.tipoEcoponto)
           return ResponseFactoryModule.generate(toEcopointRequestDTO(value));
         });
+    }
+    if (createRequestEcopointDto.acao === RequestActionEcopoint.COLETAR) {
+      this.mailerService.sendAdminNewRequest(adminMail,'Coleta',partner.nomeFantasia)
+      this.mailerService.sendPartnerRequestedCollection(partner.email)
+    }
+    if (createRequestEcopointDto.acao === RequestActionEcopoint.DEVOLUCAO) {
+      this.mailerService.sendAdminNewRequest(adminMail,'Devolução',partner.nomeFantasia)
+      this.mailerService.sendPartnerRequestedEcopointReturn(partner.email)
     }
     return this.requestEcopointsService.create(cnpj, createRequestEcopointDto);
   }

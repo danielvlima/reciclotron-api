@@ -78,6 +78,7 @@ model CuponsDesconto {
   regras                 String                   @db.LongText
   criadoEm               DateTime                 @default(now())
   atualizadoEm           DateTime?
+  notificadoAcabouEm     DateTime?
   quantidadeDisponiveis  Int
   transacoes             Transacoes[]
   empresa                EmpresasParceiras        @relation(fields: [cnpjEmpresa], references: [cnpj])
@@ -149,16 +150,18 @@ model Transacoes {
 }
 
 model CuponsCompradosUsuario {
-  id          BigInt         @id @default(autoincrement())
-  usuarioCPF  String
-  cupomId     BigInt
-  cupomNome   String
-  cupomRegras String         @db.LongText
-  criadoEm    DateTime       @default(now())
-  expiraEm    DateTime
-  utilizadoEm DateTime?
-  usuario     Usuarios       @relation(fields: [usuarioCPF], references: [cpf])
-  cupom       CuponsDesconto @relation(fields: [cupomId], references: [id])
+  id                    BigInt         @id @default(autoincrement())
+  usuarioCPF            String
+  cupomId               BigInt
+  cupomNome             String
+  cupomRegras           String         @db.LongText
+  criadoEm              DateTime       @default(now())
+  expiraEm              DateTime
+  utilizadoEm           DateTime?
+  notificadoExpiraEm    DateTime?
+  notificadoExpiradoEm  DateTime?
+  usuario               Usuarios       @relation(fields: [usuarioCPF], references: [cpf])
+  cupom                 CuponsDesconto @relation(fields: [cupomId], references: [id])
 
   @@index([cupomId])
   @@index([usuarioCPF])

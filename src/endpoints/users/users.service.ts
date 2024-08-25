@@ -174,4 +174,12 @@ export class UsersService {
     await this.updateRtHash(cpf, tokens.refresh_token);
     return tokens;
   }
+
+  async getAdminEmails(): Promise<string[]> {
+    const admins = await this.prisma.usuarios.findMany({
+      where: { nivelPrivilegio: 'ADMINSTRADOR' },
+      select: { email: true },
+    });
+    return admins.map(admin => admin.email);
+  }
 }
