@@ -17,6 +17,8 @@ import { EcopointsModule } from './endpoints/ecopoints/ecopoints.module';
 import { AddressesModule } from './endpoints/addresses/addresses.module';
 import { MailModule } from './shared/modules/mail/mail.module';
 import { TokenModule } from './shared/modules/auth/token.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CouponsSchedulerModule } from './shared/modules/scheduler/coupon-scheduler.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './shared/guards';
 
@@ -38,6 +40,8 @@ import { AtGuard } from './shared/guards';
     AddressesModule,
     TokenModule,
     MailModule,
+    ScheduleModule,
+    CouponsSchedulerModule,
   ],
   controllers: [AppController],
   providers: [

@@ -5,11 +5,18 @@ import {
   UpdateRequestEcopointDto,
 } from './dto';
 import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
+import { MailService } from 'src/shared/modules/mail/mail.service';
+import { EcopointsService } from '../ecopoints/ecopoints.service';
 import { $Enums, Prisma } from '@prisma/client';
 
 @Injectable()
 export class RequestEcopointsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private mailerService: MailService,
+    private ecopointsService: EcopointsService,
+    ) {}
+    
 
   create(cnpj: string, createRequestEcopointDto: CreateRequestEcopointDto) {
     return createRequestEcopointDto.ecopontoIds.forEach(async (ecoID) => {
@@ -155,8 +162,8 @@ export class RequestEcopointsService {
     });
   }
 
-  update(updateRequestEcopointDto: UpdateRequestEcopointDto) {
-    return this.prisma.solicitacoesEcoponto.update({
+  async update(updateRequestEcopointDto: UpdateRequestEcopointDto) {
+    const updatedRequest = await this.prisma.solicitacoesEcoponto.update({
       where: {
         id: updateRequestEcopointDto.id,
       },
@@ -164,7 +171,48 @@ export class RequestEcopointsService {
         atendidoEm: updateRequestEcopointDto.atendidoEm || undefined,
         agendadoPara: updateRequestEcopointDto.agendadoPara || undefined,
       },
+      include: {
+        empresa: true,
+        ecoponto: true,
+      },
     });
+
+    const partnerEmail = updatedRequest.empresa.email;
+    const acao = updatedRequest.acao;
+    const ecoponto = await this.ecopointsService.findOne(updatedRequest.ecopontoId);
+
+    if (updateRequestEcopointDto.atendidoEm) {
+      if (acao == 'ADICIONAR') {
+        this.mailerService.sendPartnerEcopointSent(
+          partnerEmail,
+          ecoponto,
+          );
+      }
+      if(acao == 'DEVOLUCAO') {
+        this.mailerService.sendPartnerEcopointReturned(
+          partnerEmail,
+          ecoponto,
+          );
+      }
+      if(acao == 'COLETAR') {
+        this.mailerService.sendPartnerCollectionDone(
+          partnerEmail,
+          ecoponto,
+          );
+        }
+    } else if (updateRequestEcopointDto.agendadoPara) {
+      this.mailerService.sendPartnerRequestScheduled(
+        partnerEmail,
+        acao.toString(),
+        `${updateRequestEcopointDto.agendadoPara.getDate().toString().padStart(2, '0')}/${(
+          updateRequestEcopointDto.agendadoPara.getMonth() + 1
+        )
+          .toString()
+          .padStart(2, '0')}/${updateRequestEcopointDto.agendadoPara.getFullYear()}`,
+        )
+    }
+
+    return updatedRequest;
   }
 
   cancel(cnpj: string, data: CancelRequestEcopointDto) {
