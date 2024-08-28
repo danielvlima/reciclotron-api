@@ -134,35 +134,36 @@ export class UsersService {
   };
 
   remove = (cpf: string) => {
-    return this.prisma.$transaction([
-      this.prisma.cuponsCompradosUsuario.updateMany({
-        where: {
-          usuarioCPF: cpf,
-        },
-        data: {
-          usuarioCPF: null,
+    return this.prisma
+      .$transaction([
+        this.prisma.cuponsCompradosUsuario.updateMany({
+          where: {
+            usuarioCPF: cpf,
+          },
+          data: {
+            usuarioCPF: null,
+          },
+        }),
+        this.prisma.transacoes.updateMany({
+          where: {
+            usuarioCPF: cpf,
+          },
+          data: {
+            usuarioCPF: null,
+          },
+        }),
+        this.prisma.usuarios.delete({
+          where: {
+            cpf,
+          },
+        }),
+      ])
+      .catch((err: Prisma.PrismaClientKnownRequestError) => {
+        if (err.code === PrismaErrorCode.NotFoundError) {
+          throw new NotFoundUserException();
         }
-      }),
-      this.prisma.transacoes.updateMany({
-        where: {
-          usuarioCPF: cpf,
-        },
-        data: {
-          usuarioCPF: null,
-        },
-      }),
-      this.prisma.usuarios.delete({
-        where: {
-          cpf,
-        },
-      }),
-    ])
-    .catch((err: Prisma.PrismaClientKnownRequestError) => {
-      if (err.code === PrismaErrorCode.NotFoundError) {
-        throw new NotFoundUserException();
-      }
-      throw err;
-    });
+        throw err;
+      });
   };
 
   logout(cpf: string) {
@@ -197,6 +198,6 @@ export class UsersService {
       where: { nivelPrivilegio: 'ADMINSTRADOR' },
       select: { email: true },
     });
-    return admins.map(admin => admin.email);
+    return admins.map((admin) => admin.email);
   }
 }

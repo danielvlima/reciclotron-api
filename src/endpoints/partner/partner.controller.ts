@@ -155,8 +155,11 @@ export class PartnerController {
     const partnerDto = toPartnerDTO(newPartner);
     await this.mailerService.sendSignUp(newPartner.email, true);
     const adminMail = await this.usersService.getAdminEmails();
-    await this.mailerService.sendAdminPartnerRegistered(adminMail,newPartner.nomeFantasia);
-    
+    await this.mailerService.sendAdminPartnerRegistered(
+      adminMail,
+      newPartner.nomeFantasia,
+    );
+
     return ResponseFactoryModule.generate(partnerDto);
   }
 
@@ -202,9 +205,15 @@ export class PartnerController {
   @Delete('admin/delete/:cnpj')
   async remove(@Param('cnpj') cnpj: string) {
     const partner = await this.partnerService.remove(cnpj);
-    await this.mailerService.sendGoodbye(partner.email, partner.nomeFantasia);
+    await this.mailerService.sendGoodbye(
+      partner[1].email,
+      partner[1].nomeFantasia,
+    );
     const adminMail = await this.usersService.getAdminEmails();
-    await this.mailerService.sendAdminPartnerRemoved(adminMail,partner.nomeFantasia);
+    await this.mailerService.sendAdminPartnerRemoved(
+      adminMail,
+      partner[1].nomeFantasia,
+    );
     return;
   }
 
