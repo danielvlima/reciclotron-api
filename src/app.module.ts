@@ -42,13 +42,10 @@ import { PdfModule } from './shared/modules/pdf/pdf.module';
     AddressesModule,
     TokenModule,
     MailModule,
-<<<<<<< HEAD
     StatisticsModule,
     PdfModule,
-=======
     ScheduleModule,
     CouponsSchedulerModule,
->>>>>>> origin/develop
   ],
   controllers: [AppController],
   providers: [
