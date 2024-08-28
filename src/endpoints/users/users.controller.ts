@@ -160,7 +160,7 @@ export class UsersController {
   @Delete('remove')
   async remove(@GetCurrentKey() cpf: string) {
     const user = await this.usersService.remove(cpf);
-    await this.mailerService.sendGoodbye(user.email, user.nome);
+    await this.mailerService.sendGoodbye(user[2].email, user[2].nome);
     return;
   }
 

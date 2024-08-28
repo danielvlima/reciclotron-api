@@ -70,17 +70,18 @@ model Enderecos {
 }
 
 model CuponsDesconto {
-  id                     BigInt                   @id @default(autoincrement())
-  cnpjEmpresa            String
+  id                     BigInt                    @id @default(autoincrement())
+  cnpjEmpresa            String?
   nome                   String
   valor                  Int
-  ativo                  Boolean                  @default(true)
-  regras                 String                   @db.LongText
-  criadoEm               DateTime                 @default(now())
+  ativo                  Boolean                   @default(true)
+  regras                 String                    @db.LongText
+  criadoEm               DateTime                  @default(now())
   atualizadoEm           DateTime?
+  notificadoAcabouEm     DateTime?
   quantidadeDisponiveis  Int
   transacoes             Transacoes[]
-  empresa                EmpresasParceiras        @relation(fields: [cnpjEmpresa], references: [cnpj])
+  empresa                EmpresasParceiras?        @relation(fields: [cnpjEmpresa], references: [cnpj])
   cuponsCompradosUsuario CuponsCompradosUsuario[]
 
   @@index([cnpjEmpresa])
@@ -128,20 +129,20 @@ model MateriaisDepositados {
 }
 
 model Transacoes {
-  id                   BigInt                 @id @default(autoincrement())
+  id                   BigInt                  @id @default(autoincrement())
   titulo               String
-  usuarioCPF           String
+  usuarioCPF           String?
   tipo                 TipoTransacao
   valorTotal           Int
   cupomId              BigInt?
   ecopontoId           String?
-  criadoEm             DateTime               @default(now())
+  criadoEm             DateTime                @default(now())
   status               StatusTransacao
   finalizadoEm         DateTime?
   materiaisDepositados MateriaisDepositados[]
-  cupom                CuponsDesconto?        @relation(fields: [cupomId], references: [id])
-  ecoponto             Ecopontos?             @relation(fields: [ecopontoId], references: [id])
-  usuario              Usuarios               @relation(fields: [usuarioCPF], references: [cpf])
+  cupom                CuponsDesconto?         @relation(fields: [cupomId], references: [id])
+  ecoponto             Ecopontos?              @relation(fields: [ecopontoId], references: [id])
+  usuario              Usuarios?               @relation(fields: [usuarioCPF], references: [cpf])
 
   @@index([cupomId])
   @@index([usuarioCPF])
@@ -149,16 +150,18 @@ model Transacoes {
 }
 
 model CuponsCompradosUsuario {
-  id          BigInt         @id @default(autoincrement())
-  usuarioCPF  String
-  cupomId     BigInt
-  cupomNome   String
-  cupomRegras String         @db.LongText
-  criadoEm    DateTime       @default(now())
-  expiraEm    DateTime
-  utilizadoEm DateTime?
-  usuario     Usuarios       @relation(fields: [usuarioCPF], references: [cpf])
-  cupom       CuponsDesconto @relation(fields: [cupomId], references: [id])
+  id                    BigInt         @id @default(autoincrement())
+  usuarioCPF            String?
+  cupomId               BigInt
+  cupomNome             String
+  cupomRegras           String         @db.LongText
+  criadoEm              DateTime       @default(now())
+  expiraEm              DateTime
+  utilizadoEm           DateTime?
+  notificadoExpiraEm    DateTime?
+  notificadoExpiradoEm  DateTime?
+  usuario               Usuarios?       @relation(fields: [usuarioCPF], references: [cpf])
+  cupom                 CuponsDesconto @relation(fields: [cupomId], references: [id])
 
   @@index([cupomId])
   @@index([usuarioCPF])
