@@ -64,6 +64,7 @@ export class TransactionsController {
   ) {
     const user = await this.usersService.findOneWithCpf(cpf);
     const ecopoint = await this.ecopointService.findOne(depositDto.ecopontoId);
+    const adminEmail = await this.usersService.getAdminEmails();
 
     if (!ecopoint.ativo) {
       throw new NotActiveEcopointException();
@@ -80,6 +81,10 @@ export class TransactionsController {
       depositDto.valorTotal.toFixed(),
       depositDto.materiaisDepositados,
       ecopoint,
+    );
+    await this.mailerService.sendAdminNewDeposit(
+      adminEmail,
+      ecopoint
     );
 
     return;

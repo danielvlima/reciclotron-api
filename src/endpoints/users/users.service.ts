@@ -134,12 +134,30 @@ export class UsersService {
   };
 
   remove = (cpf: string) => {
-    return this.prisma.usuarios
-      .delete({
-        where: {
-          cpf,
-        },
-      })
+    return this.prisma
+      .$transaction([
+        this.prisma.cuponsCompradosUsuario.updateMany({
+          where: {
+            usuarioCPF: cpf,
+          },
+          data: {
+            usuarioCPF: null,
+          },
+        }),
+        this.prisma.transacoes.updateMany({
+          where: {
+            usuarioCPF: cpf,
+          },
+          data: {
+            usuarioCPF: null,
+          },
+        }),
+        this.prisma.usuarios.delete({
+          where: {
+            cpf,
+          },
+        }),
+      ])
       .catch((err: Prisma.PrismaClientKnownRequestError) => {
         if (err.code === PrismaErrorCode.NotFoundError) {
           throw new NotFoundUserException();
@@ -173,5 +191,13 @@ export class UsersService {
 
     await this.updateRtHash(cpf, tokens.refresh_token);
     return tokens;
+  }
+
+  async getAdminEmails(): Promise<string[]> {
+    const admins = await this.prisma.usuarios.findMany({
+      where: { nivelPrivilegio: 'ADMINSTRADOR' },
+      select: { email: true },
+    });
+    return admins.map((admin) => admin.email);
   }
 }

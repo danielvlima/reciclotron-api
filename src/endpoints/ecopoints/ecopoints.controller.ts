@@ -26,6 +26,8 @@ import { ApiTags } from '@nestjs/swagger';
 import { GetCurrentKey, Public } from 'src/shared/decorators';
 import { AdminGuard, PartnerGuard, UserGuard } from 'src/shared/guards';
 import { PartnerService } from '../partner/partner.service';
+import { UsersService } from '../users/users.service';
+import { MailService } from 'src/shared/modules/mail/mail.service';
 
 @ApiTags('Ecopontos')
 @Controller('ecopoints')
@@ -34,17 +36,22 @@ export class EcopointsController {
     private readonly ecopointsService: EcopointsService,
     private readonly partnerService: PartnerService,
     private readonly requestEcopointsService: RequestEcopointsService,
+    private usersService: UsersService,
+    private mailerService: MailService,
   ) {}
 
   @UseGuards(AdminGuard)
   @Public()
   @Post('admin/create')
-  create(@Body() createEcopointDto: CreateEcopointDto) {
-    return this.ecopointsService.create(createEcopointDto).then((value) => {
-      return ResponseFactoryModule.generate<ResponseEcopointDto>(
-        toEcopontoDTO(value),
-      );
-    });
+  async create(@Body() createEcopointDto: CreateEcopointDto) {
+    const adminEmail = await this.usersService.getAdminEmails();
+
+    const ecopoint = await this.ecopointsService.create(createEcopointDto);
+    const responseDto = toEcopontoDTO(ecopoint);
+
+    await this.mailerService.sendAdminEcopointRegistered(adminEmail, ecopoint);
+    
+    return ResponseFactoryModule.generate<ResponseEcopointDto>(responseDto);
   }
 
   @UseGuards(AdminGuard)
@@ -163,7 +170,11 @@ export class EcopointsController {
   @Public()
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('admin/delete/:id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string) {
+    const adminEmail = await this.usersService.getAdminEmails();
+    const ecopoint = await this.ecopointsService.findOne(id);
+
+    await this.mailerService.sendAdminEcopointRemoved(adminEmail,ecopoint);
     return this.ecopointsService.remove(id).then(() => {});
   }
 }
