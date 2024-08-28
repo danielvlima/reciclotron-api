@@ -8,6 +8,7 @@ import {
   PartnerStrategy,
 } from 'src/shared/strategies';
 import { PartnerService } from '../partner/partner.service';
+import { UsersService } from '../users/users.service';
 
 @Module({
   controllers: [EcopointsController],
@@ -18,6 +19,7 @@ import { PartnerService } from '../partner/partner.service';
     UserStrategy,
     AdminStrategy,
     PartnerStrategy,
+    UsersService,
   ],
   exports: [EcopointsService],
 })
