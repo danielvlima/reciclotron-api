@@ -15,8 +15,7 @@ export class RequestEcopointsService {
     private prisma: PrismaService,
     private mailerService: MailService,
     private ecopointsService: EcopointsService,
-    ) {}
-    
+  ) {}
 
   create(cnpj: string, createRequestEcopointDto: CreateRequestEcopointDto) {
     return createRequestEcopointDto.ecopontoIds.forEach(async (ecoID) => {
