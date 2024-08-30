@@ -178,37 +178,36 @@ export class RequestEcopointsService {
 
     const partnerEmail = updatedRequest.empresa.email;
     const acao = updatedRequest.acao;
-    const ecoponto = await this.ecopointsService.findOne(updatedRequest.ecopontoId);
+    const ecoponto = await this.ecopointsService.findOne(
+      updatedRequest.ecopontoId,
+    );
 
     if (updateRequestEcopointDto.atendidoEm) {
       if (acao == 'ADICIONAR') {
-        this.mailerService.sendPartnerEcopointSent(
-          partnerEmail,
-          ecoponto,
-          );
+        this.mailerService.sendPartnerEcopointSent(partnerEmail, ecoponto);
       }
-      if(acao == 'DEVOLUCAO') {
-        this.mailerService.sendPartnerEcopointReturned(
-          partnerEmail,
-          ecoponto,
-          );
+      if (acao == 'DEVOLUCAO') {
+        this.mailerService.sendPartnerEcopointReturned(partnerEmail, ecoponto);
       }
-      if(acao == 'COLETAR') {
-        this.mailerService.sendPartnerCollectionDone(
-          partnerEmail,
-          ecoponto,
-          );
-        }
+      if (acao == 'COLETAR') {
+        this.mailerService.sendPartnerCollectionDone(partnerEmail, ecoponto);
+      }
     } else if (updateRequestEcopointDto.agendadoPara) {
       this.mailerService.sendPartnerRequestScheduled(
         partnerEmail,
         acao.toString(),
-        `${updateRequestEcopointDto.agendadoPara.getDate().toString().padStart(2, '0')}/${(
+        `${updateRequestEcopointDto.agendadoPara
+          .getDate()
+          .toString()
+          .padStart(2, '0')}/${(
           updateRequestEcopointDto.agendadoPara.getMonth() + 1
         )
           .toString()
-          .padStart(2, '0')}/${updateRequestEcopointDto.agendadoPara.getFullYear()}`,
-        )
+          .padStart(
+            2,
+            '0',
+          )}/${updateRequestEcopointDto.agendadoPara.getFullYear()}`,
+      );
     }
 
     return updatedRequest;

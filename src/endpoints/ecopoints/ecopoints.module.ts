@@ -20,6 +20,7 @@ import { UsersService } from '../users/users.service';
     UserStrategy,
     AdminStrategy,
     PartnerStrategy,
+    UsersService,
   ],
   exports: [EcopointsService],
 })

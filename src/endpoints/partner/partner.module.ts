@@ -11,6 +11,7 @@ import {
   PartnerStrategy,
   RtStrategy,
 } from 'src/shared/strategies';
+import { UsersService } from '../users/users.service';
 
 @Module({
   imports: [CryptoModule, CodeGeneratorModule],
