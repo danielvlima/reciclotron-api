@@ -5,6 +5,11 @@ import { UserGenderEnum } from '../users/enum/user-gender.enum';
 import { FieldCountDto } from './dto';
 import { TypeEcopointEnum } from 'src/shared/enum';
 
+export interface DataItem {
+  name: string;
+  c1: number;
+}
+
 @Injectable()
 export class StatisticsService {
   constructor(private prisma: PrismaService) {}
@@ -39,10 +44,10 @@ export class StatisticsService {
         },
       })
       .then((responseQuery) => {
-        return responseQuery.map<FieldCountDto>((el) => {
+        return responseQuery.map<DataItem>((el) => {
           return {
-            campo: el.cupomNome,
-            total: el._count,
+            name: el.cupomNome,
+            c1: el._count,
           };
         });
       });
@@ -76,10 +81,10 @@ export class StatisticsService {
           },
         })
         .then((responseQuery) => {
-          return responseQuery.map<FieldCountDto>((el) => {
+          return responseQuery.map<DataItem>((el) => {
             return {
-              campo: el.cupomNome,
-              total: el._count,
+              name: el.cupomNome,
+              c1: el._count,
             };
           });
         });
@@ -126,10 +131,10 @@ export class StatisticsService {
         },
       })
       .then((responseQuery) => {
-        return responseQuery.map<FieldCountDto>((el) => {
+        return responseQuery.map<DataItem>((el) => {
           return {
-            campo: el.cupomNome,
-            total: el._count,
+            name: el.cupomNome,
+            c1: el._count,
           };
         });
       });
@@ -164,10 +169,10 @@ export class StatisticsService {
           },
         })
         .then((responseQuery) => {
-          return responseQuery.map<FieldCountDto>((el) => {
+          return responseQuery.map<DataItem>((el) => {
             return {
-              campo: el.cupomNome,
-              total: el._count,
+              name: el.cupomNome,
+              c1: el._count,
             };
           });
         });
@@ -280,10 +285,10 @@ export class StatisticsService {
         },
       })
       .then((responseQuery) => {
-        return responseQuery.map<FieldCountDto>((el) => {
+        return responseQuery.map<DataItem>((el) => {
           return {
-            campo: TypeEcopointEnum[el.tipo],
-            total: el._count,
+            name: TypeEcopointEnum[el.tipo],
+            c1: el._count,
           };
         });
       });
@@ -315,10 +320,10 @@ export class StatisticsService {
         },
       })
       .then((responseQuery) => {
-        return responseQuery.map<FieldCountDto>((el) => {
+        return responseQuery.map<DataItem>((el) => {
           return {
-            campo: UserGenderEnum[el.generoUsuario],
-            total: el._count,
+            name: UserGenderEnum[el.generoUsuario],
+            c1: el._count,
           };
         });
       });
@@ -358,10 +363,10 @@ export class StatisticsService {
         },
       })
       .then((responseQuery) => {
-        return responseQuery.map<FieldCountDto>((el) => {
+        return responseQuery.map<DataItem>((el) => {
           return {
-            campo: el.nomeMaterial,
-            total: el._count,
+            name: el.nomeMaterial,
+            c1: el._count,
           };
         });
       });
@@ -401,10 +406,10 @@ export class StatisticsService {
           },
         })
         .then((responseQuery) => {
-          return responseQuery.map<FieldCountDto>((el) => {
+          return responseQuery.map<DataItem>((el) => {
             return {
-              campo: el.nomeMaterial,
-              total: el._count,
+              name: el.nomeMaterial,
+              c1: el._count,
             };
           });
         });

@@ -12,13 +12,15 @@ import { AdminGuard, PartnerGuard } from 'src/shared/guards';
 import { GetCurrentKey, Public } from 'src/shared/decorators';
 import { FieldCountDto, StatisticsDatesDto } from './dto';
 import { ResponseFactoryModule } from 'src/shared/modules/response-factory/response-factory.module';
+import { map } from 'rxjs';
 
 const convertToDate = (data: StatisticsDatesDto) => {
   const initialDate = new Date(data.anoInicial, data.mesInicial - 1, 1);
   const finalDate =
-    data.mesFinal !== undefined && data.anoFinal !== undefined
-      ? new Date(data.anoFinal, data.mesFinal - 1, 1)
-      : new Date(data.anoInicial, data.mesInicial, 1);
+    //data.mesFinal !== undefined && data.anoFinal !== undefined
+    //  ? new Date(data.anoFinal, data.mesFinal - 1, 1)
+    //  : new Date(data.anoInicial, data.mesInicial, 1);
+    new Date();
 
   return {
     initial: initialDate,
@@ -62,24 +64,38 @@ export class StatisticsController {
         dates.initial,
         dates.final,
         cnpj,
+      );  
+    const listPurchased = await this.statisticsService.listAllRedeemedCoupons(
+        dates.initial,
+        dates.final,
+        cnpj,
+      );
+    const listUtilized = await this.statisticsService.listAllUtilizedCoupons(
+        dates.initial,
+        dates.final,
+        cnpj,
       );
 
     return ResponseFactoryModule.generate<FieldCountDto[]>([
       {
         campo: 'Total de cupons resgatados',
         total: totalPurchased,
+        data: listPurchased,
       },
       {
         campo: 'Total de cupons utilizados',
         total: totalUtilized,
+        data: listUtilized,
       },
       {
         campo: 'Total de clientes que compraram os cupons',
         total: totalUserPurchased.length,
+        data: [],
       },
       {
         campo: 'Total de clientes que utilizaram os cupons',
         total: totalUserUtilized.length,
+        data: [],
       },
     ]);
   }
@@ -116,26 +132,32 @@ export class StatisticsController {
       {
         campo: 'Total de Reciclopontos gerados',
         total: toalRpts._sum.valorTotal ?? 0,
+        data: [],
       },
       {
         campo: 'Total de cupons resgatados',
         total: totalPurchased,
+        data: [],
       },
       {
         campo: 'Total de cupons utilizados',
         total: totalUtilized,
+        data: [],
       },
       {
         campo: 'Total Usuários Cadastrados',
         total: totalUsers,
+        data: [],
       },
       {
         campo: 'Total de Empresas Ativas',
         total: totalPartners,
+        data: [],
       },
       {
         campo: 'Total de Ecopontos Ativos',
         total: totalEcopoints,
+        data: [],
       },
     ]);
   }
