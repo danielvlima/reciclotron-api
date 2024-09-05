@@ -187,6 +187,249 @@ export class StatisticsService {
     return list;
   }
 
+  listGendersByCouponUsage(initialDate: Date, finalDate: Date, cnpj: string) {
+    return this.prisma.usuarios.groupBy({
+      by: ['generoUsuario'],
+      _count: {
+        _all: true
+      },
+      where: {
+        cuponsCompradosUsuario: {
+          some: {
+            cupom: {
+              cnpjEmpresa: cnpj
+            },
+            utilizadoEm: {
+              not: null,
+              gte: initialDate,
+              lt: finalDate
+            }
+          }
+        }
+      }
+    })
+    .then((responseQuery) => {
+      const format = (generoUsuario: string) => {
+        switch (generoUsuario) {
+          case 'HOMEM_CIS':
+            return 'Homem Cis';
+          case 'HOMEM_TRANS':
+            return 'Homem Trans';
+          case 'MULHER_CIS':
+            return 'Mulher Cis';
+          case 'MULHER_TRANS':
+            return 'Mulher Trans';
+          case 'NAO_BINARIO':
+            return 'Não Binário';
+          default:
+            return 'Outro';
+        }
+      };
+  
+      const genderCounts = responseQuery.map((el) => ({
+        name: format(el.generoUsuario),
+        c1: el._count._all
+      }));
+  
+      return genderCounts;
+    });
+  }
+
+  listGendersByCouponRedeem(initialDate: Date, finalDate: Date, cnpj: string) {
+    return this.prisma.usuarios.groupBy({
+      by: ['generoUsuario'],
+      _count: {
+        _all: true
+      },
+      where: {
+        cuponsCompradosUsuario: {
+          some: {
+            cupom: {
+              cnpjEmpresa: cnpj
+            },
+            criadoEm: {
+              gte: initialDate,
+              lt: finalDate
+            }
+          }
+        }
+      }
+    })
+    .then((responseQuery) => {
+      const format = (generoUsuario: string) => {
+        switch (generoUsuario) {
+          case 'HOMEM_CIS':
+            return 'Homem Cis';
+          case 'HOMEM_TRANS':
+            return 'Homem Trans';
+          case 'MULHER_CIS':
+            return 'Mulher Cis';
+          case 'MULHER_TRANS':
+            return 'Mulher Trans';
+          case 'NAO_BINARIO':
+            return 'Não Binário';
+          default:
+            return 'Outro';
+        }
+      };
+  
+      const genderCounts = responseQuery.map((el) => ({
+        name: format(el.generoUsuario),
+        c1: el._count._all
+      }));
+
+      return genderCounts;
+    });
+  }
+
+  listAgeRangesByCouponUsage(initialDate: Date, finalDate: Date, cnpj: string) {
+    return this.prisma.usuarios.findMany({
+      where: {
+        cuponsCompradosUsuario: {
+          some: {
+            cupom: {
+              cnpjEmpresa: cnpj
+            },
+            utilizadoEm: {
+              not: null,
+              gte: initialDate,
+              lt: finalDate
+            }
+          }
+        }
+      },
+      select: {
+        dataAniversario: true,
+        cuponsCompradosUsuario: {
+          where: {
+            utilizadoEm: {
+              not: null,
+              gte: initialDate,
+              lt: finalDate
+            }
+          },
+          select: {
+            utilizadoEm: true,
+          }
+        }
+      }
+    }).then((users) => {
+      const calculateAge = (birthDate: Date, usedDate: Date) => {
+        const ageDiff = new Date(usedDate).getFullYear() - new Date(birthDate).getFullYear();
+        const birthMonthDiff = new Date(usedDate).getMonth() - new Date(birthDate).getMonth();
+        if (birthMonthDiff < 0 || (birthMonthDiff === 0 && new Date(usedDate).getDate() < new Date(birthDate).getDate())) {
+          return ageDiff - 1;
+        }
+        return ageDiff;
+      };
+  
+      const categorizeAgeRange = (age: number) => {
+        if (age <= 18) return 'Até 18';
+        if (age <= 23) return '19-23';
+        if (age <= 28) return '24-28';
+        if (age <= 32) return '29-32';
+        if (age <= 36) return '33-36';
+        if (age <= 40) return '37-40';
+        if (age <= 44) return '41-44';
+        if (age <= 48) return '45-48';
+        if (age <= 52) return '49-52';
+        if (age <= 56) return '53-56';
+        if (age <= 59) return '57-59';
+        return '60+';
+      };
+  
+      const ageRangeCounts = users.reduce((acc, user) => {
+        const age = calculateAge(user.dataAniversario, user.cuponsCompradosUsuario[0].utilizadoEm);
+        const ageRange = categorizeAgeRange(age);
+        if (!acc[ageRange]) {
+          acc[ageRange] = 0;
+        }
+        acc[ageRange] += 1;
+        return acc;
+      }, {} as Record<string, number>);
+  
+      const result = Object.keys(ageRangeCounts).map((ageRange) => ({
+        name: ageRange,
+        c1: ageRangeCounts[ageRange]
+      }));
+  
+      return result;
+    });
+  }
+
+listAgeRangesByCouponRedeem(initialDate: Date, finalDate: Date, cnpj: string) {
+    return this.prisma.usuarios.findMany({
+      where: {
+        cuponsCompradosUsuario: {
+          some: {
+            cupom: {
+              cnpjEmpresa: cnpj
+            },
+            criadoEm: {
+              gte: initialDate,
+              lt: finalDate,
+            },
+          }
+        }
+      },
+      select: {
+        dataAniversario: true,
+        cuponsCompradosUsuario: {
+          where: {
+            criadoEm: {
+              gte: initialDate,
+              lt: finalDate
+            }
+          },
+          select: {
+            criadoEm: true,
+          }
+        }
+      }
+    }).then((users) => {
+      const calculateAge = (birthDate: Date, usedDate: Date) => {
+        const ageDiff = new Date(usedDate).getFullYear() - new Date(birthDate).getFullYear();
+        const birthMonthDiff = new Date(usedDate).getMonth() - new Date(birthDate).getMonth();
+        if (birthMonthDiff < 0 || (birthMonthDiff === 0 && new Date(usedDate).getDate() < new Date(birthDate).getDate())) {
+          return ageDiff - 1;
+        }
+        return ageDiff;
+      };
+  
+      const categorizeAgeRange = (age: number) => {
+        if (age <= 18) return 'Até 18';
+        if (age <= 23) return '19-23';
+        if (age <= 28) return '24-28';
+        if (age <= 32) return '29-32';
+        if (age <= 36) return '33-36';
+        if (age <= 40) return '37-40';
+        if (age <= 44) return '41-44';
+        if (age <= 48) return '45-48';
+        if (age <= 52) return '49-52';
+        if (age <= 56) return '53-56';
+        if (age <= 59) return '57-59';
+        return '60+';
+      };
+  
+      const ageRangeCounts = users.reduce((acc, user) => {
+        const age = calculateAge(user.dataAniversario, user.cuponsCompradosUsuario[0].criadoEm);
+        const ageRange = categorizeAgeRange(age);
+        if (!acc[ageRange]) {
+          acc[ageRange] = 0;
+        }
+        acc[ageRange] += 1;
+        return acc;
+      }, {} as Record<string, number>);
+  
+      const result = Object.keys(ageRangeCounts).map((ageRange) => ({
+        name: ageRange,
+        c1: ageRangeCounts[ageRange]
+      }));
+  
+      return result;
+    });
+  }
+
   countAllUserRedeemedCoupons(
     initialDate: Date,
     finalDate: Date,

@@ -76,26 +76,54 @@ export class StatisticsController {
         cnpj,
       );
 
+      const listGenderRedeemed = await this.statisticsService.listGendersByCouponRedeem(
+        dates.initial,
+        dates.final,
+        cnpj,
+      );
+
+    const listAgeRangeRedeemed = await this.statisticsService.listAgeRangesByCouponRedeem(
+        dates.initial,
+        dates.final,
+        cnpj,
+      );
+
+    const listGenderUtilized = await this.statisticsService.listGendersByCouponUsage(
+        dates.initial,
+        dates.final,
+        cnpj,
+      );
+
+    const listAgeRangeUtilized = await this.statisticsService.listAgeRangesByCouponUsage(
+        dates.initial,
+        dates.final,
+        cnpj,
+      );
+
     return ResponseFactoryModule.generate<FieldCountDto[]>([
       {
         campo: 'Total de cupons resgatados',
         total: totalPurchased,
         data: listPurchased,
+        data2: undefined,
       },
       {
         campo: 'Total de cupons utilizados',
         total: totalUtilized,
         data: listUtilized,
+        data2: undefined,
       },
       {
         campo: 'Total de clientes que compraram os cupons',
         total: totalUserPurchased.length,
-        data: [],
+        data: listGenderRedeemed,
+        data2: listAgeRangeRedeemed,
       },
       {
         campo: 'Total de clientes que utilizaram os cupons',
         total: totalUserUtilized.length,
-        data: [],
+        data: listGenderUtilized,
+        data2: listAgeRangeUtilized,
       },
     ]);
   }
@@ -133,31 +161,37 @@ export class StatisticsController {
         campo: 'Total de Reciclopontos gerados',
         total: toalRpts._sum.valorTotal ?? 0,
         data: [],
+        data2: undefined,
       },
       {
         campo: 'Total de cupons resgatados',
         total: totalPurchased,
         data: [],
+        data2: undefined,
       },
       {
         campo: 'Total de cupons utilizados',
         total: totalUtilized,
         data: [],
+        data2: undefined,
       },
       {
         campo: 'Total Usuários Cadastrados',
         total: totalUsers,
+        data2: undefined,
         data: [],
       },
       {
         campo: 'Total de Empresas Ativas',
         total: totalPartners,
         data: [],
+        data2: undefined,
       },
       {
         campo: 'Total de Ecopontos Ativos',
         total: totalEcopoints,
         data: [],
+        data2: undefined,
       },
     ]);
   }
