@@ -5,4 +5,8 @@ export class FieldCountDto {
     name: string;
     c1: number;
   }[];
+  data2: {
+    name: string;
+    c1: number;
+  }[];
 }
