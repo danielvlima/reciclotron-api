@@ -15,12 +15,8 @@ import { ResponseFactoryModule } from 'src/shared/modules/response-factory/respo
 import { map } from 'rxjs';
 
 const convertToDate = (data: StatisticsDatesDto) => {
-  const initialDate = new Date(data.anoInicial, data.mesInicial - 1, 1);
-  const finalDate =
-    //data.mesFinal !== undefined && data.anoFinal !== undefined
-    //  ? new Date(data.anoFinal, data.mesFinal - 1, 1)
-    //  : new Date(data.anoInicial, data.mesInicial, 1);
-    new Date();
+  const initialDate = new Date(data.anoInicial, data.mesInicial, data.diaInicial);
+  const finalDate = new Date(data.anoFinal, data.mesFinal, data.diaFinal);
 
   return {
     initial: initialDate,
