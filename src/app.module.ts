@@ -21,6 +21,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { CouponsSchedulerModule } from './shared/modules/scheduler/coupon-scheduler.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './shared/guards';
+import { StatisticsModule } from './endpoints/statistics/statistics.module';
+import { PdfModule } from './shared/modules/pdf/pdf.module';
 
 @Module({
   imports: [
@@ -40,6 +42,8 @@ import { AtGuard } from './shared/guards';
     AddressesModule,
     TokenModule,
     MailModule,
+    StatisticsModule,
+    PdfModule,
     ScheduleModule,
     CouponsSchedulerModule,
   ],

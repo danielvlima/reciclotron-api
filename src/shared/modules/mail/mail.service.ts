@@ -21,6 +21,7 @@ export class MailService {
       [name: string]: any;
     },
   ) {
+    return true;
     return await this.mailerService.sendMail({
       to,
       subject,

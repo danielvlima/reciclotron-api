@@ -15,6 +15,7 @@ import { UsersService } from '../users/users.service';
   providers: [
     EcopointsService,
     PartnerService,
+    UsersService,
     RequestEcopointsService,
     UserStrategy,
     AdminStrategy,

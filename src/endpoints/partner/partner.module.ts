@@ -3,6 +3,7 @@ import { PartnerService } from './partner.service';
 import { PartnerController } from './partner.controller';
 import { CryptoModule } from 'src/shared/modules/crypto/crypto.module';
 import { CodeGeneratorModule } from 'src/shared/modules/code-generator/code-generator.module';
+import { UsersService } from '../users/users.service';
 import {
   AdminStrategy,
   AtStrategy,
@@ -10,8 +11,6 @@ import {
   PartnerStrategy,
   RtStrategy,
 } from 'src/shared/strategies';
-import { UsersService } from '../users/users.service';
-
 @Module({
   imports: [CryptoModule, CodeGeneratorModule],
   controllers: [PartnerController],

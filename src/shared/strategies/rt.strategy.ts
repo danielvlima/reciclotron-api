@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -21,7 +21,11 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
       ?.replace('Bearer', '')
       .trim();
 
-    if (!refreshToken) throw new ForbiddenException('Refresh token malformado');
+    if (!refreshToken) {
+      Logger.debug(refreshToken);
+      Logger.debug(req);
+      throw new ForbiddenException('Refresh token malformado');
+    }
 
     return {
       ...payload,
