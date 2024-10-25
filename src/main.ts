@@ -3,10 +3,21 @@ import { AppModule } from './app.module';
 import { NotFoundExceptionFilter } from './exception-filter/not-found.exception-filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
+import * as fs from 'fs';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  app.enableCors();
+  const httpsOptions = {
+    key: fs.readFileSync('./secrets/private-key.pem'),
+    cert: fs.readFileSync('./secrets/public-certificate.pem'),
+  };
+
+  const app = await NestFactory.create(AppModule, {
+    httpsOptions,
+  });
+  app.enableCors({
+    origin: '*', // Permite requisições de qualquer origem
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
+  });
   app.useGlobalFilters(new NotFoundExceptionFilter());
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
