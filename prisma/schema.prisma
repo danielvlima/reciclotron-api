@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider     = "mysql"
+  provider     = "postgresql"
   url          = env("DATABASE_URL")
   relationMode = "prisma"
 }
@@ -13,7 +13,7 @@ model Usuarios {
   email                       String                   @unique
   telefone                    String                   @unique
   nome                        String
-  senha                       String                   @db.LongText
+  senha                       String                   @db.VarChar(255)
   dataAniversario             DateTime
   generoUsuario               GeneroUsuario
   nivelPrivilegio             RegraPriviegio           @default(USUARIO)
@@ -22,7 +22,7 @@ model Usuarios {
   pontos                      Int                      @default(0)
   codigoRecuperacao           String?
   codigoRecuperacaoCriadoEm   DateTime?
-  token                       String?                  @db.LongText
+  token                       String?                  @db.VarChar(255)
   codigoRecuperacaoVerificado Boolean?
   transacoes                  Transacoes[]
   cuponsCompradosUsuario      CuponsCompradosUsuario[]
@@ -34,7 +34,7 @@ model EmpresasParceiras {
   telefone                    String                 @unique
   nomeFantasia                String
   razaoSocial                 String
-  senha                       String                 @db.LongText
+  senha                       String                 @db.VarChar(255)
   ramo                        String
   ativo                       Boolean                @default(true)
   tipoEmpresa                 TipoEmpresa
@@ -43,8 +43,8 @@ model EmpresasParceiras {
   atualizadoEm                DateTime?
   codigoRecuperacao           String?
   codigoRecuperacaoCriadoEm   DateTime?
-  logo                        String?                @db.LongText
-  token                       String?                @db.LongText
+  logo                        String?                @db.VarChar(255)
+  token                       String?                @db.VarChar(255)
   codigoRecuperacaoVerificado Boolean?
   cupons                      CuponsDesconto[]
   endereco                    Enderecos?
@@ -75,7 +75,7 @@ model CuponsDesconto {
   nome                   String
   valor                  Int
   ativo                  Boolean                   @default(true)
-  regras                 String                    @db.LongText
+  regras                 String                    @db.VarChar(255)
   criadoEm               DateTime                  @default(now())
   atualizadoEm           DateTime?
   notificadoAcabouEm     DateTime?
@@ -110,7 +110,7 @@ model Materiais {
   criadoEm             DateTime                   @default(now())
   atualizadoEm         DateTime?
   ehAceitoTipoEcoponto TipoEcopontoAceitaMaterial
-  logo                 String?                    @db.LongText
+  logo                 String?                    @db.VarChar(255)
   materiaisDepositados MateriaisDepositados[]
 }
 
@@ -154,7 +154,7 @@ model CuponsCompradosUsuario {
   usuarioCPF            String?
   cupomId               BigInt
   cupomNome             String
-  cupomRegras           String         @db.LongText
+  cupomRegras           String         @db.VarChar(255)
   criadoEm              DateTime       @default(now())
   expiraEm              DateTime
   utilizadoEm           DateTime?
@@ -186,7 +186,7 @@ model SolicitacoesEcoponto {
 model Log {
   id          BigInt   @id @default(autoincrement())
   realizadoEm DateTime @default(now())
-  acao        String   @db.LongText
+  acao        String   @db.VarChar(255)
 }
 
 enum RegraPriviegio {

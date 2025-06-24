@@ -1,0 +1,10 @@
+src/
+test/
+coverage/
+*.md
+.env.local
+.env.development
+.env.test
+node_modules/.prisma
+secrets/
+prisma/migrations/
