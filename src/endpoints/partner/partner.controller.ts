@@ -69,7 +69,7 @@ export class PartnerController {
   @Post('login')
   async login(@Body() data: LoginDto): Promise<ResponseDto<Tokens>> {
     const partner = await this.partnerService.findOne(data.email);
-    CryptoModule.checkPasssword(partner.senha, data.senha);
+    CryptoModule.checkPassword(partner.senha, data.senha);
     const token = await this.tokenService.getTokens(
       partner.cnpj,
       partner.email,

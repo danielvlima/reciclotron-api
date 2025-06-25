@@ -42,6 +42,7 @@ import {
   CpfRegistredException,
   EmailRegistredException,
   ExpiredCodeException,
+  NotFoundUserException,
   PasswordLengthException,
   PhoneRegistredException,
 } from 'src/exceptions';
@@ -61,8 +62,12 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(@Body() data: LoginDto): Promise<ResponseDto<Tokens>> {
+    console.log(data);
     const user = await this.usersService.findOne(data.email);
-    CryptoModule.checkPasssword(user.senha, data.senha);
+    if (!user) {
+      throw new NotFoundUserException();
+    }
+    CryptoModule.checkPassword(user.senha, data.senha);
     const token = await this.tokenService.getTokens(
       user.cpf,
       user.email,

@@ -4,11 +4,11 @@ import { NotFoundExceptionFilter } from './exception-filter/not-found.exception-
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
 import * as fs from 'fs';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   let app: INestApplication;
-  console.log(process.env.NODE_ENV);
+
   if (process.env.NODE_ENV === 'development') {
     const httpsOptions = {
       key: fs.readFileSync('./secrets/private-key.pem'),
@@ -22,6 +22,7 @@ async function bootstrap() {
     origin: '*', // Permite requisições de qualquer origem
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
   });
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.useGlobalFilters(new NotFoundExceptionFilter());
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));

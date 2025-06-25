@@ -36,8 +36,9 @@ export class UsersService {
   };
 
   findOne = (email: string) => {
+    console.log('findOne', email);
     return this.prisma.usuarios
-      .findFirstOrThrow({
+      .findFirst({
         where: {
           email,
         },
