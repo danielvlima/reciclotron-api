@@ -19,7 +19,7 @@ export class CryptoModule {
     return `${CryptoModule.sha256(password, s)}:${s}`;
   };
 
-  static checkPasssword = (entityPassword: string, password: string) => {
+  static checkPassword = (entityPassword: string, password: string) => {
     const passwordSplitted = entityPassword.split(':');
     const passwordHashed = CryptoModule.sha256(password, passwordSplitted[1]);
 
