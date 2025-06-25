@@ -4,16 +4,20 @@ import { NotFoundExceptionFilter } from './exception-filter/not-found.exception-
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
 import * as fs from 'fs';
+import { INestApplication } from '@nestjs/common';
 
 async function bootstrap() {
-  const httpsOptions = {
-    key: fs.readFileSync('./secrets/private-key.pem'),
-    cert: fs.readFileSync('./secrets/public-certificate.pem'),
-  };
-
-  const app = await NestFactory.create(AppModule, {
-    httpsOptions,
-  });
+  let app: INestApplication;
+  console.log(process.env.NODE_ENV);
+  if (process.env.NODE_ENV === 'development') {
+    const httpsOptions = {
+      key: fs.readFileSync('./secrets/private-key.pem'),
+      cert: fs.readFileSync('./secrets/public-certificate.pem'),
+    };
+    app = await NestFactory.create(AppModule, { httpsOptions });
+  } else {
+    app = await NestFactory.create(AppModule);
+  }
   app.enableCors({
     origin: '*', // Permite requisições de qualquer origem
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
